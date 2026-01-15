@@ -34,29 +34,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-
-
-## TypeScript, ESLint, Prettier & Pre-commit Configuration
-
-### Strict TypeScript Configuration
-We enabled strict TypeScript options such as `strict`, `noImplicitAny`, `noUnusedLocals`, `noUnusedParameters`, and `forceConsistentCasingInFileNames` in the `tsconfig.json` file.  
-These settings help catch type errors, unused code, and potential logic issues at compile time, reducing runtime bugs and improving overall code reliability.
-
-### ESLint + Prettier Setup
-ESLint is configured using Next.js core web vitals along with Prettier integration to enforce consistent code style and best practices across the codebase.  
-Rules such as mandatory semicolons, double quotes, and warnings on console logs help maintain clean, readable, and professional code.  
-Prettier ensures consistent formatting for indentation, quotes, and trailing commas.
-
-### Pre-commit Hooks with Husky & lint-staged
-We integrated Husky and lint-staged to automatically run ESLint and Prettier before every commit.  
-This ensures that code is linted and formatted before being pushed, preventing bad code from entering the repository and maintaining team-wide consistency.
-
-### Why This Matters
-- Strict TypeScript reduces runtime errors and improves maintainability.
-- ESLint and Prettier enforce clean, consistent, and readable code.
-- Pre-commit hooks ensure code quality checks are never skipped.
-
-Screenshots and logs of successful lint and pre-commit checks are included as part of this submission.
-
