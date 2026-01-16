@@ -65,6 +65,16 @@ disasteriq/
 │       │       └── update/
 │       │           └── route.ts
 │       │
+│       ├──prisma
+│       │  └──migrations/
+│       │      │  └──##########
+│       │      │  └──##########
+│       │      │  └──##########
+│       │      │  └──migration.sql
+│       │      └──schema.prisma
+│       │      │└──seed.ts
+│       │
+│       │
 │       ├── repositories/
 │       │   └── disaster.repo.ts
 │       │
@@ -87,8 +97,91 @@ disasteriq/
 ├── postcss.config.mjs
 ├── tsconfig.json
 └── README.md
-
 ```
+
+---
+
+## 🗄️ Database Design & Schema Documentation
+
+This section documents the **database schema, keys, constraints, normalization strategy, and scalability considerations** for the platform. The database uses **PostgreSQL** with **Prisma ORM**.
+
+---
+
+### 📐 ER Diagram / Prisma Schema (Excerpt)
+
+```prisma
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+}
+
+model Disaster {
+  id       String   @id @default(uuid()) @db.Uuid
+  name     String
+  status   String
+  victims  Victim[]
+
+  @@index([status])
+}
+
+model Victim {
+  id         String @id @default(uuid()) @db.Uuid
+  disasterId String @db.Uuid
+
+  disaster Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+}
+```
+
+The complete schema is maintained in `prisma/schema.prisma`.
+
+---
+
+### 🔑 Keys, Constraints, and Relationships
+
+* **Primary Keys**: UUIDs are used across all tables for uniqueness and scalability.
+* **Foreign Keys**: Enforced via Prisma relations (e.g., `Victim.disasterId → Disaster.id`).
+* **Unique Constraints**:
+
+  * `User.email`
+* **Composite Keys**:
+
+  * Used in join tables such as `UserRole(userId, roleId)` for RBAC.
+* **Indexes**:
+
+  * Disaster `status` indexed for fast filtering of active disasters.
+
+---
+
+### 🧮 Normalization (1NF, 2NF, 3NF)
+
+* **1NF**: All fields are atomic with no repeating groups.
+* **2NF**: No partial dependency on composite keys.
+* **3NF**: No transitive dependencies; related entities are stored separately.
+
+**Redundancy Avoidance**:
+
+* Organizations, roles, hospitals, and resources are normalized into independent tables.
+* Aggregated data is stored in `DisasterMetric` instead of being recalculated repeatedly.
+
+---
+
+### 🛠️ Migrations & Seed Data
+
+```bash
+npx prisma migrate dev
+```
+
+* Migration history: `prisma/migrations/`
+* Seed data includes default roles, organizations, and sample users.
+
+---
+
+### 📈 Scalability & Common Queries
+
+* Supports horizontal scaling using UUIDs
+* Indexed queries for dashboards and disaster tracking
+* Optimized joins for RBAC, victims, and resource allocation
 
 ---
 
@@ -116,4 +209,3 @@ With these additions, the system can become a **complete digital backbone for di
 ---
 
 This project represents our vision of how **technology, real-time data, and collaboration** can make disaster relief operations faster, smarter, and more effective.
-
