@@ -5,5 +5,5 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
 };
 
-
+console.log("hello");
 export default nextConfig;
