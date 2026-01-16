@@ -39,23 +39,55 @@ This leads to **faster response, better planning, and more lives saved**.
 
 ```
 disasteriq/
-├── .next/                 # Next.js build output (auto-generated)
-├── node_modules/          # Installed dependencies
-├── public/                # Static assets (images, icons, etc.)
-├── src/                   # Application source code
-│   ├── app/               # App Router (pages, layouts, routes)
-│   ├── components/        # Reusable UI components
-│   ├── lib/               # Utility functions & helpers
-│   └── styles/            # Global and component styles
-├── .gitignore             # Git ignore rules
-├── eslint.config.mjs      # ESLint configuration
-├── next-env.d.ts          # Next.js TypeScript definitions
-├── next.config.ts         # Next.js configuration
-├── package.json           # Project metadata & scripts
-├── package-lock.json      # Dependency lock file
-├── postcss.config.mjs     # PostCSS configuration
-├── tsconfig.json          # TypeScript configuration
-├── README.md              # Project documentation
+├── .husky/
+│   └── pre-commit
+│
+├── .next/
+├── node_modules/
+├── public/
+│
+├── src/
+│   └── app/
+│       ├── Api/
+│       │   └── disasters/
+│       │       ├── create/
+│       │       │   └── route.ts
+│       │       │
+│       │       ├── delete/
+│       │       │   └── route.ts
+│       │       │
+│       │       ├── list/
+│       │       │   └── route.ts
+│       │       │
+│       │       ├── stats/
+│       │       │   └── route.ts
+│       │       │
+│       │       └── update/
+│       │           └── route.ts
+│       │
+│       ├── repositories/
+│       │   └── disaster.repo.ts
+│       │
+│       ├── Service/
+│       │   └── disaster.service.ts
+│       │
+│       ├── favicon.ico
+│       ├── globals.css
+│       ├── layout.tsx
+│       └── page.tsx
+│
+├── .eslintrc.json
+├── .gitignore
+├── .prettierrc
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package.json
+├── package-lock.json
+├── postcss.config.mjs
+├── tsconfig.json
+└── README.md
+
 ```
 
 ---
@@ -83,6 +115,4 @@ With these additions, the system can become a **complete digital backbone for di
 
 ---
 
-
 This project represents our vision of how **technology, real-time data, and collaboration** can make disaster relief operations faster, smarter, and more effective.
-#
