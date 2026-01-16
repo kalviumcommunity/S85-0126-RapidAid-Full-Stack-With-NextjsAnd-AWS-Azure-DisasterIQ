@@ -1,3 +1,8 @@
 node_modules
+<<<<<<< HEAD
+=======
+.env*
+!.env.example
+>>>>>>> af71b19fb935488e2fc2480d548d41c8571cf410
 
 /generated/prisma
