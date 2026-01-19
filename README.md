@@ -116,4 +116,3 @@ With these additions, the system can become a **complete digital backbone for di
 ---
 
 This project represents our vision of how **technology, real-time data, and collaboration** can make disaster relief operations faster, smarter, and more effective.
-
