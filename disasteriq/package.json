@@ -9,6 +9,9 @@
     "lint": "eslint",
     "prepare": "husky install"
   },
+   "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "eslint --fix",

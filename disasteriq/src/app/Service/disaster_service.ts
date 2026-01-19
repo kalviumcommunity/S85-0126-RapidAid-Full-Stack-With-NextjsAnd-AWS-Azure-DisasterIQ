@@ -1,41 +1,41 @@
-import { DisasterRepository } from "@/app/repositories/disaster.repo"
-
-import { randomUUID } from "crypto"
+import { DisasterRepository } from "@/app/repositories/disaster.repo";
 
 export const DisasterService = {
+  create: async (payload: any) => {
+    if (!payload.name || !payload.type) {
+      throw { code: "VALIDATION_ERROR", message: "Name and type required" };
+    }
 
-  createDisaster(title: string, location: string, severity: string) {
-    const disaster = {
-      id: randomUUID(),
-      title,
-      location,
-      severity,
+    return DisasterRepository.create({
+      name: payload.name,
+      type: payload.type,
+      severity: payload.severity ?? 1,
+      location: payload.location ?? "Unknown",
       status: "ACTIVE",
-      createdAt: new Date()
+    });
+  },
+
+  getAll: async () => {
+    return DisasterRepository.findAll();
+  },
+
+  getById: async (id: string) => {
+    const disaster = await DisasterRepository.findById(id);
+    if (!disaster) {
+      throw { code: "NOT_FOUND", message: "Disaster not found" };
     }
-
-    return DisasterRepository.save(disaster)
+    return disaster;
   },
 
-  getAllDisasters() {
-    return DisasterRepository.findAll()
+  update: async (id: string, payload: any) => {
+    return DisasterRepository.update(id, payload);
   },
 
-  updateDisaster(id: string, data: any) {
-    return DisasterRepository.update(id, data)
+  partialUpdate: async (id: string, payload: any) => {
+    return DisasterRepository.update(id, payload);
   },
 
-  deleteDisaster(id: string) {
-    return DisasterRepository.delete(id)
+  delete: async (id: string) => {
+    return DisasterRepository.delete(id);
   },
-
-  getStats() {
-    const all = DisasterRepository.findAll()
-
-    return {
-      total: all.length,
-      active: all.filter(d => d.status === "ACTIVE").length,
-      highSeverity: all.filter(d => d.severity === "HIGH").length
-    }
-  }
-}
+};
