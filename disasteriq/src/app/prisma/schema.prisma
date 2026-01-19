@@ -33,12 +33,12 @@ model User {
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
 
+  // FIXED HERE ✅
   organizationId  String?  @db.Uuid
   organization    Organization? @relation(fields: [organizationId], references: [id])
 
-  roles           UserRole[]
-  auditLogs       AuditLog[]
-
+  roles            UserRole[]
+  auditLogs        AuditLog[]
   createdResources Resource[]
   createdShelters  Shelter[]
   createdReports   MedicalReport[]

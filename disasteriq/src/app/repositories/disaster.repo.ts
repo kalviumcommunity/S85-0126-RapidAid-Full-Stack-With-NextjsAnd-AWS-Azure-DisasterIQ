@@ -1,29 +1,21 @@
-const disasters: any[] = []
-
-
+import { prisma } from "@/app/prisma/prisma";
 
 export const DisasterRepository = {
-  save(disaster: any) {
-    disasters.push(disaster)
-    return disaster
-  },
+  create: (data: any) =>
+    prisma.disaster.create({ data }),
 
-  findAll() {
-    return disasters
-  },
+  findAll: () =>
+    prisma.disaster.findMany(),
 
-  update(id: string, updates: any) {
-    const d = disasters.find(x => x.id === id)
-    if (!d) return null
+  findById: (id: string) =>
+    prisma.disaster.findUnique({ where: { id } }),
 
-    Object.assign(d, updates)
-    return d
-  },
+  update: (id: string, data: any) =>
+    prisma.disaster.update({
+      where: { id },
+      data,
+    }),
 
-  delete(id: string) {
-    const index = disasters.findIndex(x => x.id === id)
-    if (index === -1) return null
-
-    return disasters.splice(index, 1)[0]
-  }
-}
+  delete: (id: string) =>
+    prisma.disaster.delete({ where: { id } }),
+};
