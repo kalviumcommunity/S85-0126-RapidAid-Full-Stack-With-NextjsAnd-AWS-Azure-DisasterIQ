@@ -1,8 +1,7 @@
-import { fetchUsers } from '@/app/Service/user_service';
-import { NextResponse } from 'next/server';
+import { requireAuth } from "@/app/lib/authMiddleware";
+import { sendSuccess } from "@/app/lib/ responseHandler";
 
-export async function GET() {
-  const users = await fetchUsers();
-  return NextResponse.json(users);
-}
-
+export const GET = requireAuth(async (req: Request) => {
+  const user = (req as any).user;
+  return sendSuccess(user, "Protected user data");
+});
