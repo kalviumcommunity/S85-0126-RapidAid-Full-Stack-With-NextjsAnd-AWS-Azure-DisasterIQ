@@ -18,10 +18,12 @@
     "jsx": "react-jsx",
     "incremental": true,
 
-    "baseUrl": ".",               // ⭐ ADD THIS
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]           // ⭐ FIXED PATH (no ./)
+      "@/*": ["src/*"]
     },
+
+    "ignoreDeprecations": "6.0",
 
     "plugins": [
       {

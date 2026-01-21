@@ -1,43 +1,65 @@
-// import { cn } from "@/lib/utils";
+"use client";
 
-// type StatusType = "critical" | "warning" | "success" | "info" | "default";
+import { cn } from "@/app/lib/utils";
 
-// interface StatusBadgeProps {
-//   status: StatusType;
-//   label: string;
-//   pulse?: boolean;
-//   className?: string;
-// }
+/* ===================== TYPES ===================== */
 
-// const statusStyles: Record<StatusType, string> = {
-//   critical: "bg-critical/10 text-critical border-critical/20",
-//   warning: "bg-warning/10 text-warning border-warning/20",
-//   success: "bg-success/10 text-success border-success/20",
-//   info: "bg-info/10 text-info border-info/20",
-//   default: "bg-muted text-muted-foreground border-border",
-// };
+export type StatusType =
+  | "critical"
+  | "warning"
+  | "success"
+  | "info"
+  | "default";
 
-// export function StatusBadge({ status, label, pulse, className }: StatusBadgeProps) {
-//   return (
-//     <span
-//       className={cn(
-//         "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
-//         statusStyles[status],
-//         pulse && "pulse-alert",
-//         className
-//       )}
-//     >
-//       <span
-//         className={cn(
-//           "w-1.5 h-1.5 rounded-full",
-//           status === "critical" && "bg-critical",
-//           status === "warning" && "bg-warning",
-//           status === "success" && "bg-success",
-//           status === "info" && "bg-info",
-//           status === "default" && "bg-muted-foreground"
-//         )}
-//       />
-//       {label}
-//     </span>
-//   );
-// }
+interface StatusBadgeProps {
+  status: StatusType;
+  label: string;
+  pulse?: boolean;
+  className?: string;
+}
+
+/* ===================== STYLES ===================== */
+
+const statusStyles: Record<StatusType, string> = {
+  critical: "bg-red-100 text-red-700 border-red-200",
+  warning: "bg-amber-100 text-amber-700 border-amber-200",
+  success: "bg-green-100 text-green-700 border-green-200",
+  info: "bg-blue-100 text-blue-700 border-blue-200",
+  default: "bg-muted text-muted-foreground border-border",
+};
+
+const dotStyles: Record<StatusType, string> = {
+  critical: "bg-red-500",
+  warning: "bg-amber-500",
+  success: "bg-green-500",
+  info: "bg-blue-500",
+  default: "bg-muted-foreground",
+};
+
+/* ===================== COMPONENT ===================== */
+
+export function StatusBadge({
+  status,
+  label,
+  pulse = false,
+  className,
+}: StatusBadgeProps) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        statusStyles[status],
+        pulse && "animate-pulse",
+        className
+      )}
+    >
+      <span
+        className={cn(
+          "w-1.5 h-1.5 rounded-full",
+          dotStyles[status]
+        )}
+      />
+      {label}
+    </span>
+  );
+}
