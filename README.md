@@ -125,6 +125,79 @@ The seed script is written to be **idempotent**, ensuring data is not duplicated
 
 ---
 
+## ✅ Input Validation with Zod
+
+To ensure data integrity and API reliability, all **POST, PUT, and PATCH** endpoints use **Zod** for input validation before requests reach the service or database layers.
+
+### Why Validation Matters
+
+Without validation, malformed or incomplete requests could:
+
+* Corrupt database records
+* Cause unexpected runtime errors
+* Lead to inconsistent data across services
+
+Zod allows the API to **fail fast and gracefully**, returning clear and structured error messages.
+
+### Validation Flow
+
+```
+Client Request
+   ↓
+API Route
+   ↓
+Zod Schema Validation
+   ↓
+Service Layer
+   ↓
+Prisma → PostgreSQL
+```
+
+### Example Zod Schema (Disaster)
+
+```ts
+import { z } from "zod";
+
+export const createDisasterSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  type: z.string().min(3),
+  severity: z.number().int().min(1).max(10),
+  location: z.string().min(3),
+  status: z.enum(["REPORTED", "ONGOING", "RESOLVED"]),
+});
+
+export const updateDisasterSchema = createDisasterSchema.partial();
+```
+
+### API Integration Example
+
+```ts
+const body = await req.json();
+const validatedBody = createDisasterSchema.parse(body);
+```
+
+### Example Validation Error Response
+
+```json
+{
+  "success": false,
+  "message": "Validation Error",
+  "errors": [
+    "severity: Number must be less than or equal to 10"
+  ]
+}
+```
+
+### Schema Reuse & Maintainability
+
+* Zod schemas are stored in `src/app/lib/schemas`
+* Schemas are reused across API routes
+* The same schemas can be reused on the frontend for form validation
+
+This ensures **consistent validation rules**, reduces duplication, and improves long-term maintainability in team projects.
+
+---
+
 ## 🔍 Verifying Data
 
 Use Prisma Studio to visually inspect tables and relations:
@@ -194,4 +267,4 @@ disasteriq/
 
 ---
 
-This project demonstrates how **structured database design, migrations, and seed scripts** enable scalable and reliable disaster-management systems.
+This project demonstrates how **structured database design, input validation, migrations, and seed scripts** enable scalable and reliable disaster-management systems.

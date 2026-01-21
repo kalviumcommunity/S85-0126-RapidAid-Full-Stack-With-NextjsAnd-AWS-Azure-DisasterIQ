@@ -15,16 +15,22 @@ interface StatCardProps {
   className?: string;
 }
 
-const variantStyles = {
+const variantStyles: Record<
+  NonNullable<StatCardProps["variant"]>,
+  string
+> = {
   default: "border-border",
-  critical: "border-l-4 border-l-red-500 border-t-0 border-r-0 border-b-0",
-  warning: "border-l-4 border-l-amber-500 border-t-0 border-r-0 border-b-0",
-  success: "border-l-4 border-l-green-500 border-t-0 border-r-0 border-b-0",
-  info: "border-l-4 border-l-blue-500 border-t-0 border-r-0 border-b-0",
-  primary: "border-l-4 border-l-primary border-t-0 border-r-0 border-b-0",
+  critical: "border-l-4 border-l-red-500",
+  warning: "border-l-4 border-l-amber-500",
+  success: "border-l-4 border-l-green-500",
+  info: "border-l-4 border-l-blue-500",
+  primary: "border-l-4 border-l-primary",
 };
 
-const iconStyles = {
+const iconStyles: Record<
+  NonNullable<StatCardProps["variant"]>,
+  string
+> = {
   default: "bg-primary/10 text-primary",
   critical: "bg-red-100 text-red-600",
   warning: "bg-amber-100 text-amber-600",
@@ -42,11 +48,24 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className={cn("bg-card border border-border rounded-xl p-5", variantStyles[variant], className)}>
-      <div className="flex items-start justify-between">
+    <div
+      className={cn(
+        "bg-card border rounded-xl p-5 transition-shadow hover:shadow-md",
+        variantStyles[variant],
+        className
+      )}
+    >
+      <div className="flex items-start justify-between gap-4">
+        {/* Content */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            {title}
+          </p>
+
+          <p className="text-3xl font-bold tracking-tight text-foreground">
+            {value}
+          </p>
+
           {trend && (
             <p
               className={cn(
@@ -56,13 +75,19 @@ export function StatCard({
             >
               <span>{trend.isPositive ? "↑" : "↓"}</span>
               <span>{Math.abs(trend.value)}%</span>
-              <span className="text-muted-foreground font-normal">vs last week</span>
+              <span className="text-muted-foreground font-normal">
+                vs last week
+              </span>
             </p>
           )}
         </div>
-        <div className={cn("p-3 rounded-xl", iconStyles[variant])}>
-          <Icon className="h-6 w-6" />
-        </div>
+
+        {/* Icon */}
+        {Icon && (
+          <div className={cn("p-3 rounded-xl", iconStyles[variant])}>
+            <Icon className="h-6 w-6" />
+          </div>
+        )}
       </div>
     </div>
   );

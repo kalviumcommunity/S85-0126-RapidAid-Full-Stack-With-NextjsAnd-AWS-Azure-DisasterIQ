@@ -2,7 +2,14 @@
 
 import { cn } from "@/app/lib/utils";
 
-type StatusType = "critical" | "warning" | "success" | "info" | "default";
+/* ===================== TYPES ===================== */
+
+export type StatusType =
+  | "critical"
+  | "warning"
+  | "success"
+  | "info"
+  | "default";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -10,6 +17,8 @@ interface StatusBadgeProps {
   pulse?: boolean;
   className?: string;
 }
+
+/* ===================== STYLES ===================== */
 
 const statusStyles: Record<StatusType, string> = {
   critical: "bg-red-100 text-red-700 border-red-200",
@@ -19,7 +28,22 @@ const statusStyles: Record<StatusType, string> = {
   default: "bg-muted text-muted-foreground border-border",
 };
 
-export function StatusBadge({ status, label, pulse, className }: StatusBadgeProps) {
+const dotStyles: Record<StatusType, string> = {
+  critical: "bg-red-500",
+  warning: "bg-amber-500",
+  success: "bg-green-500",
+  info: "bg-blue-500",
+  default: "bg-muted-foreground",
+};
+
+/* ===================== COMPONENT ===================== */
+
+export function StatusBadge({
+  status,
+  label,
+  pulse = false,
+  className,
+}: StatusBadgeProps) {
   return (
     <span
       className={cn(
@@ -32,11 +56,7 @@ export function StatusBadge({ status, label, pulse, className }: StatusBadgeProp
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full",
-          status === "critical" && "bg-red-500",
-          status === "warning" && "bg-amber-500",
-          status === "success" && "bg-green-500",
-          status === "info" && "bg-blue-500",
-          status === "default" && "bg-muted-foreground"
+          dotStyles[status]
         )}
       />
       {label}

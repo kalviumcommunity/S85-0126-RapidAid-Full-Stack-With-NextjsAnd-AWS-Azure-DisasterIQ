@@ -18,7 +18,10 @@ interface DisasterCardProps {
   onViewDetails?: () => void;
 }
 
-const severityLabels = {
+const severityLabels: Record<
+  DisasterCardProps["severity"],
+  string
+> = {
   critical: "Critical",
   warning: "Severe",
   info: "Moderate",
@@ -53,6 +56,7 @@ export function DisasterCard({
         className
       )}
     >
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -90,6 +94,7 @@ export function DisasterCard({
         </div>
       </div>
 
+      {/* Details */}
       <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" />
@@ -108,9 +113,16 @@ export function DisasterCard({
         </div>
       </div>
 
-      <Button variant="outline" className="w-full" onClick={onViewDetails}>
-        View Details
-      </Button>
+      {/* Action */}
+      {onViewDetails && (
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={onViewDetails}
+        >
+          View Details
+        </Button>
+      )}
     </div>
   );
 }
