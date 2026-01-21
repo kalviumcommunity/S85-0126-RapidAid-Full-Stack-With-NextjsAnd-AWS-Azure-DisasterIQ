@@ -1,5 +1,8 @@
+"use client";
+
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -13,8 +16,8 @@ import {
   Shield,
   Bell,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/app/lib/utils";
+import { Button } from "@/app/components/ui/button";
 
 interface NavItem {
   label: string;
@@ -67,9 +70,13 @@ const roleColors = {
   public: "bg-accent",
 };
 
-export function DashboardLayout({ children, role, userName = "User" }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  role,
+  userName = "User",
+}: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
+  const pathname = usePathname();
   const items = navItems[role];
 
   return (
@@ -83,12 +90,19 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
       >
         {/* Logo */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
-          <Link to="/" className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", roleColors[role])}>
+          <Link href="/" className="flex items-center gap-3">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center",
+                roleColors[role]
+              )}
+            >
               <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             {sidebarOpen && (
-              <span className="font-semibold text-sidebar-foreground">DisasterRelief</span>
+              <span className="font-semibold text-sidebar-foreground">
+                DisasterRelief
+              </span>
             )}
           </Link>
           <Button
@@ -104,11 +118,11 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {items.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
-                to={item.href}
+                href={item.href}
                 className={cn("nav-item", isActive && "active")}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
@@ -120,7 +134,12 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
 
         {/* User section */}
         <div className="p-4 border-t border-sidebar-border">
-          <div className={cn("flex items-center gap-3", !sidebarOpen && "justify-center")}>
+          <div
+            className={cn(
+              "flex items-center gap-3",
+              !sidebarOpen && "justify-center"
+            )}
+          >
             <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center">
               <span className="text-sm font-medium text-sidebar-foreground">
                 {userName.charAt(0).toUpperCase()}
@@ -128,8 +147,12 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">{userName}</p>
-                <p className="text-xs text-sidebar-foreground/60">{roleLabels[role]}</p>
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  {userName}
+                </p>
+                <p className="text-xs text-sidebar-foreground/60">
+                  {roleLabels[role]}
+                </p>
               </div>
             )}
           </div>
@@ -154,28 +177,28 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="shrink-0"
             >
               <Menu className="h-5 w-5" />
             </Button>
             <div className="hidden sm:block">
               <h1 className="text-lg font-semibold">
-                {items.find((item) => item.href === location.pathname)?.label || "Dashboard"}
+                {items.find((item) => item.href === pathname)?.label ||
+                  "Dashboard"}
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-critical rounded-full text-[10px] text-critical-foreground flex items-center justify-center">
-                3
-              </span>
-            </Button>
-          </div>
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-critical rounded-full text-[10px] text-critical-foreground flex items-center justify-center">
+              3
+            </span>
+          </Button>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+          {children}
+        </main>
       </div>
 
       {/* Mobile overlay */}

@@ -1,32 +1,36 @@
+"use client";
+
 import { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   trend?: {
     value: number;
     isPositive: boolean;
   };
-  variant?: "default" | "critical" | "warning" | "success" | "info";
+  variant?: "default" | "critical" | "warning" | "success" | "info" | "primary";
   className?: string;
 }
 
 const variantStyles = {
   default: "border-border",
-  critical: "border-l-4 border-l-critical border-t-0 border-r-0 border-b-0",
-  warning: "border-l-4 border-l-warning border-t-0 border-r-0 border-b-0",
-  success: "border-l-4 border-l-success border-t-0 border-r-0 border-b-0",
-  info: "border-l-4 border-l-info border-t-0 border-r-0 border-b-0",
+  critical: "border-l-4 border-l-red-500 border-t-0 border-r-0 border-b-0",
+  warning: "border-l-4 border-l-amber-500 border-t-0 border-r-0 border-b-0",
+  success: "border-l-4 border-l-green-500 border-t-0 border-r-0 border-b-0",
+  info: "border-l-4 border-l-blue-500 border-t-0 border-r-0 border-b-0",
+  primary: "border-l-4 border-l-primary border-t-0 border-r-0 border-b-0",
 };
 
 const iconStyles = {
   default: "bg-primary/10 text-primary",
-  critical: "bg-critical/10 text-critical",
-  warning: "bg-warning/10 text-warning",
-  success: "bg-success/10 text-success",
-  info: "bg-info/10 text-info",
+  critical: "bg-red-100 text-red-600",
+  warning: "bg-amber-100 text-amber-600",
+  success: "bg-green-100 text-green-600",
+  info: "bg-blue-100 text-blue-600",
+  primary: "bg-primary/10 text-primary",
 };
 
 export function StatCard({
@@ -38,16 +42,16 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div className={cn("stat-card", variantStyles[variant], className)}>
+    <div className={cn("bg-card border border-border rounded-xl p-5", variantStyles[variant], className)}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
+          <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
           {trend && (
             <p
               className={cn(
                 "text-sm font-medium flex items-center gap-1",
-                trend.isPositive ? "text-success" : "text-critical"
+                trend.isPositive ? "text-green-600" : "text-red-600"
               )}
             >
               <span>{trend.isPositive ? "↑" : "↓"}</span>

@@ -1,9 +1,5 @@
-import DashboardLayout from "@/Components/DashboardLayout";
+import Index from "@/app/pages/Index";
 
 export default function Page() {
-  return (
-    <DashboardLayout>
-      {/* Paste the same JSX content from App.tsx here */}
-    </DashboardLayout>
-  );
+  return <Index />;
 }

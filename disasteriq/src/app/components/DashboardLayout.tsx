@@ -1,5 +1,8 @@
+"use client";
+
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -13,7 +16,7 @@ import {
   Shield,
   Bell,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 import { Button } from "@/app/components/ui/button";
 
 interface NavItem {
@@ -60,16 +63,20 @@ const roleLabels = {
   public: "Public User",
 };
 
-const roleColors = {
+const roleColors: Record<string, string> = {
   admin: "bg-primary",
-  government: "bg-info",
-  responder: "bg-success",
-  public: "bg-accent",
+  government: "bg-blue-500",
+  responder: "bg-green-500",
+  public: "bg-amber-500",
 };
 
-export function DashboardLayout({ children, role, userName = "User" }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  role,
+  userName = "User",
+}: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
+  const pathname = usePathname();
   const items = navItems[role];
 
   return (
@@ -77,24 +84,32 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar transition-all duration-300 lg:relative",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-background border-r border-border transition-all duration-300 lg:relative",
           sidebarOpen ? "w-64" : "w-0 lg:w-20"
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
-          <Link to="/" className="flex items-center gap-3">
-            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", roleColors[role])}>
-              <Shield className="w-5 h-5 text-primary-foreground" />
+        <div className="flex h-16 items-center justify-between px-4 border-b border-border">
+          <Link href="/" className="flex items-center gap-3">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center",
+                roleColors[role]
+              )}
+            >
+              <Shield className="w-5 h-5 text-white" />
             </div>
             {sidebarOpen && (
-              <span className="font-semibold text-sidebar-foreground">DisasterRelief</span>
+              <span className="font-semibold text-foreground">
+                DisasterRelief
+              </span>
             )}
           </Link>
+
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden text-sidebar-foreground"
+            className="lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="h-5 w-5" />
@@ -104,12 +119,15 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {items.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
-                to={item.href}
-                className={cn("nav-item", isActive && "active")}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                  isActive && "bg-primary text-primary-foreground hover:bg-primary/90"
+                )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
                 {sidebarOpen && <span>{item.label}</span>}
@@ -119,25 +137,24 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-border">
           <div className={cn("flex items-center gap-3", !sidebarOpen && "justify-center")}>
-            <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center">
-              <span className="text-sm font-medium text-sidebar-foreground">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-sm font-medium text-muted-foreground">
                 {userName.charAt(0).toUpperCase()}
               </span>
             </div>
+
             {sidebarOpen && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">{userName}</p>
-                <p className="text-xs text-sidebar-foreground/60">{roleLabels[role]}</p>
+              <div>
+                <p className="text-sm font-medium truncate text-foreground">{userName}</p>
+                <p className="text-xs text-muted-foreground">{roleLabels[role]}</p>
               </div>
             )}
           </div>
+
           {sidebarOpen && (
-            <Button
-              variant="ghost"
-              className="w-full mt-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent justify-start"
-            >
+            <Button variant="ghost" className="w-full mt-3 justify-start">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -146,42 +163,37 @@ export function DashboardLayout({ children, role, userName = "User" }: Dashboard
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
-        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 lg:px-6">
+      <div className="flex-1 flex flex-col">
+        <header className="h-16 border-b border-border flex items-center justify-between px-6 bg-background">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="shrink-0"
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <div className="hidden sm:block">
-              <h1 className="text-lg font-semibold">
-                {items.find((item) => item.href === location.pathname)?.label || "Dashboard"}
-              </h1>
-            </div>
+
+            <h1 className="text-lg font-semibold hidden sm:block text-foreground">
+              {items.find((item) => item.href === pathname)?.label || "Dashboard"}
+            </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-critical rounded-full text-[10px] text-critical-foreground flex items-center justify-center">
-                3
-              </span>
-            </Button>
-          </div>
+
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs flex items-center justify-center bg-red-500 text-white">
+              3
+            </span>
+          </Button>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">{children}</main>
+        <main className="flex-1 p-6 overflow-auto bg-background">{children}</main>
       </div>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
