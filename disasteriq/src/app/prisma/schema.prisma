@@ -8,47 +8,44 @@ datasource db {
 }
 
 /////////////////////
-// ORGANIZATION
-/////////////////////
-
-model Organization {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  type      String   // NGO, HOSPITAL, GOVT
-  createdAt DateTime @default(now())
-
-  users     User[]
-}
-
-/////////////////////
 // AUTH & RBAC
 /////////////////////
 
 model User {
-  id              String   @id @default(uuid()) @db.Uuid
-  name            String
-  email           String   @unique
-  phone           String?
-  passwordHash    String
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
-  // FIXED HERE ✅
-  organizationId  String?  @db.Uuid
-  organization    Organization? @relation(fields: [organizationId], references: [id])
+  governmentId String? @db.Uuid
+  policeId     String? @db.Uuid
+  ngoId        String? @db.Uuid
+  hospitalId   String? @db.Uuid
+
+  government Government? @relation(fields: [governmentId], references: [id])
+  police     Police?     @relation(fields: [policeId], references: [id])
+  ngo        NGO?        @relation(fields: [ngoId], references: [id])
+  hospital   Hospital?   @relation(fields: [hospitalId], references: [id])
 
   roles            UserRole[]
   auditLogs        AuditLog[]
   createdResources Resource[]
   createdShelters  Shelter[]
   createdReports   MedicalReport[]
+
+  @@map("user")
 }
 
 model Role {
-  id    String @id @default(uuid()) @db.Uuid
-  name  String @unique
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
 
   users UserRole[]
+
+  @@map("role")
 }
 
 model UserRole {
@@ -59,6 +56,90 @@ model UserRole {
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
+  @@map("user_role")
+}
+
+/////////////////////
+// GOVERNMENT
+/////////////////////
+
+model Government {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  level        String   // CENTRAL | STATE | DISTRICT
+  state        String?
+  district     String?
+  department   String
+  contactEmail String
+  contactPhone String
+  createdAt    DateTime @default(now())
+
+  users User[]
+
+  @@map("government")
+}
+
+/////////////////////
+// POLICE
+/////////////////////
+
+model Police {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  stationCode     String   @unique
+  state           String
+  district        String
+  address         String
+  officerInCharge String
+  contactNumber   String
+  createdAt       DateTime @default(now())
+
+  users User[]
+
+  @@map("police")
+}
+
+/////////////////////
+// NGO
+/////////////////////
+
+model NGO {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String
+  registrationNumber String   @unique
+  state              String
+  district           String
+  focusArea          String
+  contactEmail       String
+  contactPhone       String
+  createdAt          DateTime @default(now())
+
+  users User[]
+
+  @@map("ngo")
+}
+
+/////////////////////
+// HOSPITAL
+/////////////////////
+
+model Hospital {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  type          String   // GOVT | PRIVATE
+  state         String
+  district      String
+  address       String
+  totalBeds     Int
+  availableBeds Int
+  emergencyBeds Int
+  contactNumber String
+  createdAt     DateTime @default(now())
+
+  users   User[]
+  reports MedicalReport[]
+
+  @@map("hospital")
 }
 
 /////////////////////
@@ -74,12 +155,12 @@ model Disaster {
   status     String
   reportedAt DateTime @default(now())
 
-  victims      Victim[]
-  assignments  RescueAssignment[]
-  resources    ResourceAllocation[]
-  metrics      DisasterMetric?
+  victims     Victim[]
+  assignments RescueAssignment[]
+  resources   ResourceAllocation[]
+  metrics     DisasterMetric?
 
-  @@index([status])
+  @@map("disaster")
 }
 
 model Victim {
@@ -92,10 +173,10 @@ model Victim {
   rescued    Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-  disaster   Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
-  reports    MedicalReport[]
+  disaster Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  reports  MedicalReport[]
 
-  @@index([disasterId])
+  @@map("victim")
 }
 
 /////////////////////
@@ -110,6 +191,8 @@ model RescueTeam {
   status       String
 
   assignments RescueAssignment[]
+
+  @@map("rescue_team")
 }
 
 model RescueAssignment {
@@ -120,6 +203,8 @@ model RescueAssignment {
 
   rescueTeam RescueTeam @relation(fields: [rescueTeamId], references: [id])
   disaster   Disaster   @relation(fields: [disasterId], references: [id])
+
+  @@map("rescue_assignment")
 }
 
 /////////////////////
@@ -136,6 +221,8 @@ model Shelter {
 
   createdById String @db.Uuid
   createdBy   User   @relation(fields: [createdById], references: [id])
+
+  @@map("shelter")
 }
 
 /////////////////////
@@ -143,15 +230,17 @@ model Shelter {
 /////////////////////
 
 model Resource {
-  id          String @id @default(uuid()) @db.Uuid
-  type        String
-  quantity    Int
-  unit        String
+  id       String @id @default(uuid()) @db.Uuid
+  type     String
+  quantity Int
+  unit     String
 
   createdById String @db.Uuid
   createdBy   User   @relation(fields: [createdById], references: [id])
 
   allocations ResourceAllocation[]
+
+  @@map("resource")
 }
 
 model ResourceAllocation {
@@ -163,20 +252,13 @@ model ResourceAllocation {
 
   resource Resource @relation(fields: [resourceId], references: [id])
   disaster Disaster @relation(fields: [disasterId], references: [id])
+
+  @@map("resource_allocation")
 }
 
 /////////////////////
-// HOSPITAL & MEDICAL
+// MEDICAL
 /////////////////////
-
-model Hospital {
-  id            String @id @default(uuid()) @db.Uuid
-  name          String
-  location      String
-  contactNumber String
-
-  reports MedicalReport[]
-}
 
 model MedicalReport {
   id         String   @id @default(uuid()) @db.Uuid
@@ -190,18 +272,8 @@ model MedicalReport {
 
   hospital Hospital @relation(fields: [hospitalId], references: [id])
   victim   Victim   @relation(fields: [victimId], references: [id])
-}
 
-/////////////////////
-// FILES
-/////////////////////
-
-model ObjectFile {
-  id         String   @id @default(uuid()) @db.Uuid
-  entityType String
-  entityId   String
-  fileUrl    String
-  uploadedAt DateTime @default(now())
+  @@map("medical_report")
 }
 
 /////////////////////
@@ -216,6 +288,8 @@ model DisasterMetric {
   lastUpdated    DateTime @default(now())
 
   disaster Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+
+  @@map("disaster_metric")
 }
 
 /////////////////////
@@ -231,4 +305,6 @@ model AuditLog {
   timestamp DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_log")
 }

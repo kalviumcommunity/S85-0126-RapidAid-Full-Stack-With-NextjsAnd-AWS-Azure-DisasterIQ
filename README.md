@@ -2,269 +2,165 @@
 
 ## 📌 Project Overview
 
-This project is a **Disaster Relief Coordination Platform** built using **Next.js + Prisma + PostgreSQL**. It enables NGOs, hospitals, and government agencies to collaborate through **APIs and real-time dashboards** during natural disasters such as floods, earthquakes, and cyclones.
+The **Disaster Relief Coordination Platform** is a **full-stack, API-driven system** built using **Next.js (App Router), Prisma ORM, and PostgreSQL**. It enables **NGOs, hospitals, police, and government agencies** to collaborate through **secure APIs and role-based dashboards** during natural disasters such as floods, earthquakes, and cyclones.
 
-The platform acts as a **central command system** where all relief-related data — organizations, users, roles, disasters, victims, shelters, rescue teams, hospitals, and resources — is stored in a **single normalized database** and exposed through APIs for coordination and decision-making.
+The platform acts as a **central command and coordination layer** where all disaster-related data — organizations, users, roles, disasters, victims, shelters, rescue teams, hospitals, and resources — is stored in a **single normalized database** and accessed through **authorization-protected APIs**.
 
 ---
 
-## ❓ Why We Are Building This
+## ❓ Why This Platform Exists
 
-During disasters, relief operations often fail not because resources are unavailable, but because **information is scattered** across different NGOs and government departments.
+During real-world disasters, relief operations often fail not because resources are unavailable, but because **information is fragmented** across multiple NGOs and government bodies.
 
-### Problems today
+### Problems Observed
 
 * NGOs don’t know what other NGOs have supplied
-* Government doesn’t know which shelters are full
-* Rescue teams don’t know where help is needed most
+* Government authorities don’t know which shelters are full
+* Police and rescue teams lack real-time priority information
+* Hospitals cannot efficiently report victim status
 * Decisions are made using outdated or incomplete data
 
-### Our solution
+### Our Solution
 
-This platform creates a **single source of truth** where:
+This platform provides a **single source of truth** where:
 
-* NGOs upload available resources
+* NGOs publish available resources
 * Government monitors disaster severity and shelter capacity
+* Police coordinate rescue operations
 * Hospitals submit medical reports for victims
-* Rescue teams receive assignments based on priority
+* Rescue teams receive priority-based assignments
 
-This results in **faster response, better planning, and fewer resource conflicts**.
+This results in **faster response times, better coordination, and reduced duplication of effort**.
 
 ---
 
 ## 🗄️ Database Design (Prisma + PostgreSQL)
 
-The database is designed using **Prisma ORM** with PostgreSQL and follows **proper normalization (3NF)** to avoid redundancy.
+The database is designed using **Prisma ORM** with PostgreSQL and follows **Third Normal Form (3NF)** to eliminate redundancy and ensure data integrity.
 
-### Key Entities
+### Core Entities
 
-* **Organization** – NGOs, Hospitals, Government bodies
-* **User / Role / UserRole** – Authentication and RBAC (Many-to-Many)
-* **Disaster / Victim** – Disaster events and affected people
-* **RescueTeam / RescueAssignment** – Rescue operations
+* **User / Role / UserRole** – Authentication and Role-Based Access Control (RBAC)
+* **NGO / Hospital / Police / Government** – Organizational entities
+* **Disaster / Victim** – Disaster events and affected individuals
+* **RescueTeam / RescueAssignment** – Rescue coordination
 * **Shelter** – Temporary housing with capacity tracking
 * **Resource / ResourceAllocation** – Relief resource distribution
-* **Hospital / MedicalReport** – Medical tracking
+* **MedicalReport** – Hospital reports for victims
 * **AuditLog** – Action tracking for accountability
 * **DisasterMetric** – Aggregated metrics for dashboards
 
-### Keys, Constraints & Relationships
+---
 
-* UUIDs are used as **primary keys** for scalability and distributed systems
-* Foreign keys enforce **referential integrity**
-* Many-to-Many relationships are handled using junction tables (`UserRole`)
-* Cascading deletes are applied where data must not exist independently (e.g., Victims → Disaster)
-* Indexes are added on frequently queried fields such as `Disaster.status`
+## 🔐 Authorization Middleware (Assignment Implementation)
+
+### Authentication vs Authorization
+
+| Concept        | Purpose                             | Example                                    |
+| -------------- | ----------------------------------- | ------------------------------------------ |
+| Authentication | Verifies who the user is            | User logs in with email & password         |
+| Authorization  | Determines what the user can access | Only POLICE_ADMIN can access police routes |
+
+This assignment focuses on **authorization**, implemented using **JWT-based middleware and RBAC**.
 
 ---
 
-## 🔄 Database Migrations
+## 🧩 Role-Based Access Control (RBAC)
 
-Database migrations ensure that **every developer and environment** uses the same schema.
+User permissions are managed using a **many-to-many RBAC model**:
 
-### Initial Migration
+* Users can have multiple roles
+* Roles are stored centrally
+* Permissions are enforced at the API level
 
-```bash
-npx prisma migrate dev --name init_schema
-```
+Example roles:
 
-This command:
-
-* Generates SQL migration files in `prisma/migrations/`
-* Creates all tables and relations in PostgreSQL
-* Syncs Prisma Client with the schema
-
-### Updating Schema
-
-Whenever models are added or modified:
-
-```bash
-npx prisma migrate dev --name add_<feature_name>
-```
-
-Each migration is **versioned and reproducible**, making teamwork and deployments safe.
-
-### Resetting Database (Development Only)
-
-```bash
-npx prisma migrate reset
-```
-
-* Drops the database
-* Re-applies all migrations
-* Re-runs seed scripts
-
-⚠️ **Never run this in production**
+* `SUPER_ADMIN`
+* `GOVERNMENT_ADMIN`
+* `POLICE_ADMIN`
+* `NGO_ADMIN`
+* `HOSPITAL_ADMIN`
+* `USER`
 
 ---
 
-## 🌱 Seed Scripts
+## 🛡 Authorization Middleware Design
 
-Seed scripts insert **initial and test data** so the system is usable immediately.
+### Middleware Goals
 
-### Seed File Location
+* Validate JWT tokens
+* Enforce role-based access rules
+* Prevent unauthorized access
+* Follow the **principle of least privilege**
 
-```
-prisma/seed.ts
-```
-
-### What We Seed
-
-* Roles (ADMIN, NGO, HOSPITAL, GOVT)
-* Sample Organizations
-* Sample Users linked to organizations
-* Initial Disaster record for testing
-
-### Run Seed
-
-```bash
-npx prisma db seed
-```
-
-The seed script is written to be **idempotent**, ensuring data is not duplicated on re-run.
-
----
-
-## ✅ Input Validation with Zod
-
-To ensure data integrity and API reliability, all **POST, PUT, and PATCH** endpoints use **Zod** for input validation before requests reach the service or database layers.
-
-### Why Validation Matters
-
-Without validation, malformed or incomplete requests could:
-
-* Corrupt database records
-* Cause unexpected runtime errors
-* Lead to inconsistent data across services
-
-Zod allows the API to **fail fast and gracefully**, returning clear and structured error messages.
-
-### Validation Flow
+### Flow Diagram
 
 ```
 Client Request
    ↓
-API Route
+Authorization Header (Bearer JWT)
    ↓
-Zod Schema Validation
+Auth Middleware (JWT Verification)
    ↓
-Service Layer
+Role Check (RBAC)
    ↓
-Prisma → PostgreSQL
-```
-
-### Example Zod Schema (Disaster)
-
-```ts
-import { z } from "zod";
-
-export const createDisasterSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  type: z.string().min(3),
-  severity: z.number().int().min(1).max(10),
-  location: z.string().min(3),
-  status: z.enum(["REPORTED", "ONGOING", "RESOLVED"]),
-});
-
-export const updateDisasterSchema = createDisasterSchema.partial();
-```
-
-### API Integration Example
-
-```ts
-const body = await req.json();
-const validatedBody = createDisasterSchema.parse(body);
-```
-
-### Example Validation Error Response
-
-```json
-{
-  "success": false,
-  "message": "Validation Error",
-  "errors": [
-    "severity: Number must be less than or equal to 10"
-  ]
-}
-```
-
-### Schema Reuse & Maintainability
-
-* Zod schemas are stored in `src/app/lib/schemas`
-* Schemas are reused across API routes
-* The same schemas can be reused on the frontend for form validation
-
-This ensures **consistent validation rules**, reduces duplication, and improves long-term maintainability in team projects.
-
----
-
-## 🔍 Verifying Data
-
-Use Prisma Studio to visually inspect tables and relations:
-
-```bash
-npx prisma studio
-```
-
-This helps verify:
-
-* Migrations ran successfully
-* Seed data exists
-* Relationships are correctly linked
-
----
-
-## 🔐 Production Safety Practices
-
-To protect production data:
-
-* Migrations are tested in **local and staging** first
-* Database backups are taken before schema changes
-* `migrate reset` is restricted to development only
-* Seed scripts are **never executed automatically in production**
-
----
-
-## 🗂️ Project Structure
-
-```
-disasteriq/
-├── prisma/
-│   ├── migrations/
-│   ├── schema.prisma
-│   └── seed.ts
-│
-├── src/
-│   └── app/
-│       ├── Api/
-│       ├── repositories/
-│       ├── Service/
-│       └── page.tsx
-│
-├── package.json
-├── tsconfig.json
-└── README.md
+Protected API Route
 ```
 
 ---
 
-## 🚀 Future Scope
+## 🧠 Authorization Middleware Logic
 
-* 📍 GPS tracking of rescue teams
-* 🤖 AI-based shortage prediction
-* 🌐 Integration with international relief agencies
-* 📊 Advanced analytics dashboards
+* JWT is verified in `authMiddleware`
+* Decoded user data is attached to the request
+* `requireRole` checks role permissions
+* Unauthorized requests are rejected early
+
+
+
+## 🧪 Protected Route Examples
+
+### Police-only Route
+
+```
+GET /api/&&&&&/police/
+Role Required: POLICE_ADMIN
+```
+
+
+## 🔍 Testing Authorization
+
+* Valid JWT + correct role → **Access allowed**
+* Missing / invalid token → **401 Unauthorized**
+* Valid token but wrong role → **403 Forbidden**
+
+---
+
+## 🔒 Security Best Practices
+
+* JWT secrets stored in root `.env`
+* Authorization enforced at API level
+* Middleware reused across routes
+* Easy role extensibility for future needs
+
+---
+
+## 🚀 Future Enhancements
+
+* GPS tracking for rescue teams
+* AI-based resource shortage prediction
+* Advanced analytics dashboards
 
 ---
 
 ## 👥 Team
 
-| Name        | Role                                      |
-| ----------- | ----------------------------------------- |
-| **Pranav**  | System Design, Backend Architecture, APIs |
-| **Nishant** | Frontend UI, Dashboard Design             |
-| **Tanmay**  | Testing, DevOps, Documentation            |
+| Name        | Responsibility                                                  |
+| ----------- | --------------------------------------------------------------- |
+| **Pranav**  | Backend Architecture, Database Design, Authorization Middleware |
+| **Nishant** | Frontend UI, Dashboards                                         |
+| **Tanmay**  | Testing, DevOps, Documentation                                  |
 
 ---
 
-This project demonstrates how **structured database design, input validation, migrations, and seed scripts** enable scalable and reliable disaster-management systems.
+This project demonstrates **secure backend architecture**, **role-based authorization**, and **real-world API protection strategies** using modern web technologies.
