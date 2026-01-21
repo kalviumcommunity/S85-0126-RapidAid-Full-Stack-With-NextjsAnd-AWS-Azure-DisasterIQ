@@ -1,7 +1,7 @@
 import { prisma } from "@/app/prisma/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { authMiddleware } from "@/middleware/auth";
-import { requireRole } from "@/middleware/requireRole";
+import { authMiddleware } from "@/app/middleware/auth";
+import { requireRole } from "@/app/middleware/requireRole";
 
 export const runtime = "nodejs";
 
