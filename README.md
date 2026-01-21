@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-The **Disaster Relief Coordination Platform** is a **full-stack, API-driven system** built using **Next.js (App Router), Prisma ORM, and PostgreSQL**. It enables **NGOs, hospitals, police, and government agencies** to collaborate through **secure APIs and role-based dashboards** during natural disasters such as floods, earthquakes, and cyclones.
+The **Disaster Relief Coordination Platform** is a **full-stack, API-driven system** built using **Next.js (App Router), Prisma ORM, and PostgreSQL**. It enables **NGOs, hospitals, police, and government agencies** to collaborate through **secure APIs, centralized error handling, and role-based dashboards** during natural disasters such as floods, earthquakes, and cyclones.
 
 The platform acts as a **central command and coordination layer** where all disaster-related data — organizations, users, roles, disasters, victims, shelters, rescue teams, hospitals, and resources — is stored in a **single normalized database** and accessed through **authorization-protected APIs**.
 
@@ -116,19 +116,18 @@ Protected API Route
 * `requireRole` checks role permissions
 * Unauthorized requests are rejected early
 
+---
 
-
-## 🧪 Protected Route Examples
-
-### Police-only Route
+## 🧪 Protected Route Example
 
 ```
-GET /api/&&&&&/police/
+GET /api/police
 Role Required: POLICE_ADMIN
 ```
 
+---
 
-## 🔍 Testing Authorization
+## 🧪 Testing Authorization
 
 * Valid JWT + correct role → **Access allowed**
 * Missing / invalid token → **401 Unauthorized**
@@ -136,10 +135,83 @@ Role Required: POLICE_ADMIN
 
 ---
 
+## ❌ Centralized Error Handling Middleware (Assignment 2.22)
+
+The platform implements a **centralized error handling layer** to ensure consistent error responses, secure production behavior, and structured logging.
+
+### Why Centralized Error Handling?
+
+| Benefit       | Explanation                          |
+| ------------- | ------------------------------------ |
+| Consistency   | Uniform API error response structure |
+| Security      | Stack traces hidden in production    |
+| Debugging     | Structured logs improve traceability |
+| Observability | Logs ready for tools like CloudWatch |
+
+---
+
+### 🧱 Error Handling Architecture
+
+```
+lib/
+ ├── logger.ts        → Structured logging utility
+ ├── errorHandler.ts → Centralized error formatter
+```
+
+---
+
+### 🧠 Error Handling Logic
+
+* All API routes are wrapped in `try/catch`
+* Unexpected errors are passed to `handleError()`
+* Full error details are logged internally
+* Production users receive safe, generic messages
+
+---
+
+### 🌍 Environment-based Behavior
+
+| Environment | API Response         | Logs              |
+| ----------- | -------------------- | ----------------- |
+| Development | Error + stack trace  | Full stack logged |
+| Production  | Generic safe message | Stack redacted    |
+
+---
+
+### 📝 Example Error Responses
+
+**Development Mode**
+
+```json
+{
+  "success": false,
+  "message": "Database connection failed!",
+  "stack": "Error: Database connection failed! at ..."
+}
+```
+
+**Production Mode**
+
+```json
+{
+  "success": false,
+  "message": "Something went wrong. Please try again later."
+}
+```
+
+---
+
+### 💡 Reflection
+
+Centralized error handling significantly improves debugging efficiency by enforcing structured logs and consistent error responses. Redacting stack traces in production prevents sensitive data leakage, improving security and user trust. This design also scales well for introducing custom error types such as authentication, validation, and database errors.
+
+---
+
 ## 🔒 Security Best Practices
 
 * JWT secrets stored in root `.env`
 * Authorization enforced at API level
+* Centralized error handling for safe failures
 * Middleware reused across routes
 * Easy role extensibility for future needs
 
@@ -155,12 +227,12 @@ Role Required: POLICE_ADMIN
 
 ## 👥 Team
 
-| Name        | Responsibility                                                  |
-| ----------- | --------------------------------------------------------------- |
-| **Pranav**  | Backend Architecture, Database Design, Authorization Middleware |
-| **Nishant** | Frontend UI, Dashboards                                         |
-| **Tanmay**  | Testing, DevOps, Documentation                                  |
+| Name        | Responsibility                                                        |
+| ----------- | --------------------------------------------------------------------- |
+| **Pranav**  | Backend Architecture, Database Design, Authorization & Error Handling |
+| **Nishant** | Frontend UI, Dashboards                                               |
+| **Tanmay**  | Testing, DevOps, Documentation                                        |
 
 ---
 
-This project demonstrates **secure backend architecture**, **role-based authorization**, and **real-world API protection strategies** using modern web technologies.
+This project demonstrates **secure backend architecture**, **role-based authorization**, **centralized error handling**, and **real-world API protection strategies** using modern web technologies.
