@@ -52,7 +52,7 @@ The database is designed using **Prisma ORM** with PostgreSQL and follows **Thir
 
 ---
 
-## 🔐 Authorization Middleware (Assignment Implementation)
+## 🔐 Authorization Middleware 
 
 ### Authentication vs Authorization
 
@@ -61,178 +61,79 @@ The database is designed using **Prisma ORM** with PostgreSQL and follows **Thir
 | Authentication | Verifies who the user is            | User logs in with email & password         |
 | Authorization  | Determines what the user can access | Only POLICE_ADMIN can access police routes |
 
-This assignment focuses on **authorization**, implemented using **JWT-based middleware and RBAC**.
+This assignment focuses on **authorization**, implemented using **JWT-based middleware, access & refresh token strategy, and RBAC**.
 
 ---
 
-## 🧩 Role-Based Access Control (RBAC)
+## 🔑 Secure JWT & Session Management 
 
-User permissions are managed using a **many-to-many RBAC model**:
+The platform implements **secure session management** using **Access Tokens and Refresh Tokens**, following industry best practices to balance **security** and **user experience**.
 
-* Users can have multiple roles
-* Roles are stored centrally
-* Permissions are enforced at the API level
+### 🔐 Access Token vs Refresh Token
 
-Example roles:
-
-* `SUPER_ADMIN`
-* `GOVERNMENT_ADMIN`
-* `POLICE_ADMIN`
-* `NGO_ADMIN`
-* `HOSPITAL_ADMIN`
-* `USER`
+| Token Type    | Purpose                    | Expiry     | Storage Location        |
+| ------------- | -------------------------- | ---------- | ----------------------- |
+| Access Token  | Authorize API requests     | 15 minutes | In-memory (client side) |
+| Refresh Token | Renew access token session | 7 days     | HTTP-only secure cookie |
 
 ---
 
-## 🛡 Authorization Middleware Design
-
-### Middleware Goals
-
-* Validate JWT tokens
-* Enforce role-based access rules
-* Prevent unauthorized access
-* Follow the **principle of least privilege**
-
-### Flow Diagram
-
-```
-Client Request
-   ↓
-Authorization Header (Bearer JWT)
-   ↓
-Auth Middleware (JWT Verification)
-   ↓
-Role Check (RBAC)
-   ↓
-Protected API Route
-```
-
----
-
-## 🧠 Authorization Middleware Logic
-
-* JWT is verified in `authMiddleware`
-* Decoded user data is attached to the request
-* `requireRole` checks role permissions
-* Unauthorized requests are rejected early
-
----
-
-## 🧪 Protected Route Example
-
-```
-GET /api/police
-Role Required: POLICE_ADMIN
-```
-
----
-
-## 🧪 Testing Authorization
-
-* Valid JWT + correct role → **Access allowed**
-* Missing / invalid token → **401 Unauthorized**
-* Valid token but wrong role → **403 Forbidden**
-
----
-
-## ❌ Centralized Error Handling Middleware (Assignment 2.22)
+## ❌ Centralized Error Handling Middleware 
 
 The platform implements a **centralized error handling layer** to ensure consistent error responses, secure production behavior, and structured logging.
-
-### Why Centralized Error Handling?
-
-| Benefit       | Explanation                          |
-| ------------- | ------------------------------------ |
-| Consistency   | Uniform API error response structure |
-| Security      | Stack traces hidden in production    |
-| Debugging     | Structured logs improve traceability |
-| Observability | Logs ready for tools like CloudWatch |
-
----
-
-### 🧱 Error Handling Architecture
-
-```
-lib/
- ├── logger.ts        → Structured logging utility
- ├── errorHandler.ts → Centralized error formatter
-```
-
----
-
-### 🧠 Error Handling Logic
-
-* All API routes are wrapped in `try/catch`
-* Unexpected errors are passed to `handleError()`
-* Full error details are logged internally
-* Production users receive safe, generic messages
-
----
-
-### 🌍 Environment-based Behavior
-
-| Environment | API Response         | Logs              |
-| ----------- | -------------------- | ----------------- |
-| Development | Error + stack trace  | Full stack logged |
-| Production  | Generic safe message | Stack redacted    |
-
----
-
-### 📝 Example Error Responses
-
-**Development Mode**
-
-```json
-{
-  "success": false,
-  "message": "Database connection failed!",
-  "stack": "Error: Database connection failed! at ..."
-}
-```
-
-**Production Mode**
-
-```json
-{
-  "success": false,
-  "message": "Something went wrong. Please try again later."
-}
-```
-
----
-
-### 💡 Reflection
-
-Centralized error handling significantly improves debugging efficiency by enforcing structured logs and consistent error responses. Redacting stack traces in production prevents sensitive data leakage, improving security and user trust. This design also scales well for introducing custom error types such as authentication, validation, and database errors.
 
 ---
 
 ## 🔒 Security Best Practices
 
 * JWT secrets stored in root `.env`
+* Access & refresh token separation
+* Refresh tokens stored in HTTP-only cookies
 * Authorization enforced at API level
 * Centralized error handling for safe failures
 * Middleware reused across routes
-* Easy role extensibility for future needs
+* **Input sanitization applied on all write APIs**
+* **Parameterized database queries via Prisma ORM**
+* **Passwords never sanitized, only hashed**
 
 ---
 
-## 🚀 Future Enhancements
+## 🧼 Input Sanitization & OWASP Compliance 
 
-* GPS tracking for rescue teams
-* AI-based resource shortage prediction
-* Advanced analytics dashboards
+This assignment focuses on protecting the application against **OWASP Top 10 vulnerabilities**, specifically **Cross-Site Scripting (XSS)** and **SQL Injection (SQLi)**.
+
+### OWASP Threats Addressed
+
+| Vulnerability | Risk                                  | Example Attack                     |
+| ------------- | ------------------------------------- | ---------------------------------- |
+| XSS           | Script execution in user-facing pages | `<script>alert('Hacked')</script>` |
+| SQL Injection | Database manipulation                 | `' OR 1=1 --`                      |
+
+### Sanitization Strategy
+
+* All user-provided string inputs are sanitized at the API boundary
+* No HTML tags or attributes are allowed
+* Inputs are cleaned before database writes
+* Passwords are excluded and only hashed
+
+### SQL Injection Prevention
+
+Prisma ORM uses parameterized queries internally, preventing SQL Injection even when malicious input is provided.
+
+### Reflection
+
+Centralized sanitization and ORM-level protections ensure consistent, scalable security aligned with OWASP standards.
 
 ---
 
 ## 👥 Team
 
-| Name        | Responsibility                                                        |
-| ----------- | --------------------------------------------------------------------- |
-| **Pranav**  | Backend Architecture, Database Design, Authorization & Error Handling |
-| **Nishant** | Frontend UI, Dashboards                                               |
-| **Tanmay**  | Testing, DevOps, Documentation                                        |
+| Name        | Responsibility                                                  |
+| ----------- | --------------------------------------------------------------- |
+| **Pranav**  | Backend Architecture, Database Design, Authorization & Security |
+| **Nishant** | Frontend UI, Dashboards                                         |
+| **Tanmay**  | Testing, DevOps, Documentation                                  |
 
 ---
 
-This project demonstrates **secure backend architecture**, **role-based authorization**, **centralized error handling**, and **real-world API protection strategies** using modern web technologies.
+This project demonstrates **secure backend architecture**, **role-based authorization**, **OWASP-compliant input handling**, and **defensive coding practices** using modern web technologies.
