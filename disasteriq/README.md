@@ -50,3 +50,20 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ```bash
 docker-compose up --build
+
+
+
+
+RapidAid – Routing Implementation
+
+In this project, I implemented routing using the Next.js App Router.
+
+I created public routes for the home and login pages and protected routes for the dashboard and users pages using middleware. Authentication is handled by checking a JWT token stored in cookies before allowing access to protected pages.
+
+I implemented dynamic routing for user pages using route parameters so different user IDs render different content from the same page.
+
+A global layout was used to provide shared navigation across all pages.
+
+I also added a custom 404 page to handle invalid routes gracefully.
+
+This project demonstrates clean routing, access control, and dynamic page handling using modern Next.js routing conventions.
