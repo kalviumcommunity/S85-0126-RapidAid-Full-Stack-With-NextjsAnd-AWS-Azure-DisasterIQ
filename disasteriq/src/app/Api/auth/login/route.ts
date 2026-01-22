@@ -4,47 +4,34 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "@/app/lib/jwt";
+import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json();
+  const body = await req.json();
+
+  const email = sanitizeInput(body.email)?.toLowerCase();
+  const password = body.password;
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: {
-      roles: { include: { role: true } },
-    },
+    include: { roles: { include: { role: true } } },
   });
 
   if (!user) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
   }
 
   const isValid = await comparePassword(password, user.passwordHash);
   if (!isValid) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
+    return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
   }
 
-  const roles = user.roles.map((r) => r.role.name);
+  const role = user.roles[0]?.role.name;
 
-  
-  const accessToken = generateAccessToken({
-    id: user.id,
-    role: roles[0],
-  });
+  const accessToken = generateAccessToken({ id: user.id, role });
+  const refreshToken = generateRefreshToken({ id: user.id });
 
-
-  const refreshToken = generateRefreshToken({
-    id: user.id,
-  });
-
-  
   const response = NextResponse.json({
     accessToken,
     redirect:
@@ -64,7 +51,7 @@ export async function POST(req: Request) {
     secure: true,
     sameSite: "strict",
     path: "/auth/refresh",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   });
 
   return response;
