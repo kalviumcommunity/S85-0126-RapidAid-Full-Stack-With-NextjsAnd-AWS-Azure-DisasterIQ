@@ -6,33 +6,38 @@ import { useRouter } from "next/navigation";
 import { AuthInput } from "@/app/components/AuthInput";
 
 
-const loginSchema = z.object({
+const signupSchema = z.object({
+name: z.string().min(3),
 email: z.string().email(),
 password: z.string().min(6),
 });
 
 
-type LoginData = z.infer<typeof loginSchema>;
+type SignupData = z.infer<typeof signupSchema>;
 
 
-export default function LoginPage() {
+export default function SignupPage() {
 const router = useRouter();
-const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
-resolver: zodResolver(loginSchema),
+const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupData>({
+resolver: zodResolver(signupSchema),
 });
-const onSubmit = async (data: LoginData) => {
-console.log("Login:", data);
+
+
+const onSubmit = async (data: SignupData) => {
+console.log("Signup:", data);
 router.push("/dashboard");
 };
-
 
 return (
 <main className="min-h-screen flex items-center justify-center bg-gray-100">
 <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-6 w-96 rounded shadow space-y-4">
-<h1 className="text-2xl font-bold text-center">Login</h1>
+<h1 className="text-2xl font-bold text-center">Create Account</h1>
+<AuthInput label="Name" registration={register("name")} error={errors.name} />
 <AuthInput label="Email" type="email" registration={register("email")} error={errors.email} />
 <AuthInput label="Password" type="password" registration={register("password")} error={errors.password} />
-<button className="w-full bg-green-600 text-white py-2 rounded">Login</button>
+<button disabled={isSubmitting} className="w-full bg-blue-600 text-white py-2 rounded">
+{isSubmitting ? "Signing up..." : "Sign Up"}
+</button>
 </form>
 </main>
 );
