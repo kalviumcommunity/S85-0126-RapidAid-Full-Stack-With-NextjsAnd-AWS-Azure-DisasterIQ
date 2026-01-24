@@ -1,5 +1,3 @@
-;
-
 import { NextRequest, NextResponse } from "next/server";
 
 export function requireRole(
@@ -8,23 +6,27 @@ export function requireRole(
 ) {
   const user = (req as any).user;
 
-  if (!user || !Array.isArray(user.roles)) {
+  if (!user?.role) {
     return NextResponse.json(
-      { message: "Forbidden: No roles" },
+      { message: "Forbidden: role missing" },
       { status: 403 }
     );
   }
 
-  const hasRole = allowedRoles.some(role =>
-    user.roles.includes(role)
+  if (!allowedRoles.includes(user.role)) {
+    console.log(
+      `[RBAC] ${user.role} attempted restricted action: DENIED`
+    );
+
+    return NextResponse.json(
+      { message: "Forbidden: insufficient role" },
+      { status: 403 }
+    );
+  }
+
+  console.log(
+    `[RBAC] ${user.role} attempted restricted action: ALLOWED`
   );
 
-  if (!hasRole) {
-    return NextResponse.json(
-      { message: "Forbidden: Insufficient role" },
-      { status: 403 }
-    );
-  }
-
-  return null; // ✅ allow
+  return null;
 }
