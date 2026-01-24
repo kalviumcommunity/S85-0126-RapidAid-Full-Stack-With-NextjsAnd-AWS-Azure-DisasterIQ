@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "MediaType" AS ENUM ('IMAGE', 'VIDEO');
+
 -- CreateTable
 CREATE TABLE "user" (
     "id" UUID NOT NULL,
@@ -102,8 +105,22 @@ CREATE TABLE "disaster" (
     "location" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "reportedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "governmentId" UUID NOT NULL,
 
     CONSTRAINT "disaster_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "media" (
+    "id" UUID NOT NULL,
+    "type" "MediaType" NOT NULL,
+    "url" TEXT NOT NULL,
+    "thumbnail" TEXT,
+    "disasterId" UUID NOT NULL,
+    "uploadedByGovernmentId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "media_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -218,6 +235,9 @@ CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 CREATE UNIQUE INDEX "role_name_key" ON "role"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "government_contactEmail_key" ON "government"("contactEmail");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "police_stationCode_key" ON "police"("stationCode");
 
 -- CreateIndex
@@ -240,6 +260,15 @@ ALTER TABLE "user_role" ADD CONSTRAINT "user_role_userId_fkey" FOREIGN KEY ("use
 
 -- AddForeignKey
 ALTER TABLE "user_role" ADD CONSTRAINT "user_role_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "disaster" ADD CONSTRAINT "disaster_governmentId_fkey" FOREIGN KEY ("governmentId") REFERENCES "government"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "media" ADD CONSTRAINT "media_disasterId_fkey" FOREIGN KEY ("disasterId") REFERENCES "disaster"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "media" ADD CONSTRAINT "media_uploadedByGovernmentId_fkey" FOREIGN KEY ("uploadedByGovernmentId") REFERENCES "government"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "victim" ADD CONSTRAINT "victim_disasterId_fkey" FOREIGN KEY ("disasterId") REFERENCES "disaster"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -7,42 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/////////////////////
-// AUTH & RBAC
-/////////////////////
-
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  email        String   @unique
-  phone        String?
-  passwordHash String
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-
-  governmentId String? @db.Uuid
-  policeId     String? @db.Uuid
-  ngoId        String? @db.Uuid
-  hospitalId   String? @db.Uuid
-
-  government Government? @relation(fields: [governmentId], references: [id])
-  police     Police?     @relation(fields: [policeId], references: [id])
-  ngo        NGO?        @relation(fields: [ngoId], references: [id])
-  hospital   Hospital?   @relation(fields: [hospitalId], references: [id])
-
-  roles            UserRole[]
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String
+  email            String          @unique
+  phone            String?
+  passwordHash     String
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  governmentId     String?         @db.Uuid
+  policeId         String?         @db.Uuid
+  ngoId            String?         @db.Uuid
+  hospitalId       String?         @db.Uuid
   auditLogs        AuditLog[]
+  createdReports   MedicalReport[]
   createdResources Resource[]
   createdShelters  Shelter[]
-  createdReports   MedicalReport[]
+  government       Government?     @relation(fields: [governmentId], references: [id])
+  hospital         Hospital?       @relation(fields: [hospitalId], references: [id])
+  ngo              NGO?            @relation(fields: [ngoId], references: [id])
+  police           Police?         @relation(fields: [policeId], references: [id])
+  roles            UserRole[]
 
   @@map("user")
 }
 
 model Role {
-  id   String @id @default(uuid()) @db.Uuid
-  name String @unique
-
+  id    String     @id @default(uuid()) @db.Uuid
+  name  String     @unique
   users UserRole[]
 
   @@map("role")
@@ -51,37 +43,29 @@ model Role {
 model UserRole {
   userId String @db.Uuid
   roleId String @db.Uuid
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
   @@map("user_role")
 }
 
-/////////////////////
-// GOVERNMENT
-/////////////////////
-
 model Government {
-  id           String   @id @default(uuid()) @db.Uuid
+  id           String     @id @default(uuid()) @db.Uuid
   name         String
-  level        String   // CENTRAL | STATE | DISTRICT
+  level        String
   state        String?
   district     String?
   department   String
-  contactEmail String
+  contactEmail String     @unique
   contactPhone String
-  createdAt    DateTime @default(now())
-
-  users User[]
+  createdAt    DateTime   @default(now())
+  disasters    Disaster[]
+  media        Media[]
+  users        User[]
 
   @@map("government")
 }
-
-/////////////////////
-// POLICE
-/////////////////////
 
 model Police {
   id              String   @id @default(uuid()) @db.Uuid
@@ -93,15 +77,10 @@ model Police {
   officerInCharge String
   contactNumber   String
   createdAt       DateTime @default(now())
-
-  users User[]
+  users           User[]
 
   @@map("police")
 }
-
-/////////////////////
-// NGO
-/////////////////////
 
 model NGO {
   id                 String   @id @default(uuid()) @db.Uuid
@@ -113,20 +92,15 @@ model NGO {
   contactEmail       String
   contactPhone       String
   createdAt          DateTime @default(now())
-
-  users User[]
+  users              User[]
 
   @@map("ngo")
 }
 
-/////////////////////
-// HOSPITAL
-/////////////////////
-
 model Hospital {
-  id            String   @id @default(uuid()) @db.Uuid
+  id            String          @id @default(uuid()) @db.Uuid
   name          String
-  type          String   // GOVT | PRIVATE
+  type          String
   state         String
   district      String
   address       String
@@ -134,82 +108,82 @@ model Hospital {
   availableBeds Int
   emergencyBeds Int
   contactNumber String
-  createdAt     DateTime @default(now())
-
-  users   User[]
-  reports MedicalReport[]
+  createdAt     DateTime        @default(now())
+  reports       MedicalReport[]
+  users         User[]
 
   @@map("hospital")
 }
 
-/////////////////////
-// DISASTER
-/////////////////////
-
 model Disaster {
-  id         String   @id @default(uuid()) @db.Uuid
-  name       String
-  type       String
-  severity   Int
-  location   String
-  status     String
-  reportedAt DateTime @default(now())
-
-  victims     Victim[]
-  assignments RescueAssignment[]
-  resources   ResourceAllocation[]
-  metrics     DisasterMetric?
+  id           String               @id @default(uuid()) @db.Uuid
+  name         String
+  type         String
+  severity     Int
+  location     String
+  status       String
+  reportedAt   DateTime             @default(now())
+  governmentId String               @db.Uuid
+  government   Government           @relation(fields: [governmentId], references: [id])
+  metrics      DisasterMetric?
+  media        Media[]
+  assignments  RescueAssignment[]
+  resources    ResourceAllocation[]
+  victims      Victim[]
 
   @@map("disaster")
 }
 
+model Media {
+  id                     String     @id @default(uuid()) @db.Uuid
+  type                   MediaType
+  url                    String
+  thumbnail              String?
+  disasterId             String     @db.Uuid
+  uploadedByGovernmentId String     @db.Uuid
+  createdAt              DateTime   @default(now())
+  disaster               Disaster   @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  uploadedByGovernment   Government @relation(fields: [uploadedByGovernmentId], references: [id])
+
+  @@map("media")
+}
+
 model Victim {
-  id         String   @id @default(uuid()) @db.Uuid
-  disasterId String   @db.Uuid
+  id         String          @id @default(uuid()) @db.Uuid
+  disasterId String          @db.Uuid
   name       String?
   age        Int?
   gender     String?
   condition  String?
-  rescued    Boolean  @default(false)
-  createdAt  DateTime @default(now())
-
-  disaster Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
-  reports  MedicalReport[]
+  rescued    Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  reports    MedicalReport[]
+  disaster   Disaster        @relation(fields: [disasterId], references: [id], onDelete: Cascade)
 
   @@map("victim")
 }
 
-/////////////////////
-// RESCUE
-/////////////////////
-
 model RescueTeam {
-  id           String @id @default(uuid()) @db.Uuid
+  id           String             @id @default(uuid()) @db.Uuid
   name         String
   organization String
   contactPhone String
   status       String
-
-  assignments RescueAssignment[]
+  assignments  RescueAssignment[]
 
   @@map("rescue_team")
 }
 
 model RescueAssignment {
-  id           String   @id @default(uuid()) @db.Uuid
-  rescueTeamId String   @db.Uuid
-  disasterId   String   @db.Uuid
-  assignedAt   DateTime @default(now())
-
-  rescueTeam RescueTeam @relation(fields: [rescueTeamId], references: [id])
-  disaster   Disaster   @relation(fields: [disasterId], references: [id])
+  id           String     @id @default(uuid()) @db.Uuid
+  rescueTeamId String     @db.Uuid
+  disasterId   String     @db.Uuid
+  assignedAt   DateTime   @default(now())
+  disaster     Disaster   @relation(fields: [disasterId], references: [id])
+  rescueTeam   RescueTeam @relation(fields: [rescueTeamId], references: [id])
 
   @@map("rescue_assignment")
 }
-
-/////////////////////
-// SHELTER
-/////////////////////
 
 model Shelter {
   id                String   @id @default(uuid()) @db.Uuid
@@ -218,26 +192,19 @@ model Shelter {
   capacity          Int
   availableCapacity Int
   createdAt         DateTime @default(now())
-
-  createdById String @db.Uuid
-  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById       String   @db.Uuid
+  createdBy         User     @relation(fields: [createdById], references: [id])
 
   @@map("shelter")
 }
 
-/////////////////////
-// RESOURCES
-/////////////////////
-
 model Resource {
-  id       String @id @default(uuid()) @db.Uuid
-  type     String
-  quantity Int
-  unit     String
-
-  createdById String @db.Uuid
-  createdBy   User   @relation(fields: [createdById], references: [id])
-
+  id          String               @id @default(uuid()) @db.Uuid
+  type        String
+  quantity    Int
+  unit        String
+  createdById String               @db.Uuid
+  createdBy   User                 @relation(fields: [createdById], references: [id])
   allocations ResourceAllocation[]
 
   @@map("resource")
@@ -249,36 +216,25 @@ model ResourceAllocation {
   disasterId        String   @db.Uuid
   allocatedQuantity Int
   allocatedAt       DateTime @default(now())
-
-  resource Resource @relation(fields: [resourceId], references: [id])
-  disaster Disaster @relation(fields: [disasterId], references: [id])
+  disaster          Disaster @relation(fields: [disasterId], references: [id])
+  resource          Resource @relation(fields: [resourceId], references: [id])
 
   @@map("resource_allocation")
 }
 
-/////////////////////
-// MEDICAL
-/////////////////////
-
 model MedicalReport {
-  id         String   @id @default(uuid()) @db.Uuid
-  hospitalId String   @db.Uuid
-  victimId   String   @db.Uuid
-  report     String
-  reportedAt DateTime @default(now())
-
-  createdById String @db.Uuid
-  createdBy   User   @relation(fields: [createdById], references: [id])
-
-  hospital Hospital @relation(fields: [hospitalId], references: [id])
-  victim   Victim   @relation(fields: [victimId], references: [id])
+  id          String   @id @default(uuid()) @db.Uuid
+  hospitalId  String   @db.Uuid
+  victimId    String   @db.Uuid
+  report      String
+  reportedAt  DateTime @default(now())
+  createdById String   @db.Uuid
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  hospital    Hospital @relation(fields: [hospitalId], references: [id])
+  victim      Victim   @relation(fields: [victimId], references: [id])
 
   @@map("medical_report")
 }
-
-/////////////////////
-// AGGREGATION
-/////////////////////
 
 model DisasterMetric {
   disasterId     String   @id @db.Uuid
@@ -286,15 +242,10 @@ model DisasterMetric {
   rescuedVictims Int
   activeShelters Int
   lastUpdated    DateTime @default(now())
-
-  disaster Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  disaster       Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
 
   @@map("disaster_metric")
 }
-
-/////////////////////
-// AUDIT
-/////////////////////
 
 model AuditLog {
   id        String   @id @default(uuid()) @db.Uuid
@@ -303,8 +254,12 @@ model AuditLog {
   entity    String
   entityId  String
   timestamp DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
 
   @@map("audit_log")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
 }
