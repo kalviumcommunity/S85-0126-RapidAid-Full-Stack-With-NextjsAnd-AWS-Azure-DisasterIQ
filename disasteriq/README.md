@@ -67,3 +67,33 @@ A global layout was used to provide shared navigation across all pages.
 I also added a custom 404 page to handle invalid routes gracefully.
 
 This project demonstrates clean routing, access control, and dynamic page handling using modern Next.js routing conventions.
+
+
+
+## Feedback UI Implementation
+
+To improve user experience and clarity, we implemented feedback layers across the application.
+
+### Toast Notifications
+Used to show instant feedback such as:
+- Successful form submission
+- API errors
+- Save confirmations
+
+Toasts are non-intrusive and auto-dismiss after a few seconds.
+
+### Modals
+Used for blocking actions like delete confirmation.
+- Prevents accidental destructive actions
+- Focus is trapped inside the modal
+- Can be dismissed using Esc key
+
+### Loaders
+Used during async operations like API calls.
+- Shows progress without freezing the UI
+- Accessible using aria-live roles
+
+### User Flow Demonstrated
+Toast → Modal → Loader → Success/Error Toast
+
+These feedback mechanisms improve user trust, reduce confusion, and make the app feel responsive and human.
