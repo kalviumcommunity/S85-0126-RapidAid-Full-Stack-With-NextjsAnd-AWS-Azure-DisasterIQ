@@ -13,37 +13,43 @@ import {
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 
+/* ===================== ROLE CONFIG ===================== */
+
 const roles = [
   {
     id: "admin",
     title: "Admin",
-    description: "Full system access. Manage disasters, users, and organizations.",
+    description:
+      "Full system access. Manage disasters, users, and organizations.",
     icon: Shield,
-    href: "/admin",
+    href: "/auth/admin/signup",
     color: "bg-primary text-primary-foreground",
   },
   {
     id: "government",
     title: "Government Authority",
-    description: "Regional disaster coordination and emergency declarations.",
+    description:
+      "Regional disaster coordination and emergency declarations.",
     icon: Building2,
-    href: "/government",
+    href: "/auth/government/signup",
     color: "bg-blue-500 text-white",
   },
   {
     id: "responder",
     title: "NGO / Hospital",
-    description: "Manage resources and respond to relief requests.",
+    description:
+      "Manage resources and respond to relief requests.",
     icon: Heart,
-    href: "/responder",
+    href: "/auth/ngo/signup",
     color: "bg-green-500 text-white",
   },
   {
     id: "public",
     title: "Public User",
-    description: "View alerts, request help, and access emergency information.",
+    description:
+      "View alerts, request help, and access emergency information.",
     icon: Users,
-    href: "/alerts",
+    href: "/auth/citizen/signup",
     color: "bg-amber-500 text-white",
   },
 ];
@@ -57,10 +63,12 @@ const features = [
   "Secure role-based access",
 ];
 
+/* ===================== COMPONENT ===================== */
+
 export default function Index() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
+      {/* ===================== NAVBAR ===================== */}
       <nav className="border-b border-border bg-background/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-16">
@@ -68,23 +76,29 @@ export default function Index() {
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                 <Shield className="h-5 w-5 text-white" />
               </div>
-              <span className="font-semibold text-lg text-foreground">DisasterRelief</span>
+              <span className="font-semibold text-lg text-foreground">
+                DisasterRelief
+              </span>
             </div>
+
             <div className="flex items-center gap-4">
               <Link href="/alerts">
                 <Button variant="ghost" size="sm">
                   Public Alerts
                 </Button>
               </Link>
-              <Button variant="default" size="sm">
-                Sign In
-              </Button>
+
+              <Link href="/auth/login">
+                <Button variant="default" size="sm">
+                  Sign In
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* ===================== HERO ===================== */}
       <section className="pt-32 pb-20 px-6">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
@@ -92,22 +106,28 @@ export default function Index() {
               <Globe className="h-4 w-4" />
               Unified Disaster Response Platform
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-foreground">
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
               Coordinating Relief,
               <br />
               <span className="text-primary">Saving Lives</span>
             </h1>
+
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              A comprehensive platform connecting government agencies, NGOs, hospitals, and citizens for effective disaster relief coordination and response.
+              A comprehensive platform connecting government agencies, NGOs,
+              hospitals, and citizens for effective disaster relief
+              coordination and response.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/alerts">
-                <Button variant="default" size="lg">
+                <Button size="lg">
                   <AlertTriangle className="h-5 w-5 mr-2" />
                   View Active Alerts
                 </Button>
               </Link>
-              <Button variant="outline" size="xl">
+
+              <Button variant="outline" size="lg">
                 Learn More
               </Button>
             </div>
@@ -115,13 +135,15 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Role Selection */}
+      {/* ===================== ROLE SELECTION ===================== */}
       <section className="py-20 px-6 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-semibold mb-4">Access Portal</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Select your role to access the appropriate dashboard and tools
+            <h2 className="text-2xl font-semibold mb-4">
+              Access Portal
+            </h2>
+            <p className="text-muted-foreground">
+              Select your role to register and access the platform
             </p>
           </div>
 
@@ -130,17 +152,24 @@ export default function Index() {
               <Link
                 key={role.id}
                 href={role.href}
-                className="group bg-card border border-border rounded-xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                className="group bg-card border border-border rounded-xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all"
               >
                 <div
                   className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 ${role.color}`}
                 >
                   <role.icon className="h-7 w-7" />
                 </div>
-                <h3 className="text-base font-semibold mb-2">{role.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{role.description}</p>
-                <div className="flex items-center text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                  <span>Access Dashboard</span>
+
+                <h3 className="font-semibold mb-2">
+                  {role.title}
+                </h3>
+
+                <p className="text-sm text-muted-foreground mb-4">
+                  {role.description}
+                </p>
+
+                <div className="flex items-center text-sm font-medium text-primary">
+                  <span>Register</span>
                   <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -149,94 +178,46 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* ===================== FEATURES ===================== */}
       <section className="py-20 px-6">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
-            <div>
-              <h2 className="text-2xl font-semibold mb-6">
-                Built for Effective
-                <br />
-                Disaster Response
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Our platform streamlines communication and coordination between all stakeholders, enabling faster response times and more efficient resource allocation during emergencies.
-              </p>
-              <ul className="space-y-3">
-                {features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-                      <Check className="h-3 w-3 text-green-600" />
-                    </div>
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="container mx-auto max-w-5xl grid lg:grid-cols-2 gap-12">
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">
+              Built for Effective Disaster Response
+            </h2>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-primary mb-2">127</p>
-                <p className="text-sm text-muted-foreground">Disasters Managed</p>
-              </div>
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-green-600 mb-2">342</p>
-                <p className="text-sm text-muted-foreground">Partner Organizations</p>
-              </div>
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-amber-600 mb-2">2.4M</p>
-                <p className="text-sm text-muted-foreground">People Helped</p>
-              </div>
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-blue-600 mb-2">98%</p>
-                <p className="text-sm text-muted-foreground">Response Rate</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 px-4 hero-gradient">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-primary-foreground mb-4">
-            Ready to Coordinate Relief Efforts?
-          </h2>
-          <p className="text-primary-foreground/80 mb-8 max-w-xl mx-auto">
-            Join our network of government agencies, NGOs, and hospitals working together to save lives.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="xl" variant="secondary">
-              Register Organization
-            </Button>
-            <Button size="xl" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
-              Contact Us
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-12 px-4">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 hero-gradient rounded-xl flex items-center justify-center">
-                <Shield className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-semibold">DisasterRelief</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground">About</a>
-              <a href="#" className="hover:text-foreground">Privacy</a>
-              <a href="#" className="hover:text-foreground">Terms</a>
-              <a href="#" className="hover:text-foreground">Contact</a>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 Disaster Relief Coordination Platform
+            <p className="text-muted-foreground mb-8">
+              Our platform streamlines coordination between all stakeholders
+              during emergencies.
             </p>
+
+            <ul className="space-y-3">
+              {features.map((feature, i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
+                    <Check className="h-3 w-3 text-green-600" />
+                  </div>
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
+      </section>
+
+      {/* ===================== FOOTER ===================== */}
+      <footer className="border-t border-border py-12 px-4">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-semibold">DisasterRelief</span>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            © 2024 Disaster Relief Coordination Platform
+          </p>
         </div>
       </footer>
     </div>
