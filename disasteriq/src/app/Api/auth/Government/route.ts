@@ -2,9 +2,35 @@ import { prisma } from "@/app/prisma/prisma";
 import { hashPassword } from "@/app/lib/password";
 import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 
 export async function POST(req: Request) {
   try {
+    // ------------------------
+    // AUTHORIZATION
+    // ------------------------
+    const h = headers();
+
+    const userId = h.get("x-user-id");
+    const role = h.get("x-user-role");
+
+    if (!userId || !role) {
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    if (role !== "SUPER_ADMIN") {
+      return NextResponse.json(
+        { message: "Forbidden: Insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
+    // ------------------------
+    // PARSE BODY
+    // ------------------------
     const body = await req.json();
     const { government, user } = body ?? {};
 
@@ -21,10 +47,16 @@ export async function POST(req: Request) {
     const cleanGovernment = {
       name: sanitizeInput(government.name),
       level: sanitizeInput(government.level),
-      state: government.state ? sanitizeInput(government.state) : null,
-      district: government.district ? sanitizeInput(government.district) : null,
+      state: government.state
+        ? sanitizeInput(government.state)
+        : null,
+      district: government.district
+        ? sanitizeInput(government.district)
+        : null,
       department: sanitizeInput(government.department),
-      contactEmail: sanitizeInput(government.contactEmail).toLowerCase(),
+      contactEmail: sanitizeInput(
+        government.contactEmail
+      ).toLowerCase(),
       contactPhone: sanitizeInput(government.contactPhone),
     };
 
@@ -36,14 +68,17 @@ export async function POST(req: Request) {
     // ------------------------
     // CHECK EXISTING
     // ------------------------
-    const [existingGovernment, existingUser] = await Promise.all([
-      prisma.government.findUnique({
-        where: { contactEmail: cleanGovernment.contactEmail },
-      }),
-      prisma.user.findUnique({
-        where: { email: cleanUser.email },
-      }),
-    ]);
+    const [existingGovernment, existingUser] =
+      await Promise.all([
+        prisma.government.findUnique({
+          where: {
+            contactEmail: cleanGovernment.contactEmail,
+          },
+        }),
+        prisma.user.findUnique({
+          where: { email: cleanUser.email },
+        }),
+      ]);
 
     if (existingGovernment) {
       return NextResponse.json(
@@ -64,28 +99,33 @@ export async function POST(req: Request) {
     // ------------------------
     const passwordHash = await hashPassword(user.password);
 
-    const result = await prisma.$transaction(async (tx) => {
-      const createdGovernment = await tx.government.create({
-        data: cleanGovernment,
-      });
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const createdGovernment =
+          await tx.government.create({
+            data: cleanGovernment,
+          });
 
-      const createdUser = await tx.user.create({
-        data: {
-          ...cleanUser,
-          passwordHash,
-          governmentId: createdGovernment.id,
-          roles: {
-            create: {
-              role: {
-                connect: { name: "GOVERNMENT_ADMIN" },
+        const createdUser = await tx.user.create({
+          data: {
+            ...cleanUser,
+            passwordHash,
+            governmentId: createdGovernment.id,
+            roles: {
+              create: {
+                role: {
+                  connect: {
+                    name: "GOVERNMENT_ADMIN",
+                  },
+                },
               },
             },
           },
-        },
-      });
+        });
 
-      return { createdGovernment, createdUser };
-    });
+        return { createdGovernment, createdUser };
+      }
+    );
 
     // ------------------------
     // RESPONSE
