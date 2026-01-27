@@ -1,10 +1,20 @@
 import Link from "next/link";
 
-export default function UsersPage() {
-  const users = [1, 2, 3];
+async function getUsers() {
+  // simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // uncomment to test error
+  // throw new Error("Failed to fetch users");
+
+  return [1, 2, 3];
+}
+
+export default async function UsersPage() {
+  const users = await getUsers();
 
   return (
-    <div className="flex flex-col items-center mt-10">
+    <div className="mt-10 flex flex-col items-center">
       <h1 className="text-2xl font-bold">Users</h1>
 
       <ul className="mt-4 space-y-2">
