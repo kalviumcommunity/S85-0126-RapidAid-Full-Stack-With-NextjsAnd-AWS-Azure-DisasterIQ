@@ -172,10 +172,7 @@ export function DashboardLayout({
           </div>
 
           {sidebarOpen && (
-            <Button
-              variant="ghost"
-              className="w-full mt-3 justify-start"
-            >
+            <Button variant="ghost" className="w-full mt-3 justify-start">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -210,9 +207,73 @@ export function DashboardLayout({
           </Button>
         </header>
 
-        {/* Page Content */}
+        {/* ================= Page Content ================= */}
         <main className="flex-1 p-6 overflow-auto bg-background">
-          {children}
+          {role === "public" ? (
+            <div className="mx-auto max-w-6xl">
+              <h1 className="mb-2 text-3xl font-bold text-center">
+                Select your role
+              </h1>
+
+              <p className="mb-10 text-center text-muted-foreground">
+                Choose how you want to access the DisasterRelief platform
+              </p>
+
+              <div className="grid gap-6 md:grid-cols-4">
+                <Link
+                  href="/auth/admin/signup"
+                  className="rounded-xl border p-6 hover:shadow-md transition"
+                >
+                  <Shield className="h-8 w-8 mb-4 text-primary" />
+                  <h2 className="text-lg font-semibold">Admin</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Full system access and control
+                  </p>
+                </Link>
+
+                <Link
+                  href="/auth/government/signup"
+                  className="rounded-xl border p-6 hover:shadow-md transition"
+                >
+                  <Building2 className="h-8 w-8 mb-4 text-blue-600" />
+                  <h2 className="text-lg font-semibold">
+                    Government Authority
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Disaster coordination and declarations
+                  </p>
+                </Link>
+
+                <Link
+                  href="/auth/ngo/signup"
+                  className="rounded-xl border p-6 hover:shadow-md transition"
+                >
+                  <Users className="h-8 w-8 mb-4 text-green-600" />
+                  <h2 className="text-lg font-semibold">
+                    NGO / Hospital
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Manage resources and relief operations
+                  </p>
+                </Link>
+
+                <Link
+                  href="/auth/citizen/signup"
+                  className="rounded-xl border p-6 hover:shadow-md transition"
+                >
+                  <Users className="h-8 w-8 mb-4 text-amber-500" />
+                  <h2 className="text-lg font-semibold">
+                    Public User
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    View alerts and request help
+                  </p>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
 
