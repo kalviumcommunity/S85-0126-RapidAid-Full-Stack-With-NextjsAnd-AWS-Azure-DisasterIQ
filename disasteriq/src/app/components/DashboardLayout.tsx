@@ -61,18 +61,11 @@ const navItems: Record<DashboardLayoutProps["role"], NavItem[]> = {
   public: [],
 };
 
-const roleLabels: Record<DashboardLayoutProps["role"], string> = {
+const roleLabels = {
   admin: "Administrator",
   government: "Government Authority",
   responder: "NGO / Hospital",
   public: "Public User",
-};
-
-const roleColors: Record<DashboardLayoutProps["role"], string> = {
-  admin: "bg-primary",
-  government: "bg-blue-500",
-  responder: "bg-green-500",
-  public: "bg-amber-500",
 };
 
 /* ===================== COMPONENT ===================== */
@@ -87,24 +80,20 @@ export function DashboardLayout({
   const items = navItems[role];
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
-      {/* ================= Sidebar ================= */}
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 to-slate-100">
+
+      {/* ================= SIDEBAR ================= */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-background border-r border-border transition-all duration-300 lg:relative",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white/80 backdrop-blur border-r shadow-lg transition-all duration-300 lg:relative",
           sidebarOpen ? "w-64" : "w-0 lg:w-20"
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between px-4 border-b border-border">
+        <div className="h-16 flex items-center justify-between px-4 border-b">
           <Link href="/" className="flex items-center gap-3">
-            <div
-              className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center",
-                roleColors[role]
-              )}
-            >
-              <Shield className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow">
+              <Shield className="h-5 w-5 text-white" />
             </div>
             {sidebarOpen && (
               <span className="font-semibold text-foreground">
@@ -123,47 +112,45 @@ export function DashboardLayout({
           </Button>
         </div>
 
-        {/* Navigation */}
+        {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {items.map((item) => {
-            const isActive = pathname === item.href;
+            const active = pathname === item.href;
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isActive &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90"
+                  "group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all",
+                  active
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "hover:bg-slate-100"
                 )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                {sidebarOpen && <span>{item.label}</span>}
+                {sidebarOpen && (
+                  <span className="group-hover:translate-x-1 transition">
+                    {item.label}
+                  </span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* User Section */}
-        <div className="p-4 border-t border-border">
-          <div
-            className={cn(
-              "flex items-center gap-3",
-              !sidebarOpen && "justify-center"
-            )}
-          >
+        {/* User */}
+        <div className="p-4 border-t">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium">
                 {userName.charAt(0).toUpperCase()}
               </span>
             </div>
 
             {sidebarOpen && (
               <div>
-                <p className="text-sm font-medium text-foreground truncate">
-                  {userName}
-                </p>
+                <p className="text-sm font-medium truncate">{userName}</p>
                 <p className="text-xs text-muted-foreground">
                   {roleLabels[role]}
                 </p>
@@ -180,10 +167,10 @@ export function DashboardLayout({
         </div>
       </aside>
 
-      {/* ================= Main ================= */}
+      {/* ================= MAIN ================= */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 border-b border-border flex items-center justify-between px-6 bg-background">
+        <header className="h-16 bg-white/70 backdrop-blur border-b flex items-center justify-between px-6 shadow-sm">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -194,90 +181,23 @@ export function DashboardLayout({
             </Button>
 
             <h1 className="text-lg font-semibold hidden sm:block">
-              {items.find((item) => item.href === pathname)?.label ||
-                "Dashboard"}
+              {items.find((i) => i.href === pathname)?.label || "Dashboard"}
             </h1>
           </div>
 
-          <Button variant="ghost" size="icon" className="relative">
+          <div className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
               3
             </span>
-          </Button>
+          </div>
         </header>
 
-        {/* ================= Page Content ================= */}
-        <main className="flex-1 p-6 overflow-auto bg-background">
-          {role === "public" ? (
-            <div className="mx-auto max-w-6xl">
-              <h1 className="mb-2 text-3xl font-bold text-center">
-                Select your role
-              </h1>
-
-              <p className="mb-10 text-center text-muted-foreground">
-                Choose how you want to access the DisasterRelief platform
-              </p>
-
-              <div className="grid gap-6 md:grid-cols-4">
-                <Link
-                  href="/auth/admin/signup"
-                  className="rounded-xl border p-6 hover:shadow-md transition"
-                >
-                  <Shield className="h-8 w-8 mb-4 text-primary" />
-                  <h2 className="text-lg font-semibold">Admin</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Full system access and control
-                  </p>
-                </Link>
-
-                <Link
-                  href="/auth/government/signup"
-                  className="rounded-xl border p-6 hover:shadow-md transition"
-                >
-                  <Building2 className="h-8 w-8 mb-4 text-blue-600" />
-                  <h2 className="text-lg font-semibold">
-                    Government Authority
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Disaster coordination and declarations
-                  </p>
-                </Link>
-
-                <Link
-                  href="/auth/ngo/signup"
-                  className="rounded-xl border p-6 hover:shadow-md transition"
-                >
-                  <Users className="h-8 w-8 mb-4 text-green-600" />
-                  <h2 className="text-lg font-semibold">
-                    NGO / Hospital
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Manage resources and relief operations
-                  </p>
-                </Link>
-
-                <Link
-                  href="/auth/citizen/signup"
-                  className="rounded-xl border p-6 hover:shadow-md transition"
-                >
-                  <Users className="h-8 w-8 mb-4 text-amber-500" />
-                  <h2 className="text-lg font-semibold">
-                    Public User
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    View alerts and request help
-                  </p>
-                </Link>
-              </div>
-            </div>
-          ) : (
-            children
-          )}
-        </main>
+        {/* Content */}
+        <main className="flex-1 p-6">{children}</main>
       </div>
 
-      {/* Mobile Overlay */}
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/20 z-40 lg:hidden"
