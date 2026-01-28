@@ -43,6 +43,7 @@ export const POST = apiHandler(async (req: Request & { user?: any }) => {
     const disaster = await DisasterService.create({
       ...validatedBody,
       governmentId: req.user.governmentId, // 🔥 REQUIRED
+      createdByUserId: req.user.id, // audit log
     });
 
     return sendSuccess(disaster, "Disaster created", 201);
