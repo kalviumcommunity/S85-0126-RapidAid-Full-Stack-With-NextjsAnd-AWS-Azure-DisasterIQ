@@ -10,8 +10,9 @@
     "prepare": "husky install"
   },
   "prisma": {
-  "seed": "ts-node -r tsconfig-paths/register --compiler-options {\"module\":\"CommonJS\"} src/app/prisma/seed.ts"
-},
+    "schema": "src/app/prisma/schema.prisma",
+    "seed": "ts-node -r tsconfig-paths/register --compiler-options {\"module\":\"CommonJS\"} src/app/prisma/seed.ts"
+  },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "eslint --fix",

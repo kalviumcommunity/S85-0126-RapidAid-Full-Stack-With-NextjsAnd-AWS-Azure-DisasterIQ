@@ -9,3 +9,9 @@ export const createDisasterSchema = z.object({
 });
 
 export const updateDisasterSchema = createDisasterSchema.partial();
+
+export const allocateResourceSchema = z.object({
+  resourceId: z.string().uuid("resourceId must be a UUID"),
+  disasterId: z.string().uuid("disasterId must be a UUID"),
+  allocatedQuantity: z.number().int().positive(),
+});

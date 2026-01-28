@@ -29,6 +29,11 @@ model User {
   police           Police?         @relation(fields: [policeId], references: [id])
   roles            UserRole[]
 
+  @@index([createdAt])
+  @@index([governmentId])
+  @@index([policeId])
+  @@index([ngoId])
+  @@index([hospitalId])
   @@map("user")
 }
 
@@ -47,6 +52,7 @@ model UserRole {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
+  @@index([roleId])
   @@map("user_role")
 }
 
@@ -64,6 +70,7 @@ model Government {
   media        Media[]
   users        User[]
 
+  @@index([createdAt])
   @@map("government")
 }
 
@@ -79,6 +86,8 @@ model Police {
   createdAt       DateTime @default(now())
   users           User[]
 
+  @@index([createdAt])
+  @@index([state, district])
   @@map("police")
 }
 
@@ -94,6 +103,8 @@ model NGO {
   createdAt          DateTime @default(now())
   users              User[]
 
+  @@index([createdAt])
+  @@index([state, district])
   @@map("ngo")
 }
 
@@ -112,6 +123,8 @@ model Hospital {
   reports       MedicalReport[]
   users         User[]
 
+  @@index([createdAt])
+  @@index([state, district])
   @@map("hospital")
 }
 
@@ -131,6 +144,10 @@ model Disaster {
   resources    ResourceAllocation[]
   victims      Victim[]
 
+  @@index([governmentId])
+  @@index([status])
+  @@index([reportedAt])
+  @@index([governmentId, reportedAt])
   @@map("disaster")
 }
 
@@ -145,6 +162,9 @@ model Media {
   disaster               Disaster   @relation(fields: [disasterId], references: [id], onDelete: Cascade)
   uploadedByGovernment   Government @relation(fields: [uploadedByGovernmentId], references: [id])
 
+  @@index([disasterId])
+  @@index([uploadedByGovernmentId])
+  @@index([createdAt])
   @@map("media")
 }
 
@@ -160,6 +180,9 @@ model Victim {
   reports    MedicalReport[]
   disaster   Disaster        @relation(fields: [disasterId], references: [id], onDelete: Cascade)
 
+  @@index([disasterId])
+  @@index([rescued])
+  @@index([createdAt])
   @@map("victim")
 }
 
@@ -171,6 +194,7 @@ model RescueTeam {
   status       String
   assignments  RescueAssignment[]
 
+  @@index([status])
   @@map("rescue_team")
 }
 
@@ -182,6 +206,10 @@ model RescueAssignment {
   disaster     Disaster   @relation(fields: [disasterId], references: [id])
   rescueTeam   RescueTeam @relation(fields: [rescueTeamId], references: [id])
 
+  @@index([disasterId])
+  @@index([rescueTeamId])
+  @@index([assignedAt])
+  @@index([disasterId, rescueTeamId])
   @@map("rescue_assignment")
 }
 
@@ -195,6 +223,8 @@ model Shelter {
   createdById       String   @db.Uuid
   createdBy         User     @relation(fields: [createdById], references: [id])
 
+  @@index([createdById])
+  @@index([createdAt])
   @@map("shelter")
 }
 
@@ -207,6 +237,8 @@ model Resource {
   createdBy   User                 @relation(fields: [createdById], references: [id])
   allocations ResourceAllocation[]
 
+  @@index([createdById])
+  @@index([type])
   @@map("resource")
 }
 
@@ -219,6 +251,10 @@ model ResourceAllocation {
   disaster          Disaster @relation(fields: [disasterId], references: [id])
   resource          Resource @relation(fields: [resourceId], references: [id])
 
+  @@index([disasterId])
+  @@index([resourceId])
+  @@index([allocatedAt])
+  @@index([disasterId, resourceId])
   @@map("resource_allocation")
 }
 
@@ -233,6 +269,10 @@ model MedicalReport {
   hospital    Hospital @relation(fields: [hospitalId], references: [id])
   victim      Victim   @relation(fields: [victimId], references: [id])
 
+  @@index([hospitalId])
+  @@index([victimId])
+  @@index([createdById])
+  @@index([reportedAt])
   @@map("medical_report")
 }
 
@@ -244,6 +284,7 @@ model DisasterMetric {
   lastUpdated    DateTime @default(now())
   disaster       Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
 
+  @@index([lastUpdated])
   @@map("disaster_metric")
 }
 
@@ -256,6 +297,10 @@ model AuditLog {
   timestamp DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id])
 
+  @@index([userId])
+  @@index([timestamp])
+  @@index([entity])
+  @@index([entity, entityId])
   @@map("audit_log")
 }
 
