@@ -34,19 +34,29 @@ export const DisasterRepository = {
   // -------------------------
   // READ ALL
   // -------------------------
-  findAll: async () =>
+  findAll: async (opts?: {
+    skip?: number;
+    take?: number;
+    status?: "REPORTED" | "ONGOING" | "RESOLVED";
+  }) =>
     prisma.disaster.findMany({
-      include: {
+      where: opts?.status ? { status: opts.status } : undefined,
+      // Avoid over-fetching: only select fields used by UI/API
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        severity: true,
+        location: true,
+        status: true,
+        reportedAt: true,
         government: {
-          select: {
-            id: true,
-            name: true,
-          },
+          select: { id: true, name: true },
         },
       },
-      orderBy: {
-        reportedAt: "desc",
-      },
+      orderBy: { reportedAt: "desc" },
+      skip: opts?.skip,
+      take: opts?.take,
     }),
 
   // -------------------------
