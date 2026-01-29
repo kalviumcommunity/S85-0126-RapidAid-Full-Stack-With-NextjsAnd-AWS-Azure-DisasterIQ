@@ -5,6 +5,11 @@ import { apiHandler } from "@/app/lib/ apiWrapper";
 import { createDisasterSchema } from "@/app/lib/schema";
 import { ZodError } from "zod";
 
+import { EmailService } from "@/app/Service/email.service";
+import { prisma } from "@/app/prisma/prisma";
+
+
+
 
 export const POST = apiHandler(async (req: Request & { user?: any }) => {
   try {

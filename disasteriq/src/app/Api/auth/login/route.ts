@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     accessToken,
     redirect:
       user.governmentId
-        ? "/government/dashboard"
+        ? "/government"
         : user.policeId
         ? "/police/dashboard"
         : user.ngoId

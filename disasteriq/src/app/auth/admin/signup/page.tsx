@@ -6,37 +6,52 @@ import { Button } from "@/app/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export default function AdminAuthPage() {
+  const router = useRouter();
+
   const [isSignup, setIsSignup] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
-      if (isSignup) {
-        await fetch("/Api/auth/admin/signup", {
+      const response = await fetch(
+        isSignup ? "/Api/auth/admin/signup" : "/Api/auth//login",
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
-        });
-      } else {
-        await fetch("/Api/auth/admin/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
+          body: JSON.stringify(
+            isSignup
+              ? { name, email, password }
+              : { email, password }
+          ),
+        }
+      );
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Authentication failed");
+        return;
+      }
+
+      // ✅ SUCCESS FLOW
+      if (isSignup) {
+        // After signup → switch to login
+        setIsSignup(false);
+        setPassword("");
+      } else {
         router.push("/admin");
       }
     } catch (err) {
       console.error(err);
-      alert("Authentication failed");
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,6 +78,13 @@ export default function AdminAuthPage() {
           </p>
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-500/20 border border-red-500/40 px-4 py-2 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignup && (
@@ -72,6 +94,7 @@ export default function AdminAuthPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={loading}
             />
           )}
 
@@ -82,6 +105,7 @@ export default function AdminAuthPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
 
           <input
@@ -91,10 +115,11 @@ export default function AdminAuthPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
 
           <Button
-            className="w-full h-11 bg-blue-600 hover:bg-blue-700"
+            className="w-full h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
             disabled={loading}
           >
             {loading ? "Please wait..." : isSignup ? (

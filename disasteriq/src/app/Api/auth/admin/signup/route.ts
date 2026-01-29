@@ -1,7 +1,7 @@
 import { prisma } from "@/app/prisma/prisma";
 import { hashPassword } from "@/app/lib/password";
 import { NextResponse } from "next/server";
-import { EmailService } from "@/app/Service/email_service";
+import { EmailService } from "@/app/Service/email.service";
 
 export const runtime = "nodejs";
 

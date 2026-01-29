@@ -50,19 +50,24 @@ export default function GovernmentDashboard() {
         <div className="rounded-2xl border bg-gradient-to-br from-blue-50 to-white p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-semibold">
-                Government Dashboard
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Regional disaster management and coordination center
-              </p>
+            <h1 className="text-2xl font-bold text-slate-900">
+  Government Dashboard
+</h1>
+<p className="text-slate-600">
+  Regional disaster management and coordination center
+</p>
+
             </div>
 
             <div className="flex gap-3">
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
+             <Button
+  variant="outline"
+  className="text-slate-700 border-slate-300 hover:bg-slate-100"
+>
+  <Download className="h-4 w-4 mr-2" />
+  Export Report
+</Button>
+
 
               <Link href="/government/disasters/create">
   <Button className="bg-red-600 hover:bg-red-700">
