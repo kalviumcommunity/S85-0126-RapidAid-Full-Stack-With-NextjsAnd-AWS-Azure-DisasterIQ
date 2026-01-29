@@ -85,8 +85,9 @@ export default function CreateDisasterForm() {
         body: JSON.stringify({ filename: file.name }),
       });
 
-      const data = await res.json();
-      const { url, fields } = data;
+      if (!res.ok) throw new Error("Failed to get upload URL");
+
+      const { url, fields } = await res.json();
 
       const s3FormData = new FormData();
       Object.entries(fields).forEach(([k, v]) => {
@@ -94,7 +95,12 @@ export default function CreateDisasterForm() {
       });
       s3FormData.append("file", file);
 
-      await fetch(url, { method: "POST", body: s3FormData });
+      const uploadRes = await fetch(url, {
+        method: "POST",
+        body: s3FormData,
+      });
+
+      if (!uploadRes.ok) throw new Error("S3 upload failed");
 
       const fileUrl = `${url}/${fields.key}`;
 
@@ -115,14 +121,77 @@ export default function CreateDisasterForm() {
     }
   };
 
+  // 🔥 UPDATED SUBMIT LOGIC (THIS WAS MISSING)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setLoading(false);
-  };
 
-  /* ================= UI ================= */
-  return (
+    if (!form.name || !form.type || !form.location) {
+      toast({
+        title: "Missing required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const validMedia = media.filter(
+        (m) => m.url && !m.isUploading
+      );
+
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("type", form.type);
+      formData.append("severity", String(form.severity));
+      formData.append("location", form.location);
+      formData.append("status", form.status);
+      formData.append(
+        "media",
+        JSON.stringify(
+          validMedia.map((m) => ({
+            url: m.url,
+            type: m.type,
+          }))
+        )
+      );
+
+      const res = await fetch("/Api/disasters/create", {
+        method: "POST",
+        credentials: "include", // 🔐 cookie auth
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Create failed");
+      }
+
+      toast({
+        title: "Success",
+        description: "Disaster created successfully",
+      });
+
+      setForm({
+        name: "",
+        type: "",
+        severity: 1,
+        location: "",
+        status: "REPORTED",
+      });
+      setMedia([]);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+return (
     <form
       onSubmit={handleSubmit}
       className="
