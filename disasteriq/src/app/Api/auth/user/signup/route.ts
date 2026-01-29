@@ -1,6 +1,7 @@
 import { prisma } from "@/app/prisma/prisma";
 import { hashPassword } from "@/app/lib/password";
 import { NextResponse } from "next/server";
+import { EmailService } from "@/app/Service/email_service";
 
 export const runtime = "nodejs";
 
@@ -41,6 +42,18 @@ export async function POST(req: Request) {
         }
       }
     }
+  });
+
+  // 📧 Send welcome email (non-blocking - don't fail signup if email fails)
+  EmailService.sendWelcomeEmail({
+    to: email,
+    userName: name,
+    dashboardUrl: process.env.NEXT_PUBLIC_APP_URL 
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
+      : "https://rapidaid.app/dashboard",
+  }).catch((error) => {
+    console.error("Failed to send welcome email:", error);
+    // Don't throw - signup should succeed even if email fails
   });
 
   return NextResponse.json({

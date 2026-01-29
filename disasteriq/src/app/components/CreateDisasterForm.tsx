@@ -265,7 +265,16 @@ export default function CreateDisasterForm() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Upload button clicked");
+            if (fileInputRef.current) {
+              fileInputRef.current.click();
+            } else {
+              console.error("File input ref is null");
+            }
+          }}
         >
           Upload Media
         </Button>

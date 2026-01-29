@@ -10,9 +10,7 @@
     "prepare": "husky install"
   },
   "prisma": {
-
     "schema": "src/app/prisma/schema.prisma",
-
     "seed": "ts-node -r tsconfig-paths/register --compiler-options {\"module\":\"CommonJS\"} src/app/prisma/seed.ts"
   },
   "lint-staged": {
@@ -22,6 +20,7 @@
     ]
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.967.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^5.x",
     "@radix-ui/react-accordion": "^1.2.12",
