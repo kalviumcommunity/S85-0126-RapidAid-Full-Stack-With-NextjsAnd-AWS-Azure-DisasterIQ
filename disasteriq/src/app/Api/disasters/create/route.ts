@@ -4,7 +4,7 @@ import { ERROR_CODES } from "@/app/lib/ errorCodes";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 import { createDisasterSchema } from "@/app/lib/schema";
 import { ZodError } from "zod";
-import { EmailService } from "@/app/Service/email_service";
+import { EmailService } from "@/app/Service/email.service";
 import { prisma } from "@/app/prisma/prisma";
 
 
