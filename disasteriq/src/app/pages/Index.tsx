@@ -87,7 +87,7 @@ export default function Index() {
 
               <Link href="/auth/login">
                 <Button size="sm">
-                  Sign In
+                 Login
                 </Button>
               </Link>
             </div>

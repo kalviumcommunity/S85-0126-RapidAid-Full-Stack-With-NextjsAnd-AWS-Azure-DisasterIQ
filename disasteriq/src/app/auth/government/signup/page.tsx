@@ -3,117 +3,109 @@
 import { useState } from "react";
 import { Building2, Shield, User } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function GovernmentAuthPage() {
-  const [isSignup, setIsSignup] = useState(true);
+  const [mode, setMode] = useState<"signup" | "login">("signup");
+  const router = useRouter();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
-      <div className="relative w-full max-w-6xl h-[650px] bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      <div className="w-full max-w-4xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 text-white">
 
-        {/* ================= BLUE SLIDING PANEL ================= */}
-        <div
-          className={`absolute top-0 h-full w-1/2 z-10 bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center transition-all duration-700 ease-in-out
-          ${isSignup ? "right-0 rounded-l-[140px]" : "left-0 rounded-r-[140px]"}`}
-        >
-          <div className="text-center px-12 space-y-6">
-            <span className="inline-block rounded-full bg-white/20 px-4 py-1 text-sm">
-              DisasterIQ Platform
-            </span>
+        {/* ================= HEADER ================= */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold flex items-center gap-2">
+            <Building2 className="text-blue-400" />
+            Government Authority
+          </h1>
+          <p className="text-sm text-white/70 mt-1">
+            Disaster coordination and emergency management portal
+          </p>
+        </div>
 
-            <h2 className="text-4xl font-bold">
-              {isSignup ? "Hello, Authority!" : "Welcome Back!"}
-            </h2>
+        {/* ================= TABS ================= */}
+        <div className="flex gap-2 mb-8">
+          <button
+            onClick={() => setMode("signup")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition
+              ${
+                mode === "signup"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+          >
+            Signup
+          </button>
 
-            <p className="text-sm leading-relaxed opacity-90">
-              {isSignup
-                ? "Register your government body and manage disaster response, alerts, and coordination efficiently."
-                : "Login to manage incidents, alerts, and coordination dashboards."}
-            </p>
+          {/* 🔥 THIS NOW NAVIGATES */}
+         <button>
+  <a href="/auth/login">Login</a>
+</button>
 
-            <Button
-              variant="secondary"
-              onClick={() => setIsSignup(!isSignup)}
-              className="px-10"
-            >
-              {isSignup ? "Go to Login" : "Go to Signup"}
+        </div>
+
+        {/* ================= SIGNUP FORM ================= */}
+        {mode === "signup" && (
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Authority Info */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase text-white/60 flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Authority Information
+              </h3>
+
+              {[
+                "Authority Name",
+                "Level (STATE / DISTRICT)",
+                "State",
+                "District",
+                "Department",
+                "Official Email",
+                "Contact Phone",
+              ].map((placeholder, i) => (
+                <input
+                  key={i}
+                  placeholder={placeholder}
+                  type={placeholder.includes("Email") ? "email" : "text"}
+                  className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ))}
+            </div>
+
+            {/* Admin Info */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase text-white/60 flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Admin Account
+              </h3>
+
+              <input
+                placeholder="Admin Name"
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="email"
+                placeholder="Admin Email"
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ================= ACTION ================= */}
+        {mode === "signup" && (
+          <div className="mt-8">
+            <Button className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
+              Register Government
             </Button>
           </div>
-        </div>
-
-        {/* ================= FORMS ================= */}
-        <div className="absolute inset-0 flex z-20">
-
-          {/* ================= SIGNUP ================= */}
-          <div
-            className={`w-1/2 p-10 overflow-y-auto transition-all duration-700
-            ${isSignup ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-          >
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Building2 className="text-blue-600" />
-              Government Signup
-            </h2>
-
-            <div className="space-y-6">
-
-              {/* Government Section */}
-              <div className="rounded-xl border bg-slate-50 p-6">
-                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-600 flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Authority Information
-                </h3>
-
-                <div className="space-y-3">
-                  <input className="input" placeholder="Authority Name" />
-                  <input className="input" placeholder="Level (STATE / DISTRICT)" />
-                  <input className="input" placeholder="State" />
-                  <input className="input" placeholder="District" />
-                  <input className="input" placeholder="Department" />
-                  <input className="input" type="email" placeholder="Official Email" />
-                  <input className="input" placeholder="Contact Phone" />
-                </div>
-              </div>
-
-              {/* Admin Section */}
-              <div className="rounded-xl border bg-white p-6">
-                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-600 flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Admin Account
-                </h3>
-
-                <div className="space-y-3">
-                  <input className="input" placeholder="Admin Name" />
-                  <input className="input" type="email" placeholder="Admin Email" />
-                  <input className="input" type="password" placeholder="Password" />
-                </div>
-              </div>
-
-              <Button className="w-full h-11">
-                Register Government
-              </Button>
-            </div>
-          </div>
-
-          {/* ================= LOGIN ================= */}
-          <div
-            className={`w-1/2 p-10 flex items-center justify-center transition-all duration-700
-            ${isSignup ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-          >
-            <div className="w-full max-w-sm space-y-6">
-              <h2 className="text-3xl font-bold text-center">
-                Admin Login
-              </h2>
-
-              <input className="input" placeholder="Admin Email" />
-              <input className="input" type="password" placeholder="Password" />
-
-              <Button className="w-full h-11">
-                Login
-              </Button>
-            </div>
-          </div>
-
-        </div>
+        )}
       </div>
     </div>
   );

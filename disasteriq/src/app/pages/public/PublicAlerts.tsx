@@ -20,6 +20,8 @@ import {
 import { Button } from "@/app/components/ui/button";
 import { StatusBadge } from "@/app/components/StatusBadge";
 
+/* ================= DATA (UNCHANGED) ================= */
+
 const activeAlerts = [
   {
     id: "1",
@@ -27,8 +29,13 @@ const activeAlerts = [
     location: "Northern Valley District",
     severity: "critical",
     time: "Active Now",
-    description: "Heavy rainfall causing flash floods. Avoid low-lying areas. Evacuation recommended for Zone A residents.",
-    safetyTips: ["Move to higher ground immediately", "Do not attempt to cross flooded areas", "Keep emergency kit ready"],
+    description:
+      "Heavy rainfall causing flash floods. Avoid low-lying areas. Evacuation recommended for Zone A residents.",
+    safetyTips: [
+      "Move to higher ground immediately",
+      "Do not attempt to cross flooded areas",
+      "Keep emergency kit ready",
+    ],
   },
   {
     id: "2",
@@ -36,8 +43,13 @@ const activeAlerts = [
     location: "Eastern Coastal Zone",
     severity: "warning",
     time: "Expected in 24 hours",
-    description: "Cyclone approaching coastal areas. Wind speeds expected to reach 120 km/h. Stay indoors and secure loose objects.",
-    safetyTips: ["Secure all windows and doors", "Stock up on essentials", "Follow evacuation orders if issued"],
+    description:
+      "Cyclone approaching coastal areas. Wind speeds expected to reach 120 km/h.",
+    safetyTips: [
+      "Secure all windows and doors",
+      "Stock up on essentials",
+      "Follow evacuation orders if issued",
+    ],
   },
   {
     id: "3",
@@ -45,8 +57,13 @@ const activeAlerts = [
     location: "Southern Hills Region",
     severity: "info",
     time: "Aftershocks possible",
-    description: "Recent seismic activity detected. Be prepared for possible aftershocks. Buildings are being inspected.",
-    safetyTips: ["Stay away from damaged structures", "Drop, cover, and hold during shaking", "Check on neighbors"],
+    description:
+      "Recent seismic activity detected. Be prepared for possible aftershocks.",
+    safetyTips: [
+      "Stay away from damaged structures",
+      "Drop, cover, and hold during shaking",
+      "Check on neighbors",
+    ],
   },
 ];
 
@@ -57,134 +74,117 @@ const emergencyContacts = [
   { name: "Fire Service", number: "101", available: "24/7" },
 ];
 
+/* ================= COMPONENT ================= */
+
 export default function PublicAlerts() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showHelpForm, setShowHelpForm] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 hero-gradient rounded-xl flex items-center justify-center">
-                <Shield className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="font-semibold text-lg">DisasterRelief</span>
-            </Link>
-
-            {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/alerts" className="text-sm font-medium text-foreground">
-                Alerts
-              </Link>
-              <Link href="/request-help" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Request Help
-              </Link>
-              <Link href="/resources" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-                Resources
-              </Link>
-              <Link href="/">
-                <Button variant="outline" size="sm">
-                  Login
-                </Button>
-              </Link>
+    <div className="min-h-screen bg-[#0b1220] text-slate-100">
+      {/* ================= NAVBAR ================= */}
+      <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#0e1628]/80 backdrop-blur">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+              <Shield className="h-5 w-5 text-white" />
             </div>
+            <span className="font-semibold text-lg">DisasterRelief</span>
+          </Link>
 
-            {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          <div className="hidden md:flex items-center gap-6">
+            <Link href="/alerts" className="text-sm font-medium text-white">
+              Alerts
+            </Link>
+            <Link
+              href="/request-help"
+              className="text-sm text-slate-400 hover:text-white"
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+              Request Help
+            </Link>
+            <Link
+              href="/resources"
+              className="text-sm text-slate-400 hover:text-white"
+            >
+              Resources
+            </Link>
+            <Link href="/auth/login">
+              <Button variant="outline">Login</Button>
+            </Link>
           </div>
 
-          {/* Mobile menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border">
-              <div className="space-y-2">
-                <Link href="/alerts" className="block px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-                  Alerts
-                </Link>
-                <Link href="/request-help" className="block px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-                  Request Help
-                </Link>
-                <Link href="/resources" className="block px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">
-                  Resources
-                </Link>
-                <Link href="/" className="block px-4 py-2">
-                  <Button variant="outline" className="w-full">
-                    Login
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X /> : <Menu />}
+          </Button>
         </div>
       </nav>
 
-      {/* Hero/Alert Banner */}
-      <div className="bg-critical text-critical-foreground py-3 px-4">
-        <div className="container mx-auto flex items-center justify-center gap-2 text-sm">
-          <Bell className="h-4 w-4 animate-pulse" />
-          <span className="font-medium">Active Emergency Alert:</span>
-          <span>Flash Flood Warning in Northern Valley District</span>
-        </div>
+      {/* ================= ALERT STRIP ================= */}
+      <div className="bg-red-600 text-white py-2 text-center text-sm font-medium">
+        <Bell className="inline h-4 w-4 mr-1 animate-pulse" />
+        Flash Flood Warning active in Northern Valley District
       </div>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Page header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      {/* ================= MAIN ================= */}
+      <main className="container mx-auto px-4 py-10">
+        <div className="flex flex-col sm:flex-row justify-between gap-6 mb-10">
           <div>
             <h1 className="text-3xl font-bold">Disaster Alerts</h1>
-            <p className="text-muted-foreground mt-1">
-              Stay informed about disasters in your area
+            <p className="text-slate-400 mt-1">
+              Stay informed and act fast during emergencies
             </p>
           </div>
-          <Button variant="hero" size="lg" onClick={() => setShowHelpForm(true)}>
-            <Phone className="h-4 w-4" />
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setShowHelpForm(true)}
+          >
+            <Phone className="h-4 w-4 mr-2" />
             Request Help
           </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content - Alerts */}
-          <div className="lg:col-span-2 space-y-4">
-            {activeAlerts.map((alert, index) => (
+          {/* ================= ALERTS ================= */}
+          <div className="lg:col-span-2 space-y-6">
+            {activeAlerts.map((alert) => (
               <div
                 key={alert.id}
-                className={`bg-card border rounded-xl overflow-hidden animate-fade-in`}
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="bg-[#0e1628] border border-white/10 rounded-xl overflow-hidden"
               >
                 <div
-                  className={`h-1.5 ${
+                  className={`h-1 ${
                     alert.severity === "critical"
-                      ? "bg-critical"
+                      ? "bg-red-500"
                       : alert.severity === "warning"
-                      ? "bg-warning"
-                      : "bg-info"
+                      ? "bg-yellow-500"
+                      : "bg-blue-500"
                   }`}
                 />
+
                 <div className="p-5">
-                  <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex justify-between gap-4 mb-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2">
                         <AlertTriangle
-                          className={`h-5 w-5 ${
+                          className={
                             alert.severity === "critical"
-                              ? "text-critical"
+                              ? "text-red-500"
                               : alert.severity === "warning"
-                              ? "text-warning"
-                              : "text-info"
-                          }`}
+                              ? "text-yellow-500"
+                              : "text-blue-500"
+                          }
                         />
-                        <h3 className="text-lg font-semibold">{alert.title}</h3>
+                        <h3 className="font-semibold text-lg">
+                          {alert.title}
+                        </h3>
                       </div>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+
+                      <div className="flex gap-4 text-sm text-slate-400 mt-1">
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {alert.location}
@@ -195,23 +195,29 @@ export default function PublicAlerts() {
                         </span>
                       </div>
                     </div>
+
                     <StatusBadge
-                      status={alert.severity === "critical" ? "critical" : alert.severity === "warning" ? "warning" : "info"}
+                      status={alert.severity as any}
                       label={alert.severity}
                       pulse={alert.severity === "critical"}
                     />
                   </div>
 
-                  <p className="text-sm text-muted-foreground mb-4">{alert.description}</p>
+                  <p className="text-sm text-slate-300 mb-4">
+                    {alert.description}
+                  </p>
 
-                  <div className="bg-muted/30 rounded-lg p-4">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                  <div className="bg-black/30 rounded-lg p-4">
+                    <p className="text-xs uppercase text-slate-400 mb-2">
                       Safety Tips
                     </p>
                     <ul className="space-y-1">
                       {alert.safetyTips.map((tip, i) => (
-                        <li key={i} className="text-sm flex items-start gap-2">
-                          <ChevronRight className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <li
+                          key={i}
+                          className="text-sm flex items-start gap-2"
+                        >
+                          <ChevronRight className="h-4 w-4 text-blue-400 mt-0.5" />
                           {tip}
                         </li>
                       ))}
@@ -222,102 +228,74 @@ export default function PublicAlerts() {
             ))}
           </div>
 
-          {/* Sidebar */}
+          {/* ================= SIDEBAR ================= */}
           <div className="space-y-6">
-            {/* Help Request Form (simplified) */}
             {showHelpForm && (
-              <div className="bg-card border border-border rounded-xl p-5 animate-slide-up">
-                <div className="flex items-center justify-between mb-4">
+              <div className="bg-[#0e1628] border border-white/10 rounded-xl p-5">
+                <div className="flex justify-between mb-4">
                   <h3 className="font-semibold">Request Help</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setShowHelpForm(false)}>
-                    <X className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowHelpForm(false)}
+                  >
+                    <X />
                   </Button>
                 </div>
+
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  <button className="p-4 bg-muted/50 hover:bg-muted rounded-lg transition-colors text-center">
-                    <Heart className="h-6 w-6 mx-auto mb-2 text-critical" />
-                    <span className="text-sm font-medium">Medical</span>
-                  </button>
-                  <button className="p-4 bg-muted/50 hover:bg-muted rounded-lg transition-colors text-center">
-                    <Utensils className="h-6 w-6 mx-auto mb-2 text-warning" />
-                    <span className="text-sm font-medium">Food</span>
-                  </button>
-                  <button className="p-4 bg-muted/50 hover:bg-muted rounded-lg transition-colors text-center">
-                    <Home className="h-6 w-6 mx-auto mb-2 text-info" />
-                    <span className="text-sm font-medium">Shelter</span>
-                  </button>
-                  <button className="p-4 bg-muted/50 hover:bg-muted rounded-lg transition-colors text-center">
-                    <Truck className="h-6 w-6 mx-auto mb-2 text-success" />
-                    <span className="text-sm font-medium">Rescue</span>
-                  </button>
+                  <HelpBtn icon={Heart} label="Medical" />
+                  <HelpBtn icon={Utensils} label="Food" />
+                  <HelpBtn icon={Home} label="Shelter" />
+                  <HelpBtn icon={Truck} label="Rescue" />
                 </div>
-                <Button variant="hero" className="w-full">
-                  Continue Request
+
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  Continue
                 </Button>
               </div>
             )}
 
-            {/* Emergency Contacts */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Phone className="h-4 w-4 text-primary" />
-                Emergency Contacts
-              </h3>
-              <div className="space-y-3">
-                {emergencyContacts.map((contact, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">{contact.name}</p>
-                      <p className="text-xs text-muted-foreground">{contact.available}</p>
-                    </div>
-                    <a
-                      href={`tel:${contact.number}`}
-                      className="text-lg font-bold text-primary hover:text-primary/80"
-                    >
-                      {contact.number}
-                    </a>
+            <div className="bg-[#0e1628] border border-white/10 rounded-xl p-5">
+              <h3 className="font-semibold mb-4">Emergency Contacts</h3>
+              {emergencyContacts.map((c) => (
+                <div
+                  key={c.number}
+                  className="flex justify-between py-2 border-b border-white/10 last:border-0"
+                >
+                  <div>
+                    <p className="text-sm">{c.name}</p>
+                    <p className="text-xs text-slate-400">{c.available}</p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                Your Location
-              </h3>
-              <div className="bg-muted/50 rounded-lg p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Enable location to see nearby disasters
-                </p>
-                <Button variant="outline" size="sm">
-                  <MapPin className="h-4 w-4" />
-                  Enable Location
-                </Button>
-              </div>
+                  <a
+                    href={`tel:${c.number}`}
+                    className="font-bold text-blue-400"
+                  >
+                    {c.number}
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border mt-12 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              <span className="font-semibold">DisasterRelief</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 Disaster Relief Coordination Platform. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
+  );
+}
+
+/* ================= HELPER ================= */
+
+function HelpBtn({
+  icon: Icon,
+  label,
+}: {
+  icon: any;
+  label: string;
+}) {
+  return (
+    <button className="bg-black/30 hover:bg-black/40 border border-white/10 rounded-lg p-4 text-center transition">
+      <Icon className="h-6 w-6 mx-auto mb-2 text-blue-400" />
+      <span className="text-sm font-medium">{label}</span>
+    </button>
   );
 }

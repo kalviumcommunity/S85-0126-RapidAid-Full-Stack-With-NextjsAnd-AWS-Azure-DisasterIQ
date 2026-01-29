@@ -33,7 +33,7 @@ const recentDisasters = [
     location: "Eastern Coastal Zone",
     severity: "warning" as const,
     status: "monitoring" as const,
-    affectedCount: 120000,
+    affectedCount: 120345678000,
     lastUpdate: "4 hours ago",
   },
   {
@@ -43,7 +43,7 @@ const recentDisasters = [
     location: "Southern Hills Region",
     severity: "info" as const,
     status: "active" as const,
-    affectedCount: 28000,
+    affectedCount: 28000000000000000,
     lastUpdate: "1 day ago",
   },
 ];
