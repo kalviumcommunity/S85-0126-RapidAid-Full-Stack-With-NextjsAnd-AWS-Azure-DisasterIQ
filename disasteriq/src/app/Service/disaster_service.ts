@@ -1,10 +1,7 @@
-import { DisasterRepository } from "@/app/repositories/disaster.repo";
+
 import { prisma } from "@/app/prisma/prisma";
 
 export const DisasterService = {
-  // -------------------------
-  // CREATE
-  // -------------------------
   create: async (payload: any) => {
     if (!payload.name || !payload.type) {
       throw {
@@ -16,15 +13,13 @@ export const DisasterService = {
     if (!payload.governmentId) {
       throw {
         code: "VALIDATION_ERROR",
-        message: "Government ID missing for disaster creation",
+        message: "Government ID missing",
       };
     }
 
-    // ✅ TRANSACTION: disaster + initial metrics + audit log (all-or-nothing)
     try {
-      const createdByUserId: string | undefined = payload.createdByUserId;
-
       const result = await prisma.$transaction(async (tx) => {
+        // 🌪 Create Disaster
         const disaster = await tx.disaster.create({
           data: {
             name: payload.name,
@@ -34,14 +29,21 @@ export const DisasterService = {
             status: payload.status ?? "REPORTED",
             governmentId: payload.governmentId,
           },
-          include: {
-            government: {
-              select: { id: true, name: true },
-            },
-          },
         });
 
-        // Initial metrics row for dashboard/stat queries
+        // 📸 Save Media (S3 URLs only)
+        if (payload.media?.length) {
+          await tx.media.createMany({
+            data: payload.media.map((m: any) => ({
+              url: m.url,
+              type: m.type,
+              disasterId: disaster.id,
+              uploadedByGovernmentId: payload.governmentId,
+            })),
+          });
+        }
+
+        // 📊 Metrics
         await tx.disasterMetric.create({
           data: {
             disasterId: disaster.id,
@@ -51,11 +53,11 @@ export const DisasterService = {
           },
         });
 
-        // Audit log is optional (if userId is available)
-        if (createdByUserId) {
+        // 🧾 Audit log
+        if (payload.createdByUserId) {
           await tx.auditLog.create({
             data: {
-              userId: createdByUserId,
+              userId: payload.createdByUserId,
               action: "DISASTER_CREATED",
               entity: "Disaster",
               entityId: disaster.id,
@@ -67,59 +69,12 @@ export const DisasterService = {
       });
 
       return result;
-    } catch (error) {
-      // Rollback happens automatically; this is for graceful error propagation
-      console.error("Disaster create transaction failed. Rolling back.", error);
+    } catch (err) {
+      console.error("Disaster transaction failed:", err);
       throw {
         code: "DATABASE_FAILURE",
-        message: "Failed to create disaster (transaction rolled back)",
-        details: error,
+        message: "Failed to create disaster",
       };
     }
-  },
-
-  // -------------------------
-  // READ
-  // -------------------------
-  getAll: async (opts?: {
-    page?: number;
-    pageSize?: number;
-    status?: "REPORTED" | "ONGOING" | "RESOLVED";
-  }) => {
-    const pageSize = Math.min(Math.max(opts?.pageSize ?? 20, 1), 100);
-    const page = Math.max(opts?.page ?? 1, 1);
-    const skip = (page - 1) * pageSize;
-
-    return DisasterRepository.findAll({
-      skip,
-      take: pageSize,
-      status: opts?.status,
-    });
-  },
-
-  getById: async (id: string) => {
-    const disaster = await DisasterRepository.findById(id);
-    if (!disaster) {
-      throw { code: "NOT_FOUND", message: "Disaster not found" };
-    }
-    return disaster;
-  },
-
-  // -------------------------
-  // UPDATE
-  // -------------------------
-  update: async (id: string, payload: any) => {
-    return DisasterRepository.update(id, payload);
-  },
-
-  partialUpdate: async (id: string, payload: any) => {
-    return DisasterRepository.update(id, payload);
-  },
-
-  // -------------------------
-  // DELETE
-  // -------------------------
-  delete: async (id: string) => {
-    return DisasterRepository.delete(id);
   },
 };
