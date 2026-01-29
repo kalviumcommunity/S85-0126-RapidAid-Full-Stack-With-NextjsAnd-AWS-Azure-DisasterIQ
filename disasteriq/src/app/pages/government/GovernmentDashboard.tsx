@@ -24,7 +24,7 @@ const regionDisasters = [
     location: "Northern Valley District",
     severity: "critical" as const,
     status: "active" as const,
-    affectedCount: 45000,
+    affectedCount: 457345,
     lastUpdate: "2 hours ago",
   },
   {

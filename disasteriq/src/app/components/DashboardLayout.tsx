@@ -80,32 +80,30 @@ export function DashboardLayout({
   const items = navItems[role];
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
 
       {/* ================= SIDEBAR ================= */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-white/80 backdrop-blur border-r shadow-lg transition-all duration-300 lg:relative",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-black/30 backdrop-blur border-r border-white/10 transition-all duration-300 lg:relative",
           sidebarOpen ? "w-64" : "w-0 lg:w-20"
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>
             {sidebarOpen && (
-              <span className="font-semibold text-foreground">
-                DisasterRelief
-              </span>
+              <span className="font-semibold">DisasterRelief</span>
             )}
           </Link>
 
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden text-white"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="h-5 w-5" />
@@ -113,7 +111,7 @@ export function DashboardLayout({
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1">
           {items.map((item) => {
             const active = pathname === item.href;
 
@@ -122,27 +120,23 @@ export function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all",
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition",
                   active
-                    ? "bg-primary text-primary-foreground shadow"
-                    : "hover:bg-slate-100"
+                    ? "bg-blue-600 text-white"
+                    : "text-white/80 hover:bg-white/10"
                 )}
               >
-                <item.icon className="h-5 w-5 shrink-0" />
-                {sidebarOpen && (
-                  <span className="group-hover:translate-x-1 transition">
-                    {item.label}
-                  </span>
-                )}
+                <item.icon className="h-5 w-5" />
+                {sidebarOpen && <span>{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
         {/* User */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
               <span className="text-sm font-medium">
                 {userName.charAt(0).toUpperCase()}
               </span>
@@ -150,8 +144,8 @@ export function DashboardLayout({
 
             {sidebarOpen && (
               <div>
-                <p className="text-sm font-medium truncate">{userName}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm font-medium">{userName}</p>
+                <p className="text-xs text-white/60">
                   {roleLabels[role]}
                 </p>
               </div>
@@ -159,7 +153,10 @@ export function DashboardLayout({
           </div>
 
           {sidebarOpen && (
-            <Button variant="ghost" className="w-full mt-3 justify-start">
+            <Button
+              variant="ghost"
+              className="w-full mt-3 justify-start text-white/80 hover:text-white"
+            >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -169,12 +166,14 @@ export function DashboardLayout({
 
       {/* ================= MAIN ================= */}
       <div className="flex-1 flex flex-col">
+
         {/* Header */}
-        <header className="h-16 bg-white/70 backdrop-blur border-b flex items-center justify-between px-6 shadow-sm">
+        <header className="h-16 bg-black/20 backdrop-blur border-b border-white/10 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
+              className="text-white"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               <Menu className="h-5 w-5" />
@@ -194,13 +193,15 @@ export function DashboardLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-6">
+          {children}
+        </main>
       </div>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
