@@ -6,6 +6,7 @@ import {
 import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
 import { findUserForAuthByEmail } from "@/app/repositories/user.repository";
+import { GovernmentRepository } from "@/app/repositories/government.repository";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -48,11 +49,26 @@ export async function POST(req: Request) {
     );
   }
 
-  // ✅ JWT WITH ORG IDS
+  // -------------------------
+  // FETCH GOVERNMENT STATE
+  // -------------------------
+  let governmentState: string | undefined;
+
+  if (role === "GOVERNMENT_ADMIN" && user.governmentId) {
+    const government = await GovernmentRepository.findById(
+      user.governmentId
+    );
+    governmentState = government?.state ?? undefined;
+  }
+
+  // -------------------------
+  // JWT WITH STATE INCLUDED
+  // -------------------------
   const accessToken = generateAccessToken({
     userId: user.id,
     role,
     governmentId: user.governmentId,
+    governmentState, // ✅ NOW PART OF PAYLOAD
     policeId: user.policeId,
     ngoId: user.ngoId,
     hospitalId: user.hospitalId,

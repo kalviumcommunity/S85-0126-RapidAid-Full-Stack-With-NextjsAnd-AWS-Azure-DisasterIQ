@@ -8,26 +8,31 @@ datasource db {
 }
 
 model User {
-  id               String          @id @default(uuid()) @db.Uuid
-  name             String
-  email            String          @unique
-  phone            String?
-  passwordHash     String
-  isActive         Boolean         @default(true)
-  createdAt        DateTime        @default(now())
-  governmentId     String?         @db.Uuid
-  policeId         String?         @db.Uuid
-  ngoId            String?         @db.Uuid
-  hospitalId       String?         @db.Uuid
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  governmentId String?  @db.Uuid
+  policeId     String?  @db.Uuid
+  ngoId        String?  @db.Uuid
+  hospitalId   String?  @db.Uuid
+
   auditLogs        AuditLog[]
   createdReports   MedicalReport[]
   createdResources Resource[]
   createdShelters  Shelter[]
-  government       Government?     @relation(fields: [governmentId], references: [id])
-  hospital         Hospital?       @relation(fields: [hospitalId], references: [id])
-  ngo              NGO?            @relation(fields: [ngoId], references: [id])
-  police           Police?         @relation(fields: [policeId], references: [id])
-  roles            UserRole[]
+
+  government Government? @relation(fields: [governmentId], references: [id])
+  hospital   Hospital?   @relation(fields: [hospitalId], references: [id])
+  ngo        NGO?        @relation(fields: [ngoId], references: [id])
+  police     Police?     @relation(fields: [policeId], references: [id])
+
+  roles UserRole[]
+
+  ngoRequestsSent NGORequest[] // ✅ ADD THIS
 
   @@index([createdAt])
   @@index([governmentId])
@@ -57,18 +62,20 @@ model UserRole {
 }
 
 model Government {
-  id           String     @id @default(uuid()) @db.Uuid
+  id           String   @id @default(uuid()) @db.Uuid
   name         String
   level        String
   state        String?
   district     String?
   department   String
-  contactEmail String     @unique
+  contactEmail String   @unique
   contactPhone String
-  createdAt    DateTime   @default(now())
-  disasters    Disaster[]
-  media        Media[]
-  users        User[]
+  createdAt    DateTime @default(now())
+
+  disasters   Disaster[]
+  media       Media[]
+  users       User[]
+  ngoRequests NGORequest[] // ✅ ADD THIS
 
   @@index([createdAt])
   @@map("government")
@@ -92,16 +99,17 @@ model Police {
 }
 
 model NGO {
-  id                 String   @id @default(uuid()) @db.Uuid
+  id                 String       @id @default(uuid()) @db.Uuid
   name               String
-  registrationNumber String   @unique
+  registrationNumber String       @unique
   state              String
   district           String
   focusArea          String
   contactEmail       String
   contactPhone       String
-  createdAt          DateTime @default(now())
+  createdAt          DateTime     @default(now())
   users              User[]
+  requests           NGORequest[]
 
   @@index([createdAt])
   @@index([state, district])
@@ -143,12 +151,40 @@ model Disaster {
   assignments  RescueAssignment[]
   resources    ResourceAllocation[]
   victims      Victim[]
+  ngoRequests  NGORequest[]
 
   @@index([governmentId])
   @@index([status])
   @@index([reportedAt])
   @@index([governmentId, reportedAt])
   @@map("disaster")
+}
+
+model NGORequest {
+  id String @id @default(uuid()) @db.Uuid
+
+  disasterId   String @db.Uuid
+  ngoId        String @db.Uuid
+  governmentId String @db.Uuid
+
+  status NGORequestStatus @default(PENDING)
+
+  requestedById String    @db.Uuid // government user
+  respondedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  disaster    Disaster   @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  ngo         NGO        @relation(fields: [ngoId], references: [id])
+  government  Government @relation(fields: [governmentId], references: [id])
+  requestedBy User       @relation(fields: [requestedById], references: [id])
+
+  @@unique([disasterId, ngoId]) // one request per NGO per disaster
+  @@index([status])
+  @@index([createdAt])
+  @@index([disasterId])
+  @@index([ngoId])
+  @@index([governmentId])
+  @@map("ngo_request")
 }
 
 model Media {
@@ -307,4 +343,10 @@ model AuditLog {
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+enum NGORequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

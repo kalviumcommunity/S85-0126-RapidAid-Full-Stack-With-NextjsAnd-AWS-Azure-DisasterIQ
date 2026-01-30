@@ -1,13 +1,11 @@
+import type { NextRequest } from "next/server";
 import { DisasterService } from "@/app/Service/disaster_service";
-import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
-import { ERROR_CODES } from "@/app/lib/ errorCodes";
+import { sendSuccess } from "@/app/lib/ responseHandler";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 
-/**
- * GET /api/disasters
- */
-export const GET = apiHandler(async (req: Request) => {
-  const { searchParams } = new URL(req.url);
+export const GET = apiHandler(async (req: NextRequest & { user?: any }) => {
+  const { searchParams } = req.nextUrl;
+
   const id = searchParams.get("id");
   const page = searchParams.get("page");
   const pageSize = searchParams.get("pageSize");
@@ -27,5 +25,6 @@ export const GET = apiHandler(async (req: Request) => {
     pageSize: pageSize ? Number(pageSize) : undefined,
     status: status ?? undefined,
   });
+
   return sendSuccess(disasters, "Disasters fetched");
 });
