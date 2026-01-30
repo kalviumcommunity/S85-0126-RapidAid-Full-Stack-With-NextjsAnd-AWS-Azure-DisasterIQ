@@ -5,6 +5,13 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+// 🔢 Registration number generator
+function generateRegistrationNumber(state) {
+  const code = state.slice(0, 2).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `NGO-${code}-${Date.now()}-${random}`;
+}
+
 export async function POST(req) {
   const body = await req.json();
   const { ngo, user } = body;
@@ -12,7 +19,11 @@ export async function POST(req) {
   // 🔒 Required field validation
   if (
     !ngo?.name ||
-    !ngo?.registrationNumber ||
+    !ngo?.state ||
+    !ngo?.district ||
+    !ngo?.focusArea ||
+    !ngo?.contactEmail ||
+    !ngo?.contactPhone ||
     !user?.email ||
     !user?.password
   ) {
@@ -25,31 +36,18 @@ export async function POST(req) {
   // 🧼 Sanitize NGO inputs
   const cleanNGO = {
     name: sanitizeInput(ngo.name),
-    registrationNumber: sanitizeInput(ngo.registrationNumber),
     state: sanitizeInput(ngo.state),
     district: sanitizeInput(ngo.district),
     focusArea: sanitizeInput(ngo.focusArea),
-    contactEmail: sanitizeInput(ngo.contactEmail)?.toLowerCase(),
+    contactEmail: sanitizeInput(ngo.contactEmail).toLowerCase(),
     contactPhone: sanitizeInput(ngo.contactPhone),
   };
 
-  // 🧼 Sanitize User inputs (except password)
+  // 🧼 Sanitize User inputs
   const cleanUser = {
     name: sanitizeInput(user.name),
     email: sanitizeInput(user.email).toLowerCase(),
   };
-
-  // 🔒 Check duplicate NGO
-  const existingNGO = await prisma.nGO.findUnique({
-    where: { registrationNumber: cleanNGO.registrationNumber },
-  });
-
-  if (existingNGO) {
-    return NextResponse.json(
-      { message: "NGO already registered" },
-      { status: 400 }
-    );
-  }
 
   // 🔒 Check duplicate user email
   const existingUser = await prisma.user.findUnique({
@@ -63,16 +61,22 @@ export async function POST(req) {
     );
   }
 
-  // ✅ Atomic creation
+  // 🔢 Generate unique registration number
+  const registrationNumber = generateRegistrationNumber(cleanNGO.state);
+
+  // ✅ Atomic creation (NGO + NGO_ADMIN)
   const result = await prisma.$transaction(async (tx) => {
     const createdNGO = await tx.nGO.create({
-      data: cleanNGO,
+      data: {
+        ...cleanNGO,
+        registrationNumber,
+      },
     });
 
     const createdUser = await tx.user.create({
       data: {
         ...cleanUser,
-        passwordHash: await hashPassword(user.password), // ❗ never sanitize passwords
+        passwordHash: await hashPassword(user.password), // 🔐 never sanitize passwords
         ngoId: createdNGO.id,
         roles: {
           create: {
@@ -89,6 +93,7 @@ export async function POST(req) {
     {
       message: "NGO registered successfully",
       ngoId: result.createdNGO.id,
+      registrationNumber: result.createdNGO.registrationNumber,
       userId: result.createdUser.id,
     },
     { status: 201 }

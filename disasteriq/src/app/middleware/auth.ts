@@ -11,18 +11,23 @@ interface JwtPayload {
   hospitalId?: string;
   policeId?: string;
   governmentId?: string;
+  governmentState:string
 }
 
 export async function authMiddleware(req: NextRequest) {
   let token: string | undefined;
 
-  // Header
+  // -------------------------
+  // TOKEN FROM HEADER
+  // -------------------------
   const authHeader = req.headers.get("authorization");
   if (authHeader?.startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];
   }
 
-  // Cookie
+  // -------------------------
+  // TOKEN FROM COOKIE
+  // -------------------------
   if (!token) {
     token = req.cookies.get("accessToken")?.value;
   }
@@ -37,23 +42,28 @@ export async function authMiddleware(req: NextRequest) {
   ) as JwtPayload;
 
   let governmentName: string | null = null;
+  let governmentState: string | null = null;
 
   if (decoded.governmentId) {
     const government = await GovernmentRepository.findById(
       decoded.governmentId
     );
+
     governmentName = government?.name ?? null;
+    governmentState = government?.state ?? null;
   }
 
   // ✅ RETURN USER CONTEXT
   return {
     id: decoded.userId,
     role: decoded.role,
+
     governmentId: decoded.governmentId,
     governmentName,
+    governmentState,
+
     ngoId: decoded.ngoId,
     policeId: decoded.policeId,
     hospitalId: decoded.hospitalId,
   };
 }
-

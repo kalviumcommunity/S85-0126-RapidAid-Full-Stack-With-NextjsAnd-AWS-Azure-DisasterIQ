@@ -1,7 +1,16 @@
-
 import { prisma } from "@/app/prisma/prisma";
+import { DisasterRepository } from "@/app/repositories/disaster.repo";
+
+type GetAllDisastersParams = {
+  page?: number;
+  pageSize?: number;
+  status?: "REPORTED" | "ONGOING" | "RESOLVED";
+};
 
 export const DisasterService = {
+  // -------------------------
+  // CREATE
+  // -------------------------
   create: async (payload: any) => {
     if (!payload.name || !payload.type) {
       throw {
@@ -31,7 +40,7 @@ export const DisasterService = {
           },
         });
 
-        // 📸 Save Media (S3 URLs only)
+        // 📸 Save Media
         if (payload.media?.length) {
           await tx.media.createMany({
             data: payload.media.map((m: any) => ({
@@ -76,5 +85,48 @@ export const DisasterService = {
         message: "Failed to create disaster",
       };
     }
+  },
+
+  // -------------------------
+  // READ ALL (PAGINATED)
+  // -------------------------
+  getAll: async (params?: GetAllDisastersParams) => {
+    const page = params?.page ?? 1;
+    const pageSize = params?.pageSize ?? 10;
+
+    return DisasterRepository.findAll({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      status: params?.status,
+    });
+  },
+
+  // -------------------------
+  // READ BY ID
+  // -------------------------
+  getById: async (id: string) => {
+    const disaster = await DisasterRepository.findById(id);
+    if (!disaster) {
+      throw { code: "NOT_FOUND", message: "Disaster not found" };
+    }
+    return disaster;
+  },
+
+  // -------------------------
+  // UPDATE
+  // -------------------------
+  update: async (id: string, payload: any) => {
+    return DisasterRepository.update(id, payload);
+  },
+
+  partialUpdate: async (id: string, payload: any) => {
+    return DisasterRepository.update(id, payload);
+  },
+
+  // -------------------------
+  // DELETE
+  // -------------------------
+  delete: async (id: string) => {
+    return DisasterRepository.delete(id);
   },
 };

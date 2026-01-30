@@ -10,6 +10,7 @@ type JwtUserPayload = {
   policeId?: string | null;
   ngoId?: string | null;
   hospitalId?: string | null;
+  governmentState?: string;
 };
 
 export const generateAccessToken = (payload: JwtUserPayload) => {
@@ -21,6 +22,7 @@ export const generateAccessToken = (payload: JwtUserPayload) => {
       policeId: payload.policeId ?? null,
       ngoId: payload.ngoId ?? null,
       hospitalId: payload.hospitalId ?? null,
+      governementState:payload.governmentState?? null
     },
     ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }

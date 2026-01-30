@@ -4,15 +4,17 @@ export const GovernmentRepository = {
   // -------------------------
   // FIND BY ID (used in auth middleware)
   // -------------------------
-  findById: async (governmentId: string) => {
-    return prisma.government.findUnique({
-      where: { id: governmentId },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-  },
+  findById: async (id: string) => {
+  return prisma.government.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      state: true,
+    },
+  });
+},
+
 
   // -------------------------
   // FIND ALL (optional, for admin dashboards)
