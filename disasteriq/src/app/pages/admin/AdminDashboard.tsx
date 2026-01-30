@@ -1,4 +1,18 @@
 "use client";
+import Link from "next/link";
+
+<Link href="/government/disasters/create">
+  <Button
+    asChild
+    size="lg"
+    className="bg-red-600 hover:bg-red-700 text-white"
+  >
+    <span>
+      <AlertTriangle className="h-4 w-4 mr-2" />
+      Create Disaster Record
+    </span>
+  </Button>
+</Link>
 
 import {
   AlertTriangle,
@@ -66,10 +80,20 @@ export default function AdminDashboard() {
               Overview of disaster relief operations and system status
             </p>
           </div>
-          <Button variant="default" size="lg">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Create Disaster Record
-          </Button>
+          <Link href="/government/disasters/create">
+             <Button
+             asChild
+            size="lg"
+              className="bg-red-600 hover:bg-red-700 text-white"
+                >
+    <span>
+      <AlertTriangle className="h-4 w-4 mr-2" />
+      Create Disaster Record
+    </span>
+  </Button>
+</Link>
+
+
         </div>
 
         {/* Stats grid */}

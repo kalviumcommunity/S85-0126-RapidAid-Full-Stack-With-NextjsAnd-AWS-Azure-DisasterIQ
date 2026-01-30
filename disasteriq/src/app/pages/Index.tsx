@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Check,
   Globe,
+  Hospital,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 
@@ -34,7 +35,7 @@ const roles = [
   },
   {
     id: "responder",
-    title: "NGO / Hospital",
+    title: "NGO ",
     description: "Manage resources and relief operations",
     icon: Heart,
     href: "/auth/ngo/signup",
@@ -47,6 +48,14 @@ const roles = [
     icon: Users,
     href: "/auth/citizen/signup",
     accent: "from-amber-500 to-orange-500",
+  },
+  {
+    id: "Hospital",
+    title: "Hospital ",
+    description: "Provide medical help and\nemergency treatment support ",
+    icon: Hospital,
+    href: "/auth/hospital/signup",
+    accent: "from-blue-500 to-emerald-500",
   },
 ];
 
@@ -146,7 +155,7 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {roles.map((role) => (
               <Link
                 key={role.id}
