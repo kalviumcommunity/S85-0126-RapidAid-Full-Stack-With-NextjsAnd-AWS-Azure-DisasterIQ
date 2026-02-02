@@ -86,7 +86,7 @@ export async function POST(req: Request) {
         : user.policeId
         ? "/police/dashboard"
         : user.ngoId
-        ? "/ngo/dashboard"
+        ? "/responder"
         : user.hospitalId
         ? "/hospital/dashboard"
         : "/user/home",
