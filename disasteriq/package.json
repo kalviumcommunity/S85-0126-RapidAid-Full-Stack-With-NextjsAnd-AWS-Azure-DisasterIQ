@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "test": "vitest run",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -97,6 +98,9 @@
     "prisma": "^5.22.0",
     "tailwindcss": "^4.1.18",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^5.2.0",
+    "vite-tsconfig-paths": "^4.3.0",
+    "vitest": "^1.6.1"
   }
 }
