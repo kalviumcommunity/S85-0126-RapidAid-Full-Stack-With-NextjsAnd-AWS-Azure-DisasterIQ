@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
     const passwordHash = await hashPassword(user.password);
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async () => {
       const createdPolice = await tx.police.create({
         data: cleanPolice,
       });
