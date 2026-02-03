@@ -18,7 +18,6 @@ export const NGORepository = {
         name: true,
         registrationNumber: true,
         state: true,
-        district: true,
         focusArea: true,
         contactEmail: true,
         contactPhone: true,

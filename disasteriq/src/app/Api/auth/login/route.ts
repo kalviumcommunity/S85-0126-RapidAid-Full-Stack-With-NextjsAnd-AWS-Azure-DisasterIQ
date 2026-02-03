@@ -7,6 +7,7 @@ import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
 import { findUserForAuthByEmail } from "@/app/repositories/user.repository";
 import { GovernmentRepository } from "@/app/repositories/government.repository";
+import { prisma } from "@/app/prisma/prisma";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -50,15 +51,21 @@ export async function POST(req: Request) {
   }
 
   // -------------------------
-  // FETCH GOVERNMENT STATE
+  // FETCH GOVERNMENT / NGO STATE
   // -------------------------
   let governmentState: string | undefined;
+  let state: string | undefined;
 
   if (role === "GOVERNMENT_ADMIN" && user.governmentId) {
-    const government = await GovernmentRepository.findById(
-      user.governmentId
-    );
+    const government = await GovernmentRepository.findById(user.governmentId);
     governmentState = government?.state ?? undefined;
+    state = governmentState;
+  }
+
+  // If NGO user, fetch NGO state and include as `state` in payload
+  if (user.ngoId) {
+    const ngo = await prisma.nGO.findUnique({ where: { id: user.ngoId } });
+    if (ngo?.state) state = ngo.state;
   }
 
   // -------------------------
@@ -68,10 +75,11 @@ export async function POST(req: Request) {
     userId: user.id,
     role,
     governmentId: user.governmentId,
-    governmentState, // ✅ NOW PART OF PAYLOAD
+    governmentState,
     policeId: user.policeId,
     ngoId: user.ngoId,
     hospitalId: user.hospitalId,
+    state,
   });
 
   const refreshToken = generateRefreshToken({

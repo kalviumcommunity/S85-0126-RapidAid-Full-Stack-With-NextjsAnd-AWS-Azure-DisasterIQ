@@ -11,6 +11,7 @@ type JwtUserPayload = {
   ngoId?: string | null;
   hospitalId?: string | null;
   governmentState?: string;
+  state?: string; // generic state (e.g., NGO state)
 };
 
 export const generateAccessToken = (payload: JwtUserPayload) => {
@@ -22,7 +23,8 @@ export const generateAccessToken = (payload: JwtUserPayload) => {
       policeId: payload.policeId ?? null,
       ngoId: payload.ngoId ?? null,
       hospitalId: payload.hospitalId ?? null,
-      governementState:payload.governmentState?? null
+      governmentState: payload.governmentState ?? null,
+      state: payload.state ?? null,
     },
     ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }
