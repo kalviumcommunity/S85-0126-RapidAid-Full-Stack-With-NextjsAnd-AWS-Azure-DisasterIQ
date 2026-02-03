@@ -20,7 +20,6 @@ export async function POST(req) {
   if (
     !ngo?.name ||
     !ngo?.state ||
-    !ngo?.district ||
     !ngo?.focusArea ||
     !ngo?.contactEmail ||
     !ngo?.contactPhone ||
@@ -37,7 +36,6 @@ export async function POST(req) {
   const cleanNGO = {
     name: sanitizeInput(ngo.name),
     state: sanitizeInput(ngo.state),
-    district: sanitizeInput(ngo.district),
     focusArea: sanitizeInput(ngo.focusArea),
     contactEmail: sanitizeInput(ngo.contactEmail).toLowerCase(),
     contactPhone: sanitizeInput(ngo.contactPhone),
