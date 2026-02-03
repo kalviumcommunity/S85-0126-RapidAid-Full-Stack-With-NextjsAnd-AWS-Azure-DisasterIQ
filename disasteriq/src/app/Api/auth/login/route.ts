@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   if (!email || !password) {
     return NextResponse.json(
-      { message: "Email and password required" },
+      { message: "Email and Password Required" },
       { status: 400 }
     );
   }
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
   if (!user) {
     return NextResponse.json(
-      { message: "Invalid credentials" },
+      { message: "Invalid Credentials" },
       { status: 401 }
     );
   }
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   const isValid = await comparePassword(password, user.passwordHash);
   if (!isValid) {
     return NextResponse.json(
-      { message: "Invalid credentials" },
+      { message: "Invalid Credentials" },
       { status: 401 }
     );
   }
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   // 🛡 SAFETY CHECK
   if (role === "GOVERNMENT_ADMIN" && !user.governmentId) {
     return NextResponse.json(
-      { message: "Government account not linked" },
+      { message: "Government account not linkedd" },
       { status: 403 }
     );
   }

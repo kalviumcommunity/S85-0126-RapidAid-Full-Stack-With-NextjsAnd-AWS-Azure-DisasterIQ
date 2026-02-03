@@ -41,21 +41,21 @@ export async function POST(req: Request) {
 
     if (existingStation) {
       return NextResponse.json(
-        { message: "Police station already exists" },
+        { message: "Police station Already existss" },
         { status: 400 }
       );
     }
 
     if (existingUser) {
       return NextResponse.json(
-        { message: "User email already exists" },
+        { message: "User email already Exists" },
         { status: 400 }
       );
     }
 
     const passwordHash = await hashPassword(user.password);
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async () => {
       const createdPolice = await tx.police.create({
         data: cleanPolice,
       });
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message: "Police station created successfully",
+        message: "Police station Created Successfully",
         policeId: result.createdPolice.id,
         userId: result.createdUser.id,
       },
