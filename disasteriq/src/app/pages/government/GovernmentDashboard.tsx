@@ -90,10 +90,10 @@ export default function GovernmentDashboard() {
       <div className="space-y-10">
 
         {/* HEADER */}
-        <div className="rounded-2xl border bg-gradient-to-br from-blue-50 to-white p-6">
+        <div className="rounded-2xl border bg-gradient-to-br from-black-50 to-black p-6">
           <div className="flex flex-col md:flex-row md:justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-bold">Government Dashboard</h1>
+              <h1 className="text-2xl font-bold ">Government Dashboard</h1>
               <p className="text-slate-600">
                 Regional disaster management and coordination center
               </p>

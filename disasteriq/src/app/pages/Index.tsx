@@ -136,9 +136,12 @@ export default function Index() {
               </Button>
             </Link>
 
-            <Button size="lg" variant="outline">
-              Learn More
-            </Button>
+           <Link href="/learnmore">
+           <Button size="lg" variant="outline">
+            Learn More
+           </Button>
+          </Link>
+
           </div>
         </div>
       </section>
