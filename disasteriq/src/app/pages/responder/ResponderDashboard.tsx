@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 import {
   AlertTriangle,
   Heart,
@@ -10,10 +13,13 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
+
 import { DashboardLayout } from "@/app/components/DashboardLayout";
 import { StatCard } from "@/app/components/StatCart";
 import { StatusBadge } from "@/app/components/StatusBadge";
 import { Button } from "@/app/components/ui/button";
+
+/* ===================== DUMMY DATA ===================== */
 
 const assignedDisasters = [
   {
@@ -35,10 +41,34 @@ const assignedDisasters = [
 ];
 
 const reliefRequests = [
-  { id: "1", type: "Medical", location: "Block A, Valley", urgency: "critical", time: "10 min ago" },
-  { id: "2", type: "Food", location: "Block C, Valley", urgency: "warning", time: "25 min ago" },
-  { id: "3", type: "Shelter", location: "Block B, Valley", urgency: "warning", time: "1 hour ago" },
-  { id: "4", type: "Rescue", location: "Block D, Valley", urgency: "critical", time: "2 hours ago" },
+  {
+    id: "1",
+    type: "Medical",
+    location: "Block A, Valley",
+    urgency: "critical",
+    time: "10 min ago",
+  },
+  {
+    id: "2",
+    type: "Food",
+    location: "Block C, Valley",
+    urgency: "warning",
+    time: "25 min ago",
+  },
+  {
+    id: "3",
+    type: "Shelter",
+    location: "Block B, Valley",
+    urgency: "warning",
+    time: "1 hour ago",
+  },
+  {
+    id: "4",
+    type: "Rescue",
+    location: "Block D, Valley",
+    urgency: "critical",
+    time: "2 hours ago",
+  },
 ];
 
 const resources = [
@@ -49,7 +79,25 @@ const resources = [
   { name: "Volunteers", available: 85, total: 120 },
 ];
 
+/* ===================== COMPONENT ===================== */
+
 export default function ResponderDashboard() {
+  const router = useRouter();
+
+  /* ===================== BUTTON HANDLERS ===================== */
+
+  const handleUpdateResources = () => {
+    router.push("/responder/resources");
+  };
+
+  const handleEdit = () => {
+    alert("Edit feature coming soon!");
+  };
+
+  const handleAcceptRequest = (id: string) => {
+    alert(`Request ${id} accepted (backend integration coming next)`);
+  };
+
   return (
     <DashboardLayout role="responder" userName="Relief Coordinator">
       <div className="space-y-8 text-white">
@@ -62,7 +110,11 @@ export default function ResponderDashboard() {
               Manage relief operations and resource deployment
             </p>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={handleUpdateResources}
+          >
             <Package className="h-4 w-4 mr-2" />
             Update Resources
           </Button>
@@ -73,24 +125,49 @@ export default function ResponderDashboard() {
           <div className="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center">
             <Heart className="h-7 w-7 text-green-400" />
           </div>
+
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h2 className="font-semibold">Red Cross Regional Chapter</h2>
               <StatusBadge status="success" label="Verified" />
             </div>
+
             <p className="text-sm text-white/70">
               NGO • Active since 2015 • 120 volunteers
             </p>
           </div>
-          <Button variant="outline">Edit</Button>
+
+          <Button variant="outline" onClick={handleEdit}>
+            Edit
+          </Button>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Active Operations" value={4} icon={AlertTriangle} variant="critical" />
-          <StatCard title="Pending Requests" value={23} icon={Clock} variant="warning" />
-          <StatCard title="Completed Today" value={47} icon={CheckCircle} variant="success" />
-          <StatCard title="Volunteers Active" value={85} icon={Users} variant="info" />
+          <StatCard
+            title="Active Operations"
+            value={4}
+            icon={AlertTriangle}
+            variant="critical"
+          />
+          <StatCard
+            title="Pending Requests"
+            value={23}
+            icon={Clock}
+            variant="warning"
+          />
+          <StatCard
+            title="Completed Today"
+            value={47}
+            icon={CheckCircle}
+            variant="success"
+          />
+          <StatCard
+            title="Volunteers Active"
+            value={85}
+            icon={Users}
+            variant="info"
+          />
         </div>
 
         {/* Main Grid */}
@@ -103,11 +180,16 @@ export default function ResponderDashboard() {
             <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
               <div className="flex justify-between mb-4">
                 <h3 className="font-semibold">Assigned Disasters</h3>
-                <Button variant="ghost" size="sm">View All</Button>
+
+                <Link href="/responder/disasters">
+                  <Button variant="ghost" size="sm">
+                    View All
+                  </Button>
+                </Link>
               </div>
 
               <div className="space-y-3">
-                {assignedDisasters.map(d => (
+                {assignedDisasters.map((d) => (
                   <div
                     key={d.id}
                     className="p-4 rounded-lg border border-white/10 bg-white/5 flex justify-between"
@@ -121,6 +203,7 @@ export default function ResponderDashboard() {
                         <span>{d.distance} away</span>
                       </div>
                     </div>
+
                     <div className="text-right">
                       <p className="text-lg font-bold">{d.requestsCount}</p>
                       <p className="text-xs text-white/60">pending</p>
@@ -133,8 +216,9 @@ export default function ResponderDashboard() {
             {/* Relief Requests */}
             <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
               <h3 className="font-semibold mb-4">Incoming Requests</h3>
+
               <div className="space-y-2">
-                {reliefRequests.map(r => (
+                {reliefRequests.map((r) => (
                   <div
                     key={r.id}
                     className="p-3 rounded-lg hover:bg-white/10 transition flex justify-between"
@@ -143,9 +227,15 @@ export default function ResponderDashboard() {
                       <p className="font-medium">{r.type}</p>
                       <p className="text-xs text-white/60">{r.location}</p>
                     </div>
+
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-white/60">{r.time}</span>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleAcceptRequest(r.id)}
+                      >
                         Accept
                       </Button>
                     </div>
@@ -161,9 +251,11 @@ export default function ResponderDashboard() {
             {/* Resources */}
             <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
               <h3 className="font-semibold mb-4">Resources</h3>
+
               <div className="space-y-4">
-                {resources.map(r => {
+                {resources.map((r) => {
                   const percent = (r.available / r.total) * 100;
+
                   return (
                     <div key={r.name}>
                       <div className="flex justify-between text-sm mb-1">
@@ -172,6 +264,7 @@ export default function ResponderDashboard() {
                           {r.available}/{r.total}
                         </span>
                       </div>
+
                       <div className="h-2 bg-white/10 rounded-full">
                         <div
                           className="h-full bg-blue-500 rounded-full"
@@ -187,15 +280,18 @@ export default function ResponderDashboard() {
             {/* Operations */}
             <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
               <h3 className="font-semibold mb-4">Ongoing Operations</h3>
+
               <div className="space-y-3">
                 <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
                   <Truck className="h-4 w-4 text-green-400 inline mr-2" />
                   Food Distribution
                 </div>
+
                 <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
                   <Heart className="h-4 w-4 text-blue-400 inline mr-2" />
                   Medical Camp
                 </div>
+
                 <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                   <Users className="h-4 w-4 text-yellow-400 inline mr-2" />
                   Evacuation Support
