@@ -45,13 +45,16 @@ const navItems: Record<DashboardLayoutProps["role"], NavItem[]> = {
     { label: "Reports", href: "/admin/reports", icon: FileText },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ],
-  government: [
-    { label: "Dashboard", href: "/government", icon: LayoutDashboard },
-    { label: "Disasters", href: "/government/disasters", icon: AlertTriangle },
-    { label: "Coordination", href: "/government/coordination", icon: Building2 },
-    { label: "Resources", href: "/government/resources", icon: Shield },
-    { label: "Reports", href: "/government/reports", icon: FileText },
-  ],
+government: [
+  { label: "Dashboard", href: "/government", icon: LayoutDashboard },
+  { label: "Disasters", href: "/government/disaster", icon: AlertTriangle },
+  { label: "Coordination", href: "/government/coordination", icon: Building2 },
+  { label: "Resources", href: "/government/resources", icon: Shield },
+  { label: "Reports", href: "/government/reports", icon: FileText },
+  // ✅ NEW NGO OPTION
+  { label: "NGO", href: "/government/ngo", icon: Users },
+],
+
   responder: [
     { label: "Dashboard", href: "/responder", icon: LayoutDashboard },
     { label: "Assigned Disasters", href: "/responder/disasters", icon: AlertTriangle },
