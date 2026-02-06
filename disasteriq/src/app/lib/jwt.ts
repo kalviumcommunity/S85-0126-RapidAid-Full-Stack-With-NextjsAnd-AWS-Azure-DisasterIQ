@@ -40,3 +40,11 @@ export const generateRefreshToken = (payload: { userId: string }) => {
     { expiresIn: "7d" }
   );
 };
+
+export const verifyToken = (token: string) => {
+  try {
+    return jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtUserPayload;
+  } catch (error) {
+    return null;
+  }
+};

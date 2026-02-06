@@ -18,13 +18,14 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      const response = await fetch("/Api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include", // 🔥 REQUIRED for HttpOnly cookies
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       const data = await response.json();
