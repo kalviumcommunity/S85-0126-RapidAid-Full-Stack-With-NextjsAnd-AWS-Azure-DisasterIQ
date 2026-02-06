@@ -22,7 +22,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // ✅ FETCH FULL AUTH USER
   const user = await findUserForAuthByEmail(email);
 
   if (!user) {
@@ -42,34 +41,32 @@ export async function POST(req: Request) {
 
   const role = user.roles[0]?.role.name;
 
-  // 🛡 SAFETY CHECK
   if (role === "GOVERNMENT_ADMIN" && !user.governmentId) {
     return NextResponse.json(
-      { message: "Government account not linkedd" },
+      { message: "Government account not linked" },
       { status: 403 }
     );
   }
 
   // -------------------------
-  // FETCH GOVERNMENT / NGO STATE
+  // FETCH STATE INFO
   // -------------------------
   let governmentState: string | undefined;
   let state: string | undefined;
 
   if (role === "GOVERNMENT_ADMIN" && user.governmentId) {
     const government = await GovernmentRepository.findById(user.governmentId);
-    governmentState = government?.state ?? undefined;
+   governmentState = government?.state ?? undefined;
     state = governmentState;
   }
 
-  // If NGO user, fetch NGO state and include as `state` in payload
   if (user.ngoId) {
     const ngo = await prisma.nGO.findUnique({ where: { id: user.ngoId } });
     if (ngo?.state) state = ngo.state;
   }
 
   // -------------------------
-  // JWT WITH STATE INCLUDED
+  // JWTs
   // -------------------------
   const accessToken = generateAccessToken({
     userId: user.id,
@@ -86,18 +83,11 @@ export async function POST(req: Request) {
     userId: user.id,
   });
 
+  // -------------------------
+  // RESPONSE
+  // -------------------------
   const response = NextResponse.json({
-    success: true,
-    user: {
-      id: user.id,
-      email: user.email,
-      role,
-      governmentId: user.governmentId,
-      ngoId: user.ngoId,
-      policeId: user.policeId,
-      hospitalId: user.hospitalId,
-      state,
-    },
+    role,
     redirect:
       user.governmentId
         ? "/government"
@@ -110,21 +100,21 @@ export async function POST(req: Request) {
         : "/user/home",
   });
 
-  // Set JWT token in HttpOnly cookie
-  response.cookies.set("token", accessToken, {
+  // ✅ ACCESS TOKEN COOKIE
+  response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 15 * 60, // 15 minutes
   });
 
-  // Set refresh token in HttpOnly cookie
+  // ✅ REFRESH TOKEN COOKIE
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    path: "/auth/refresh",
+    path: "/api/auth/refresh",
     maxAge: 7 * 24 * 60 * 60,
   });
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import {
   AlertTriangle,
@@ -11,167 +12,128 @@ import {
   Package,
   CheckCircle,
   Clock,
+  MapPin,
   XCircle,
-  Bell,
 } from "lucide-react";
 
 import { DashboardLayout } from "@/app/components/DashboardLayout";
 import { StatCard } from "@/app/components/StatCart";
 import { DisasterCard } from "@/app/components/DisasterCart";
 import { Button } from "@/app/components/ui/button";
-import { authApi } from "@/app/lib/authFetch";
 
 /* ===================== TYPES ===================== */
 
-type Severity = "critical" | "warning" | "info";
-
-type Disaster = {
+type ReliefRequest = {
   id: string;
-  title: string;
-  type: string;
-  location: string;
-  severity: Severity;
-  status: "active" | "monitoring" | "resolved";
-  affectedCount: number;
-  lastUpdate: string;
-};
-
-type TaskRequest = {
-  id: string;
-  title: string;
-  description: string;
-  priority: string;
-  status: "PENDING" | "ACCEPTED" | "REJECTED";
-  disaster?: {
-    id: string;
-    name: string;
-    type: string;
-  };
-  government: {
-    id: string;
-    name: string;
-    state: string;
-  };
-  requestedBy: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
-  respondedAt?: string;
-};
-
-/* ===================== HELPERS ===================== */
-
-const mapSeverity = (value: number): Severity => {
-  if (value >= 7) return "critical";
-  if (value >= 4) return "warning";
-  return "info";
-};
-
-const mapStatus = (
-  status: string
-): "active" | "monitoring" | "resolved" => {
-  if (status === "RESOLVED") return "resolved";
-  if (status === "ONGOING") return "active";
-  return "monitoring"; // REPORTED
+  requestedById: string;
+  respondedAt?: string | null;
+  disaster?: {
+    type?: string;
+    location?: string;
+  };
 };
 
 /* ===================== COMPONENT ===================== */
 
-export default function NGODashboard() {
-  const [disasters, setDisasters] = useState<Disaster[]>([]);
-  const [tasks, setTasks] = useState<TaskRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ResponderDashboard() {
+  const router = useRouter();
 
-  /* ===================== FETCH DATA ===================== */
+  const [reliefRequests, setReliefRequests] = useState<ReliefRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  /* ===================== FETCH NGO REQUESTS ===================== */
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchNgoRequests = async () => {
       try {
-        // Fetch disasters
-        const disastersRes = await authApi.get("/Api/disasters/get");
-        if (disastersRes.ok) {
-          const disastersJson = await disastersRes.json();
+        setLoadingRequests(true);
+        setRequestError(null);
 
-          const normalized: Disaster[] = disastersJson.data.map((d: any) => ({
-            id: d.id,
-            title: d.name,
-            type: d.type,
-            location: d.location,
-            severity: mapSeverity(d.severity),
-            status: mapStatus(d.status),
-            affectedCount: 0,
-            lastUpdate: new Date(d.reportedAt).toLocaleString(),
-          }));
+        const res = await fetch(
+          "http://localhost:3000/Api/ngoRequest/ngo/[ngoId]",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
-          setDisasters(normalized);
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json.message || "Failed to fetch NGO requests");
         }
 
-        // Fetch NGO tasks
-        const tasksRes = await authApi.get("/Api/ngo/tasks");
-        if (tasksRes.ok) {
-          const tasksJson = await tasksRes.json();
-          setTasks(tasksJson.data || []);
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
+        setReliefRequests(json.data);
+      } catch (err: any) {
+        setRequestError(err.message);
       } finally {
-        setLoading(false);
+        setLoadingRequests(false);
       }
     };
 
-    fetchData();
+    fetchNgoRequests();
   }, []);
 
-  /* ===================== TASK HANDLERS ===================== */
+  /* ===================== RESPOND HANDLER ===================== */
 
-  const handleRespondToTask = async (taskId: string, status: "ACCEPTED" | "REJECTED") => {
+  const respondToRequest = async (
+    requestedById: string,
+    status: "APPROVED" | "REJECTED"
+  ) => {
     try {
-      const response = await authApi.patch(`/Api/ngo/tasks/${taskId}/respond`, {
-        status,
-      });
+      setActionLoadingId(requestedById);
 
-      if (response.ok) {
-        alert(`Task ${status.toLowerCase()} successfully!`);
-        
-        // Refresh tasks
-        const tasksRes = await authApi.get("/Api/ngo/tasks");
-        if (tasksRes.ok) {
-          const tasksJson = await tasksRes.json();
-          setTasks(tasksJson.data || []);
+      const res = await fetch(
+        "http://localhost:3000/Api/ngoRequest/respond",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            requestedById,
+            status,
+          }),
         }
-      } else {
-        alert("Failed to respond to task");
+      );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.message || "Failed to respond to request");
       }
-    } catch (error) {
-      console.error("Error responding to task:", error);
-      alert("Error responding to task");
+
+      // ✅ Optimistic UI update
+      setReliefRequests((prev) =>
+        prev.map((req) =>
+          req.requestedById === requestedById
+            ? {
+                ...req,
+                status,
+                respondedAt: new Date().toISOString(),
+              }
+            : req
+        )
+      );
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "HIGH": return "text-red-400";
-      case "MEDIUM": return "text-yellow-400";
-      case "LOW": return "text-green-400";
-      default: return "text-gray-400";
-    }
-  };
+  /* ===================== DERIVED DATA ===================== */
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "ACCEPTED": return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case "REJECTED": return <XCircle className="h-4 w-4 text-red-400" />;
-      default: return <Clock className="h-4 w-4 text-yellow-400" />;
-    }
-  };
+  const pendingCount = reliefRequests.filter(
+    (r) => r.status === "PENDING"
+  ).length;
 
-  /* ===================== BUTTON HANDLERS ===================== */
-
-  const handleRequestResources = () => {
-    alert("Request resources feature coming soon!");
-  };
+  /* ===================== UI ===================== */
 
   return (
     <DashboardLayout role="ngo" userName="NGO Coordinator">
@@ -187,8 +149,8 @@ export default function NGODashboard() {
           </div>
 
           <Button
-            className="bg-green-600 hover:bg-green-700"
-            onClick={handleRequestResources}
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => router.push("/responder/resources")}
           >
             <Package className="h-4 w-4 mr-2" />
             Request Resources
@@ -210,6 +172,8 @@ export default function NGODashboard() {
               NGO • Active since 2018 • 85 volunteers
             </p>
           </div>
+
+          <Button variant="outline">Edit</Button>
         </div>
 
         {/* Stats */}
@@ -221,9 +185,9 @@ export default function NGODashboard() {
             variant="critical"
           />
           <StatCard
-            title="Assigned Tasks"
-            value={tasks.filter((t) => t.status === "PENDING").length}
-            icon={Bell}
+            title="Pending Requests"
+            value={loadingRequests ? 0 : pendingCount}
+            icon={Clock}
             variant="warning"
           />
           <StatCard
@@ -240,174 +204,85 @@ export default function NGODashboard() {
           />
         </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Incoming Requests */}
+        <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
+          <h3 className="font-semibold mb-4">Incoming Requests</h3>
 
-          {/* Left */}
-          <div className="lg:col-span-2 space-y-6">
+          {loadingRequests && (
+            <p className="text-sm text-white/60">Loading requests...</p>
+          )}
 
-            {/* Disasters */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <div className="flex justify-between mb-4">
-                <h3 className="font-semibold">Active Disasters</h3>
+          {requestError && (
+            <p className="text-sm text-red-400">{requestError}</p>
+          )}
 
-                <Link href="/ngo/disasters">
-                  <Button variant="ghost" size="sm">
-                    View All
-                  </Button>
-                </Link>
-              </div>
+          {!loadingRequests && reliefRequests.length === 0 && (
+            <p className="text-sm text-white/60">No incoming requests</p>
+          )}
 
-              <div className="space-y-3">
-                {loading ? (
-                  <p className="text-white/70">Loading disasters...</p>
-                ) : disasters.length === 0 ? (
-                  <p className="text-white/70">No disasters found</p>
-                ) : (
-                  disasters.slice(0, 3).map((disaster) => (
-                    <DisasterCard key={disaster.id} {...disaster} />
-                  ))
-                )}
-              </div>
-            </div>
+          <div className="space-y-2">
+            {reliefRequests.map((r) => (
+              <div
+                key={r.id}
+                className="p-3 rounded-lg hover:bg-white/10 transition flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-medium">
+                    {r.disaster?.type || "Relief Request"}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {r.disaster?.location || "Unknown location"}
+                  </p>
+                </div>
 
-            {/* Task Notifications */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <div className="flex justify-between mb-4">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Task Notifications
-                </h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/70">
-                    {tasks.filter((t) => t.status === "PENDING").length} pending
+                  <span className="text-xs text-white/60">
+                    {new Date(r.createdAt).toLocaleString()}
                   </span>
-                  <Link href="/ngo/requests">
-                    <Button variant="ghost" size="sm">
-                      View All
-                    </Button>
-                  </Link>
+
+                  {r.status === "PENDING" && (
+                    <>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        disabled={actionLoadingId === r.requestedById}
+                        onClick={() =>
+                          respondToRequest(r.requestedById, "APPROVED")
+                        }
+                      >
+                        Accept
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={actionLoadingId === r.requestedById}
+                        onClick={() =>
+                          respondToRequest(r.requestedById, "REJECTED")
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
+
+                  {r.status === "APPROVED" && (
+                    <span className="text-green-400 text-sm font-medium">
+                      Approved
+                    </span>
+                  )}
+
+                  {r.status === "REJECTED" && (
+                    <span className="text-red-400 text-sm font-medium">
+                      Rejected
+                    </span>
+                  )}
                 </div>
               </div>
-
-              <div className="space-y-3">
-                {tasks.length === 0 ? (
-                  <p className="text-white/70">No task assignments</p>
-                ) : (
-                  tasks.map((task) => (
-                    <div key={task.id} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{task.title}</h4>
-                          <p className="text-sm text-white/70 mb-2">{task.description}</p>
-                          <div className="flex items-center gap-4 text-sm">
-                            <span className={`font-medium ${getPriorityColor(task.priority)}`}>
-                              {task.priority} Priority
-                            </span>
-                            {task.disaster && (
-                              <span className="text-white/50">
-                                • Disaster: {task.disaster.name}
-                              </span>
-                            )}
-                          </div>
-                          {task.requestedBy && (
-                            <p className="text-xs text-white/50">
-                              From: {task.requestedBy.name} ({task.government.name})
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(task.status)}
-                          <span className="text-sm font-medium">{task.status}</span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons for PENDING tasks */}
-                      {task.status === "PENDING" && (
-                        <div className="flex gap-2 mt-3">
-                          <Button
-                            size="sm"
-                            onClick={() => handleRespondToTask(task.id, "ACCEPTED")}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRespondToTask(task.id, "REJECTED")}
-                            className="border-red-600 text-red-400 hover:bg-red-600/10"
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Reject
-                          </Button>
-                        </div>
-                      )}
-
-                      {/* Response info for COMPLETED tasks */}
-                      {task.status !== "PENDING" && task.respondedAt && (
-                        <div className="mt-3 p-3 rounded bg-white/10 border border-white/20">
-                          <p className="text-xs text-white/60">
-                            Responded {new Date(task.respondedAt).toLocaleString()}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right */}
-          <div className="space-y-6">
-
-            {/* Quick Actions */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <h3 className="font-semibold mb-4">Quick Actions</h3>
-
-              <div className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  <Truck className="h-4 w-4 mr-2" />
-                  Deploy Resources
-                </Button>
-
-                <Button className="w-full justify-start" variant="outline">
-                  <Users className="h-4 w-4 mr-2" />
-                  Manage Volunteers
-                </Button>
-
-                <Button className="w-full justify-start" variant="outline">
-                  <Package className="h-4 w-4 mr-2" />
-                  Request Supplies
-                </Button>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <h3 className="font-semibold mb-4">Recent Activity</h3>
-
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <Truck className="h-4 w-4 text-green-400 inline mr-2" />
-                  Resource deployment completed
-                </div>
-
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <Heart className="h-4 w-4 text-blue-400 inline mr-2" />
-                  50 volunteers registered
-                </div>
-
-                <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                  <Package className="h-4 w-4 text-yellow-400 inline mr-2" />
-                  Supply request approved
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );
