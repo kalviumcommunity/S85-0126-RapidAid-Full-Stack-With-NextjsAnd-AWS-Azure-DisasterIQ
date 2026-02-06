@@ -1,35 +1,27 @@
-// Authenticated fetch helper that automatically includes JWT token
+// Authenticated fetch helper that automatically includes cookies
 export interface AuthFetchOptions extends RequestInit {
   // Allow any additional fetch options
 }
 
 export async function authFetch(url: string, options: AuthFetchOptions = {}): Promise<Response> {
-  // Get token from localStorage
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  
   // Prepare headers
   const headers = new Headers(options.headers);
-  
-  // Add Authorization header if token exists
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
   
   // Add Content-Type if not already set and we have a body
   if (options.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
   
-  // Make the fetch request with auth headers
+  // Make fetch request with credentials to include cookies
   const response = await fetch(url, {
     ...options,
     headers,
+    credentials: 'include',
   });
   
-  // Handle 401 Unauthorized - clear token and redirect to login
+  // Handle 401 Unauthorized - redirect to login
   if (response.status === 401) {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
       window.location.href = '/pages/login';
     }
   }

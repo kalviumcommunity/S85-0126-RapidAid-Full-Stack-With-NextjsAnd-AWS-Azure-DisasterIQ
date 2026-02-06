@@ -87,8 +87,17 @@ export async function POST(req: Request) {
   });
 
   const response = NextResponse.json({
-    accessToken,
-    role,
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      role,
+      governmentId: user.governmentId,
+      ngoId: user.ngoId,
+      policeId: user.policeId,
+      hospitalId: user.hospitalId,
+      state,
+    },
     redirect:
       user.governmentId
         ? "/government"
@@ -101,9 +110,19 @@ export async function POST(req: Request) {
         : "/user/home",
   });
 
+  // Set JWT token in HttpOnly cookie
+  response.cookies.set("token", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  });
+
+  // Set refresh token in HttpOnly cookie
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/auth/refresh",
     maxAge: 7 * 24 * 60 * 60,
