@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import {
   AlertTriangle,
@@ -12,6 +13,7 @@ import {
   CheckCircle,
   Clock,
   MapPin,
+  XCircle,
 } from "lucide-react";
 
 import { DashboardLayout } from "@/app/components/DashboardLayout";
@@ -19,84 +21,119 @@ import { StatCard } from "@/app/components/StatCart";
 import { StatusBadge } from "@/app/components/StatusBadge";
 import { Button } from "@/app/components/ui/button";
 
-/* ===================== DUMMY DATA ===================== */
+/* ===================== TYPES ===================== */
 
-const assignedDisasters = [
-  {
-    id: "1",
-    title: "Flash Floods in Valley Region",
-    location: "Northern Valley District",
-    severity: "critical",
-    distance: "12 km",
-    requestsCount: 45,
-  },
-  {
-    id: "2",
-    title: "Landslide Warning - Hill Areas",
-    location: "Eastern Hills",
-    severity: "warning",
-    distance: "28 km",
-    requestsCount: 12,
-  },
-];
-
-const reliefRequests = [
-  {
-    id: "1",
-    type: "Medical",
-    location: "Block A, Valley",
-    urgency: "critical",
-    time: "10 min ago",
-  },
-  {
-    id: "2",
-    type: "Food",
-    location: "Block C, Valley",
-    urgency: "warning",
-    time: "25 min ago",
-  },
-  {
-    id: "3",
-    type: "Shelter",
-    location: "Block B, Valley",
-    urgency: "warning",
-    time: "1 hour ago",
-  },
-  {
-    id: "4",
-    type: "Rescue",
-    location: "Block D, Valley",
-    urgency: "critical",
-    time: "2 hours ago",
-  },
-];
-
-const resources = [
-  { name: "Medical Beds", available: 45, total: 60 },
-  { name: "Food Packets", available: 2500, total: 5000 },
-  { name: "Medicine Kits", available: 120, total: 200 },
-  { name: "Vehicles", available: 8, total: 12 },
-  { name: "Volunteers", available: 85, total: 120 },
-];
+type ReliefRequest = {
+  id: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  requestedById: string;
+  respondedAt?: string | null;
+  disaster?: {
+    type?: string;
+    location?: string;
+  };
+};
 
 /* ===================== COMPONENT ===================== */
 
 export default function ResponderDashboard() {
   const router = useRouter();
 
-  /* ===================== BUTTON HANDLERS ===================== */
+  const [reliefRequests, setReliefRequests] = useState<ReliefRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  const handleUpdateResources = () => {
-    router.push("/responder/resources");
+  /* ===================== FETCH NGO REQUESTS ===================== */
+
+  useEffect(() => {
+    const fetchNgoRequests = async () => {
+      try {
+        setLoadingRequests(true);
+        setRequestError(null);
+
+        const res = await fetch(
+          "http://localhost:3000/Api/ngoRequest/ngo/[ngoId]",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json.message || "Failed to fetch NGO requests");
+        }
+
+        setReliefRequests(json.data);
+      } catch (err: any) {
+        setRequestError(err.message);
+      } finally {
+        setLoadingRequests(false);
+      }
+    };
+
+    fetchNgoRequests();
+  }, []);
+
+  /* ===================== RESPOND HANDLER ===================== */
+
+  const respondToRequest = async (
+    requestedById: string,
+    status: "APPROVED" | "REJECTED"
+  ) => {
+    try {
+      setActionLoadingId(requestedById);
+
+      const res = await fetch(
+        "http://localhost:3000/Api/ngoRequest/respond",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            requestedById,
+            status,
+          }),
+        }
+      );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.message || "Failed to respond to request");
+      }
+
+      // ✅ Optimistic UI update
+      setReliefRequests((prev) =>
+        prev.map((req) =>
+          req.requestedById === requestedById
+            ? {
+                ...req,
+                status,
+                respondedAt: new Date().toISOString(),
+              }
+            : req
+        )
+      );
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setActionLoadingId(null);
+    }
   };
 
-  const handleEdit = () => {
-    alert("Edit feature coming soon!");
-  };
+  /* ===================== DERIVED DATA ===================== */
 
-  const handleAcceptRequest = (id: string) => {
-    alert(`Request ${id} accepted (backend integration coming next)`);
-  };
+  const pendingCount = reliefRequests.filter(
+    (r) => r.status === "PENDING"
+  ).length;
+
+  /* ===================== UI ===================== */
 
   return (
     <DashboardLayout role="responder" userName="Relief Coordinator">
@@ -113,7 +150,7 @@ export default function ResponderDashboard() {
 
           <Button
             className="bg-blue-600 hover:bg-blue-700"
-            onClick={handleUpdateResources}
+            onClick={() => router.push("/responder/resources")}
           >
             <Package className="h-4 w-4 mr-2" />
             Update Resources
@@ -137,9 +174,7 @@ export default function ResponderDashboard() {
             </p>
           </div>
 
-          <Button variant="outline" onClick={handleEdit}>
-            Edit
-          </Button>
+          <Button variant="outline">Edit</Button>
         </div>
 
         {/* Stats */}
@@ -152,7 +187,7 @@ export default function ResponderDashboard() {
           />
           <StatCard
             title="Pending Requests"
-            value={23}
+            value={loadingRequests ? 0 : pendingCount}
             icon={Clock}
             variant="warning"
           />
@@ -170,137 +205,85 @@ export default function ResponderDashboard() {
           />
         </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Incoming Requests */}
+        <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
+          <h3 className="font-semibold mb-4">Incoming Requests</h3>
 
-          {/* Left */}
-          <div className="lg:col-span-2 space-y-6">
+          {loadingRequests && (
+            <p className="text-sm text-white/60">Loading requests...</p>
+          )}
 
-            {/* Assigned Disasters */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <div className="flex justify-between mb-4">
-                <h3 className="font-semibold">Assigned Disasters</h3>
+          {requestError && (
+            <p className="text-sm text-red-400">{requestError}</p>
+          )}
 
-                <Link href="/responder/disasters">
-                  <Button variant="ghost" size="sm">
-                    View All
-                  </Button>
-                </Link>
-              </div>
+          {!loadingRequests && reliefRequests.length === 0 && (
+            <p className="text-sm text-white/60">No incoming requests</p>
+          )}
 
-              <div className="space-y-3">
-                {assignedDisasters.map((d) => (
-                  <div
-                    key={d.id}
-                    className="p-4 rounded-lg border border-white/10 bg-white/5 flex justify-between"
-                  >
-                    <div>
-                      <p className="font-medium">{d.title}</p>
-                      <div className="flex items-center gap-3 text-sm text-white/70 mt-1">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {d.location}
-                        </span>
-                        <span>{d.distance} away</span>
-                      </div>
-                    </div>
+          <div className="space-y-2">
+            {reliefRequests.map((r) => (
+              <div
+                key={r.id}
+                className="p-3 rounded-lg hover:bg-white/10 transition flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-medium">
+                    {r.disaster?.type || "Relief Request"}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {r.disaster?.location || "Unknown location"}
+                  </p>
+                </div>
 
-                    <div className="text-right">
-                      <p className="text-lg font-bold">{d.requestsCount}</p>
-                      <p className="text-xs text-white/60">pending</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/60">
+                    {new Date(r.createdAt).toLocaleString()}
+                  </span>
 
-            {/* Relief Requests */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <h3 className="font-semibold mb-4">Incoming Requests</h3>
-
-              <div className="space-y-2">
-                {reliefRequests.map((r) => (
-                  <div
-                    key={r.id}
-                    className="p-3 rounded-lg hover:bg-white/10 transition flex justify-between"
-                  >
-                    <div>
-                      <p className="font-medium">{r.type}</p>
-                      <p className="text-xs text-white/60">{r.location}</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-white/60">{r.time}</span>
-
+                  {r.status === "PENDING" && (
+                    <>
                       <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700"
-                        onClick={() => handleAcceptRequest(r.id)}
+                        disabled={actionLoadingId === r.requestedById}
+                        onClick={() =>
+                          respondToRequest(r.requestedById, "APPROVED")
+                        }
                       >
                         Accept
                       </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Right */}
-          <div className="space-y-6">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={actionLoadingId === r.requestedById}
+                        onClick={() =>
+                          respondToRequest(r.requestedById, "REJECTED")
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
 
-            {/* Resources */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <h3 className="font-semibold mb-4">Resources</h3>
+                  {r.status === "APPROVED" && (
+                    <span className="text-green-400 text-sm font-medium">
+                      Approved
+                    </span>
+                  )}
 
-              <div className="space-y-4">
-                {resources.map((r) => {
-                  const percent = (r.available / r.total) * 100;
-
-                  return (
-                    <div key={r.name}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>{r.name}</span>
-                        <span className="text-white/60">
-                          {r.available}/{r.total}
-                        </span>
-                      </div>
-
-                      <div className="h-2 bg-white/10 rounded-full">
-                        <div
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Operations */}
-            <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
-              <h3 className="font-semibold mb-4">Ongoing Operations</h3>
-
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <Truck className="h-4 w-4 text-green-400 inline mr-2" />
-                  Food Distribution
-                </div>
-
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <Heart className="h-4 w-4 text-blue-400 inline mr-2" />
-                  Medical Camp
-                </div>
-
-                <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                  <Users className="h-4 w-4 text-yellow-400 inline mr-2" />
-                  Evacuation Support
+                  {r.status === "REJECTED" && (
+                    <span className="text-red-400 text-sm font-medium">
+                      Rejected
+                    </span>
+                  )}
                 </div>
               </div>
-            </div>
-
+            ))}
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );
