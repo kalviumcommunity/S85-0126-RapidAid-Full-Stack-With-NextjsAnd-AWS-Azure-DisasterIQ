@@ -34,12 +34,20 @@ export default function AdminAuthPage() {
         }
       );
 
-      const data = await response.json();
-
       if (!response.ok) {
-        setError(data.message || "Authentication failed");
+        // Try to parse error message, but don't fail if it's not JSON
+        let errorMessage = "Authentication failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || "Authentication failed";
+        } catch {
+          // If parsing fails, use default error message
+        }
+        setError(errorMessage);
         return;
       }
+
+      const data = await response.json();
 
       // ✅ SUCCESS FLOW
       if (isSignup) {

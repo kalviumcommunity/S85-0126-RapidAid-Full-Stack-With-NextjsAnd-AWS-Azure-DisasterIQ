@@ -6,16 +6,58 @@ import { useState } from "react";
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleLogin() {
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setLoading(true);
+    setError("");
 
-    // mock auth (for routing demo)
-    document.cookie = "token=mock.jwt.token; path=/";
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 800);
+    try {
+      const response = await fetch("/Api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        // Try to parse error message, but don't fail if it's not JSON
+        let errorMessage = "Login failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || "Login failed";
+        } catch {
+          // If parsing fails, use default error message
+        }
+        setError(errorMessage);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Store JWT token and role in localStorage
+      if (data.accessToken) {
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("role", data.role || "user");
+        
+        // Redirect based on user role or use the provided redirect
+        const redirectUrl = data.redirect || "/dashboard";
+        router.push(redirectUrl);
+      } else {
+        setError("No token received from server");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -28,14 +70,22 @@ export default function LoginPage() {
           Login to access the dashboard
         </p>
 
-        <div className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           <div>
             <label className="mb-1 block text-sm font-medium">
               Email
             </label>
             <input
               type="email"
+              name="email"
               placeholder="user@example.com"
+              required
               className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -46,23 +96,21 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
+              name="password"
               placeholder="••••••••"
+              required
               className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <button
-            onClick={handleLogin}
+            type="submit"
             disabled={loading}
             className="w-full rounded-md bg-primary py-2 font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-        </div>
-
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Demo login – no real authentication
-        </p>
+        </form>
       </div>
     </div>
   );

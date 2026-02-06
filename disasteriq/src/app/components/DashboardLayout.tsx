@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -30,7 +30,7 @@ interface NavItem {
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  role: "admin" | "government" | "responder" | "public";
+  role: "admin" | "government" | "responder" | "ngo" | "hospital" | "public";
   userName?: string;
 }
 
@@ -61,13 +61,31 @@ government: [
     { label: "Resources", href: "/responder/resources", icon: Shield },
     { label: "Operations", href: "/responder/operations", icon: Building2 },
   ],
-  public: [],
+  ngo: [
+    { label: "Dashboard", href: "/ngo", icon: LayoutDashboard },
+    { label: "Disasters", href: "/ngo/disasters", icon: AlertTriangle },
+    { label: "Resources", href: "/ngo/resources", icon: Shield },
+    { label: "Requests", href: "/ngo/requests", icon: FileText },
+  ],
+  hospital: [
+    { label: "Dashboard", href: "/hospital", icon: LayoutDashboard },
+    { label: "Disasters", href: "/hospital/disasters", icon: AlertTriangle },
+    { label: "Emergency", href: "/hospital/emergency", icon: Bell },
+    { label: "Resources", href: "/hospital/resources", icon: Shield },
+  ],
+  public: [
+    { label: "Dashboard", href: "/public", icon: LayoutDashboard },
+    { label: "Alerts", href: "/public/alerts", icon: AlertTriangle },
+    { label: "Request Help", href: "/public/request", icon: FileText },
+  ],
 };
 
 const roleLabels = {
   admin: "Administrator",
   government: "Government Authority",
   responder: "NGO / Hospital",
+  ngo: "NGO Organization",
+  hospital: "Hospital Authority",
   public: "Public User",
 };
 
@@ -80,7 +98,14 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
   const items = navItems[role];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    router.push("/pages/login");
+  };
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
@@ -159,6 +184,7 @@ export function DashboardLayout({
             <Button
               variant="ghost"
               className="w-full mt-3 justify-start text-white/80 hover:text-white"
+              onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
