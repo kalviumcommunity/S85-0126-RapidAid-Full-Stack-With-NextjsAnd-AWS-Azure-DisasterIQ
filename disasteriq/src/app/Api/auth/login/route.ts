@@ -49,34 +49,15 @@ export async function POST(req: Request) {
   }
 
   // -------------------------
-  // FETCH STATE INFO
-  // -------------------------
-  let governmentState: string | undefined;
-  let state: string | undefined;
-
-  if (role === "GOVERNMENT_ADMIN" && user.governmentId) {
-    const government = await GovernmentRepository.findById(user.governmentId);
-   governmentState = government?.state ?? undefined;
-    state = governmentState;
-  }
-
-  if (user.ngoId) {
-    const ngo = await prisma.nGO.findUnique({ where: { id: user.ngoId } });
-    if (ngo?.state) state = ngo.state;
-  }
-
-  // -------------------------
-  // JWTs
+  // JWT PAYLOAD (LEAN)
   // -------------------------
   const accessToken = generateAccessToken({
     userId: user.id,
     role,
-    governmentId: user.governmentId,
-    governmentState,
-    policeId: user.policeId,
     ngoId: user.ngoId,
+    governmentId: user.governmentId,
+    policeId: user.policeId,
     hospitalId: user.hospitalId,
-    state,
   });
 
   const refreshToken = generateRefreshToken({
@@ -100,20 +81,20 @@ export async function POST(req: Request) {
         : "/user/home",
   });
 
-  // ✅ ACCESS TOKEN COOKIE
+  // ✅ ACCESS TOKEN COOKIE (MATCHES MIDDLEWARE)
   response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/",
-    maxAge: 15 * 60, // 15 minutes
+    maxAge: 15 * 60, // 15 min
   });
 
   // ✅ REFRESH TOKEN COOKIE
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/api/auth/refresh",
     maxAge: 7 * 24 * 60 * 60,
   });

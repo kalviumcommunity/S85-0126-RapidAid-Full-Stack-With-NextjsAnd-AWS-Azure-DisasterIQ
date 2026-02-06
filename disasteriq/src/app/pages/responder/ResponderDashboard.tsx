@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -18,7 +18,7 @@ import {
 
 import { DashboardLayout } from "@/app/components/DashboardLayout";
 import { StatCard } from "@/app/components/StatCart";
-import { DisasterCard } from "@/app/components/DisasterCart";
+import { StatusBadge } from "@/app/components/StatusBadge";
 import { Button } from "@/app/components/ui/button";
 
 /* ===================== TYPES ===================== */
@@ -136,15 +136,15 @@ export default function ResponderDashboard() {
   /* ===================== UI ===================== */
 
   return (
-    <DashboardLayout role="ngo" userName="NGO Coordinator">
+    <DashboardLayout role="responder" userName="Relief Coordinator">
       <div className="space-y-8 text-white">
 
         {/* Header */}
         <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">NGO Dashboard</h1>
+            <h1 className="text-2xl font-semibold">Responder Dashboard</h1>
             <p className="text-sm text-white/70">
-              Coordinate relief efforts and resource management
+              Manage relief operations and resource deployment
             </p>
           </div>
 
@@ -153,7 +153,7 @@ export default function ResponderDashboard() {
             onClick={() => router.push("/responder/resources")}
           >
             <Package className="h-4 w-4 mr-2" />
-            Request Resources
+            Update Resources
           </Button>
         </div>
 
@@ -165,11 +165,12 @@ export default function ResponderDashboard() {
 
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold">Relief Foundation</h2>
+              <h2 className="font-semibold">Red Cross Regional Chapter</h2>
+              <StatusBadge status="success" label="Verified" />
             </div>
 
             <p className="text-sm text-white/70">
-              NGO • Active since 2018 • 85 volunteers
+              NGO • Active since 2015 • 120 volunteers
             </p>
           </div>
 
@@ -179,8 +180,8 @@ export default function ResponderDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Active Disasters"
-            value={disasters.filter((d) => d.status === "active").length}
+            title="Active Operations"
+            value={4}
             icon={AlertTriangle}
             variant="critical"
           />
@@ -191,9 +192,9 @@ export default function ResponderDashboard() {
             variant="warning"
           />
           <StatCard
-            title="Resources Available"
-            value={2500}
-            icon={Package}
+            title="Completed Today"
+            value={47}
+            icon={CheckCircle}
             variant="success"
           />
           <StatCard
