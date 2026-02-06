@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 import { GovernmentRepository } from "@/app/repositories/government.repository";
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
@@ -11,37 +12,19 @@ interface JwtPayload {
   hospitalId?: string;
   policeId?: string;
   governmentId?: string;
-  governmentState:string
+  governmentState:string;
 }
 
-export async function authMiddleware(req: NextRequest) {
-  let token: string | undefined;
-
-  // -------------------------
-  // TOKEN FROM HEADER
-  // -------------------------
-  const authHeader = req.headers.get("authorization");
-  console.log("Raw auth header:", authHeader);
-  
-  if (authHeader?.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-    console.log("Token extracted, length:", token?.length);
-  }
-
+export async function authMiddleware() {
   // -------------------------
   // TOKEN FROM COOKIE
   // -------------------------
-  if (!token) {
-    token = req.cookies.get("accessToken")?.value;
-    console.log("Token from cookie, length:", token?.length);
-  }
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   if (!token) {
     throw new Error("NO_TOKEN");
   }
-
-  console.log("Token starts with:", token.substring(0, 20));
-  console.log("Token ends with:", token.substring(token.length - 20));
 
   try {
     const decoded = jwt.verify(

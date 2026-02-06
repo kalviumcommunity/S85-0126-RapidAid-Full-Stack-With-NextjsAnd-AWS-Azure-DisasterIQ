@@ -14,8 +14,9 @@ import {
 
 type NGORequest = {
   id: string;
-  disasterId: string;
   ngoId: string;
+  governmentId: string;
+  requestedById: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
   respondedAt?: string;
@@ -27,11 +28,6 @@ type NGORequest = {
     severity: number;
     reportedAt: string;
   };
-  government?: {
-    id: string;
-    name: string;
-    state: string;
-  };
 };
 
 export default function NGORequestsPage() {
@@ -39,26 +35,31 @@ export default function NGORequestsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const response = await authApi.get("/Api/ngoRequest/get");
-        if (response.ok) {
-          const data = await response.json();
-          setRequests(data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching requests:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  async function fetchRequests() {
+    try {
+      const res = await fetch("/api/ngoRequest/ngo/me", {
+        method: "GET",
+        credentials: "include"
+      });
 
-    fetchRequests();
-  }, []);
+      const data = await res.json();
+
+      if (data.success) {
+        setRequests(data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch NGO tasks", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchRequests();
+}, []);
 
   const handleRespondToRequest = async (requestId: string, status: "ACCEPTED" | "REJECTED") => {
     try {
-      const response = await authApi.patch(`/Api/ngoRequest/${requestId}/respond`, {
+      const response = await authApi.patch(`/api/ngoRequest/${requestId}/respond`, {
         status,
       });
 
@@ -66,10 +67,10 @@ export default function NGORequestsPage() {
         alert(`Request ${status.toLowerCase()} successfully!`);
         
         // Refresh requests
-        const requestsRes = await authApi.get("/Api/ngoRequest/get");
+        const requestsRes = await authApi.get("/api/ngoRequest/ngo/me");
         if (requestsRes.ok) {
           const requestsData = await requestsRes.json();
-          setRequests(requestsData.data || []);
+          setRequests(requestsData.data?.requests || []);
         }
       } else {
         const errorData = await response.json();
@@ -150,7 +151,7 @@ export default function NGORequestsPage() {
 
                       <div className="flex items-center gap-4 text-sm">
                         <span className="text-white/50">
-                          From: {request.government?.name || 'Government Agency'}
+                          Government Assignment
                         </span>
                         <span className="text-white/50">
                           {new Date(request.createdAt).toLocaleDateString()}

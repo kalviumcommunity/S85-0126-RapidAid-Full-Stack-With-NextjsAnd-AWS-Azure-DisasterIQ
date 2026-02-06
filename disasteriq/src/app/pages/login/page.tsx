@@ -18,12 +18,13 @@ export default function LoginPage() {
     const password = formData.get("password") as string;
 
     try {
-      const response = await fetch("/Api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -41,17 +42,12 @@ export default function LoginPage() {
 
       const data = await response.json();
 
-      // Store JWT token and role in localStorage
-      if (data.accessToken) {
-        localStorage.setItem("token", data.accessToken);
-        localStorage.setItem("role", data.role || "user");
-        
-        // Redirect based on user role or use the provided redirect
-        const redirectUrl = data.redirect || "/dashboard";
-        router.push(redirectUrl);
-      } else {
-        setError("No token received from server");
-      }
+      // Cookie is automatically set by the server
+      // No need to store token in localStorage anymore
+      
+      // Redirect based on user role or use provided redirect
+      const redirectUrl = data.redirect || "/dashboard";
+      router.push(redirectUrl);
     } catch (err) {
       setError("Network error. Please try again.");
       console.error("Login error:", err);
