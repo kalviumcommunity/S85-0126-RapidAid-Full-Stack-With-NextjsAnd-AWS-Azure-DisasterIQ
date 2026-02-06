@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useToast } from "@/app/hooks/use-toast";
+import { authApi } from "@/app/lib/authFetch";
 
 type MediaItem = {
   url: string;
@@ -156,11 +157,7 @@ export default function CreateDisasterForm() {
         )
       );
 
-      const res = await fetch("/Api/disasters/create", {
-        method: "POST",
-        credentials: "include", // 🔐 cookie auth
-        body: formData,
-      });
+      const res = await authApi.postFormData("/Api/disasters/create", formData);
 
       const data = await res.json();
 

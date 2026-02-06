@@ -22,21 +22,29 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        setError(data.message || "Login failed");
+        // Try to parse error message, but don't fail if it's not JSON
+        let errorMessage = "Login failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || "Login failed";
+        } catch {
+          // If parsing fails, use default error message
+        }
+        setError(errorMessage);
         return;
       }
 
-      // Store access token (short-lived)
-      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${
-        15 * 60
-      }; secure; samesite=strict`;
+      const data = await response.json();
+
+      // Store JWT token and role in localStorage
+      if (data.accessToken) {
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("role", data.role || "user");
+      }
 
       router.push(data.redirect);
     } catch (err) {

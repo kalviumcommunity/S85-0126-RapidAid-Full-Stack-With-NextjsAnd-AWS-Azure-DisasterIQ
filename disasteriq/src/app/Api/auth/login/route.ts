@@ -88,6 +88,7 @@ export async function POST(req: Request) {
 
   const response = NextResponse.json({
     accessToken,
+    role,
     redirect:
       user.governmentId
         ? "/government"

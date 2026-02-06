@@ -16,6 +16,7 @@ import { DashboardLayout } from "@/app/components/DashboardLayout";
 import { StatCard } from "@/app/components/StatCart";
 import { DisasterCard } from "@/app/components/DisasterCart";
 import { Button } from "@/app/components/ui/button";
+import { authApi } from "@/app/lib/authFetch";
 
 /* =========================
    TYPES (UI-SAFE)
@@ -57,7 +58,7 @@ export default function GovernmentDashboard() {
   useEffect(() => {
     const fetchDisasters = async () => {
       try {
-        const res = await fetch("/Api/disasters/get");
+        const res = await authApi.get("/Api/disasters/get");
         if (!res.ok) throw new Error("Failed to fetch disasters");
 
         const json = await res.json();

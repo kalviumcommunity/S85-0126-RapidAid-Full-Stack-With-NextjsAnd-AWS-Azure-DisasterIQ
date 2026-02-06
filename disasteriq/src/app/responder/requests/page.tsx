@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/app/components/DashboardLayout";
 import { Button } from "@/app/components/ui/button";
 import { MapPin, Clock, AlertTriangle } from "lucide-react";
+import { authApi } from "@/app/lib/authFetch";
 
 /* ===================== TYPES ===================== */
 
@@ -27,7 +28,7 @@ export default function Requests() {
   useEffect(() => {
     async function loadRequests() {
       try {
-        const res = await fetch("/Api/responder/requests");
+        const res = await authApi.get("/Api/responder/requests");
 
         if (!res.ok) {
           throw new Error("Failed to fetch requests");
@@ -47,7 +48,7 @@ export default function Requests() {
 
   /* ===================== ACCEPT REQUEST ===================== */
 
-  async function handleAccept(id: string) {
+  async function handleAccept(_id: string) {
     alert("Accept request backend will be added next!");
 
     // Later you will do:
