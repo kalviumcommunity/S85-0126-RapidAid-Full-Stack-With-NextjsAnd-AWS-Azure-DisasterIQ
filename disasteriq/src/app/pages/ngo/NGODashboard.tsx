@@ -38,25 +38,15 @@ type Disaster = {
 
 type TaskRequest = {
   id: string;
-  title: string;
-  description: string;
-  priority: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   disaster?: {
     id: string;
     name: string;
     type: string;
   };
-  government: {
-    id: string;
-    name: string;
-    state: string;
-  };
-  requestedBy: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  ngoId: string;
+  governmentId: string;
+  requestedById: string;
   createdAt: string;
   respondedAt?: string;
 };
@@ -87,41 +77,26 @@ export default function NGODashboard() {
   /* ===================== FETCH DATA ===================== */
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchTasks() {
       try {
-        // Fetch disasters
-        const disastersRes = await authApi.get("/Api/disasters/get");
-        if (disastersRes.ok) {
-          const disastersJson = await disastersRes.json();
+        const res = await fetch("/Api/ngoRequest/ngo/me", {
+          method: "GET",
+          credentials: "include"
+        });
 
-          const normalized: Disaster[] = disastersJson.data.map((d: any) => ({
-            id: d.id,
-            title: d.name,
-            type: d.type,
-            location: d.location,
-            severity: mapSeverity(d.severity),
-            status: mapStatus(d.status),
-            affectedCount: 0,
-            lastUpdate: new Date(d.reportedAt).toLocaleString(),
-          }));
+        const data = await res.json();
 
-          setDisasters(normalized);
-        }
-
-        // Fetch NGO tasks
-        const tasksRes = await authApi.get("/Api/ngo/tasks");
-        if (tasksRes.ok) {
-          const tasksJson = await tasksRes.json();
-          setTasks(tasksJson.data || []);
+        if (data.success) {
+          setTasks(data.data);
         }
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Failed to fetch NGO tasks", err);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchData();
+    fetchTasks();
   }, []);
 
   /* ===================== TASK HANDLERS ===================== */
@@ -136,10 +111,10 @@ export default function NGODashboard() {
         alert(`Task ${status.toLowerCase()} successfully!`);
         
         // Refresh tasks
-        const tasksRes = await authApi.get("/Api/ngo/tasks");
+        const tasksRes = await authApi.get("/api/ngoRequest/ngo/me");
         if (tasksRes.ok) {
           const tasksJson = await tasksRes.json();
-          setTasks(tasksJson.data || []);
+          setTasks(tasksJson.data?.requests || []);
         }
       } else {
         alert("Failed to respond to task");
@@ -147,15 +122,6 @@ export default function NGODashboard() {
     } catch (error) {
       console.error("Error responding to task:", error);
       alert("Error responding to task");
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "HIGH": return "text-red-400";
-      case "MEDIUM": return "text-yellow-400";
-      case "LOW": return "text-green-400";
-      default: return "text-gray-400";
     }
   };
 
@@ -291,71 +257,20 @@ export default function NGODashboard() {
               </div>
 
               <div className="space-y-3">
-                {tasks.length === 0 ? (
-                  <p className="text-white/70">No task assignments</p>
-                ) : (
-                  tasks.map((task) => (
-                    <div key={task.id} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{task.title}</h4>
-                          <p className="text-sm text-white/70 mb-2">{task.description}</p>
-                          <div className="flex items-center gap-4 text-sm">
-                            <span className={`font-medium ${getPriorityColor(task.priority)}`}>
-                              {task.priority} Priority
-                            </span>
-                            {task.disaster && (
-                              <span className="text-white/50">
-                                • Disaster: {task.disaster.name}
-                              </span>
-                            )}
-                          </div>
-                          {task.requestedBy && (
-                            <p className="text-xs text-white/50">
-                              From: {task.requestedBy.name} ({task.government.name})
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(task.status)}
-                          <span className="text-sm font-medium">{task.status}</span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons for PENDING tasks */}
-                      {task.status === "PENDING" && (
-                        <div className="flex gap-2 mt-3">
-                          <Button
-                            size="sm"
-                            onClick={() => handleRespondToTask(task.id, "ACCEPTED")}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRespondToTask(task.id, "REJECTED")}
-                            className="border-red-600 text-red-400 hover:bg-red-600/10"
-                          >
-                            <XCircle className="h-4 w-4 mr-2" />
-                            Reject
-                          </Button>
-                        </div>
-                      )}
-
-                      {/* Response info for COMPLETED tasks */}
-                      {task.status !== "PENDING" && task.respondedAt && (
-                        <div className="mt-3 p-3 rounded bg-white/10 border border-white/20">
-                          <p className="text-xs text-white/60">
-                            Responded {new Date(task.respondedAt).toLocaleString()}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ))
+                {loading && <p>Loading tasks...</p>}
+                
+                {!loading && tasks.length === 0 && (
+                  <p className="text-white/60">No assigned tasks yet</p>
                 )}
+                
+                {!loading && tasks.length > 0 && tasks.slice(0, 3).map(task => (
+                  <div key={task.id} className="p-3 rounded-lg bg-white/5">
+                    <p className="font-semibold">{task.disaster?.name || 'Disaster Assignment'}</p>
+                    <p className="text-sm text-white/70">
+                      Status: {task.status}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
