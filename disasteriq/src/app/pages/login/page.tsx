@@ -23,22 +23,38 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // 🔥 REQUIRED for HttpOnly cookies
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        setError(data.message || "Login failed");
+        // Try to parse error message, but don't fail if it's not JSON
+        let errorMessage = "Login failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || "Login failed";
+        } catch {
+          // If parsing fails, use default error message
+        }
+        setError(errorMessage);
         return;
       }
 
-      // ✅ Token is already stored in HttpOnly cookie by backend
-      router.push(data.redirect || "/dashboard");
+      const data = await response.json();
+
+      // Store JWT token and role in localStorage
+      if (data.accessToken) {
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("role", data.role || "user");
+        
+        // Redirect based on user role or use the provided redirect
+        const redirectUrl = data.redirect || "/dashboard";
+        router.push(redirectUrl);
+      } else {
+        setError("No token received from server");
+      }
     } catch (err) {
-      console.error("Login error:", err);
       setError("Network error. Please try again.");
+      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }
@@ -70,8 +86,7 @@ export default function LoginPage() {
               name="email"
               placeholder="user@example.com"
               required
-              disabled={loading}
-              className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+              className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -84,8 +99,7 @@ export default function LoginPage() {
               name="password"
               placeholder="••••••••"
               required
-              disabled={loading}
-              className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+              className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
