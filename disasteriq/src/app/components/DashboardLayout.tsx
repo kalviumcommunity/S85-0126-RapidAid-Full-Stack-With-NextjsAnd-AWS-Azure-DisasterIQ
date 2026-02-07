@@ -51,7 +51,6 @@ government: [
   { label: "Coordination", href: "/government/coordination", icon: Building2 },
   { label: "Resources", href: "/government/resources", icon: Shield },
   { label: "Reports", href: "/government/reports", icon: FileText },
-  // ✅ NEW NGO OPTION
   { label: "NGO", href: "/government/ngo", icon: Users },
 ],
 
