@@ -217,7 +217,7 @@ export default function NGODashboard() {
               <div className="flex justify-between mb-4">
                 <h3 className="font-semibold">Active Disasters</h3>
 
-                <Link href="/ngo/disasters">
+                <Link href="/responder/disasters">
                   <Button variant="ghost" size="sm">
                     View All
                   </Button>

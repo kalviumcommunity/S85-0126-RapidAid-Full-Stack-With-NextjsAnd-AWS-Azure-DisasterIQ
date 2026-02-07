@@ -1,113 +1,100 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
-
-    const formData = new FormData(event.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      // ✅ FIXED API PATH + COOKIE SUPPORT
+      const response = await fetch("/Api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
+        credentials: "include", // ✅ important
       });
 
       if (!response.ok) {
-        // Try to parse error message, but don't fail if it's not JSON
         let errorMessage = "Login failed";
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || "Login failed";
-        } catch {
-          // If parsing fails, use default error message
-        }
+        } catch {}
         setError(errorMessage);
         return;
       }
 
       const data = await response.json();
 
-      // Store JWT token and role in localStorage
+      // Optional localStorage (only if needed)
       if (data.accessToken) {
         localStorage.setItem("token", data.accessToken);
         localStorage.setItem("role", data.role || "user");
-        
-        // Redirect based on user role or use the provided redirect
-        const redirectUrl = data.redirect || "/dashboard";
-        router.push(redirectUrl);
-      } else {
-        setError("No token received from server");
       }
+
+      router.push(data.redirect || "/dashboard");
     } catch (err) {
-      setError("Network error. Please try again.");
-      console.error("Login error:", err);
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <div className="w-full max-w-sm rounded-xl border bg-card p-6 shadow">
-        <h1 className="mb-2 text-center text-2xl font-bold">
-          Welcome Back
-        </h1>
-        <p className="mb-6 text-center text-sm text-muted-foreground">
-          Login to access the dashboard
-        </p>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      <div className="w-full max-w-md rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-8 text-white">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Sign In</h1>
+          <p className="mt-2 text-sm text-white/70">
+            Access your DisasterRelief account
+          </p>
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+        {error && (
+          <p className="mb-4 rounded-lg bg-red-500/20 border border-red-500/40 px-4 py-2 text-sm text-red-300">
+            {error}
+          </p>
+        )}
 
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="user@example.com"
-              required
-              className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              required
-              className="w-full rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-primary py-2 font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-lg bg-blue-600 py-2.5 font-medium hover:bg-blue-700 transition disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
