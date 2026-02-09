@@ -2,41 +2,28 @@ import { prisma } from "@/app/prisma/prisma";
 import { hashPassword } from "@/app/lib/password";
 import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    // ------------------------
-    // AUTHORIZATION
-    // ------------------------
-   const h = await headers();
-
-    const userId = h.get("x-user-id");
-    const role = h.get("x-user-role");
-
-    if (!userId || !role) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    if (role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { message: "Forbidden: Insufficient permissions" },
-        { status: 403 }
-      );
-    }
-
-    // ------------------------
-    // PARSE BODY
-    // ------------------------
     const body = await req.json();
-    const { government, user } = body ?? {};
+    const { government, user } = body;
 
-    if (!government || !user || !user.password) {
+    // ------------------------
+    // REQUIRED FIELD VALIDATION
+    // ------------------------
+    if (
+      !government?.name ||
+      !government?.level ||
+      !government?.department ||
+      !government?.contactEmail ||
+      !government?.contactPhone ||
+      !user?.email ||
+      !user?.password
+    ) {
       return NextResponse.json(
-        { message: "Invalid request body" },
+        { message: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -54,9 +41,7 @@ export async function POST(req: Request) {
         ? sanitizeInput(government.district)
         : null,
       department: sanitizeInput(government.department),
-      contactEmail: sanitizeInput(
-        government.contactEmail
-      ).toLowerCase(),
+      contactEmail: sanitizeInput(government.contactEmail).toLowerCase(),
       contactPhone: sanitizeInput(government.contactPhone),
     };
 
@@ -66,14 +51,12 @@ export async function POST(req: Request) {
     };
 
     // ------------------------
-    // CHECK EXISTING
+    // CHECK DUPLICATES
     // ------------------------
     const [existingGovernment, existingUser] =
       await Promise.all([
         prisma.government.findUnique({
-          where: {
-            contactEmail: cleanGovernment.contactEmail,
-          },
+          where: { contactEmail: cleanGovernment.contactEmail },
         }),
         prisma.user.findUnique({
           where: { email: cleanUser.email },
@@ -99,47 +82,42 @@ export async function POST(req: Request) {
     // ------------------------
     const passwordHash = await hashPassword(user.password);
 
-    const result = await prisma.$transaction(
-      async (tx) => {
-        const createdGovernment =
-          await tx.government.create({
-            data: cleanGovernment,
-          });
+    const result = await prisma.$transaction(async (tx) => {
+      const createdGovernment = await tx.government.create({
+        data: cleanGovernment,
+      });
 
-        const createdUser = await tx.user.create({
-          data: {
-            ...cleanUser,
-            passwordHash,
-            governmentId: createdGovernment.id,
-            roles: {
-              create: {
-                role: {
-                  connect: {
-                    name: "GOVERNMENT_ADMIN",
-                  },
-                },
+      const createdUser = await tx.user.create({
+        data: {
+          ...cleanUser,
+          passwordHash,
+          governmentId: createdGovernment.id,
+          roles: {
+            create: {
+              role: {
+                connect: { name: "GOVERNMENT_ADMIN" },
               },
             },
           },
-        });
+        },
+      });
 
-        return { createdGovernment, createdUser };
-      }
-    );
+      return { createdGovernment, createdUser };
+    });
 
     // ------------------------
     // RESPONSE
     // ------------------------
     return NextResponse.json(
       {
-        message: "Government created successfully",
+        message: "Government registered successfully",
         governmentId: result.createdGovernment.id,
         userId: result.createdUser.id,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Create government error:", error);
+    console.error("Government signup error:", error);
 
     return NextResponse.json(
       { message: "Internal server error" },

@@ -8,34 +8,31 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  email        String   @unique
-  phone        String?
-  state        String?  
-  passwordHash String
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  governmentId String?  @db.Uuid
-  policeId     String?  @db.Uuid
-  ngoId        String?  @db.Uuid
-  hospitalId   String?  @db.Uuid
- volunteer Volunteer?
-  auditLogs        AuditLog[]
-  createdReports   MedicalReport[]
-  createdResources Resource[]
-  createdShelters  Shelter[]
-
-  government Government? @relation(fields: [governmentId], references: [id])
-  hospital   Hospital?   @relation(fields: [hospitalId], references: [id])
-  ngo        NGO?        @relation(fields: [ngoId], references: [id])
-  police     Police?     @relation(fields: [policeId], references: [id])
-
-  roles UserRole[]
-
-  ngoRequestsSent NGORequest[] // ✅ ADD THIS
+  id                     String                  @id @default(uuid()) @db.Uuid
+  name                   String
+  email                  String                  @unique
+  phone                  String?
+  passwordHash           String
+  isActive               Boolean                 @default(true)
+  createdAt              DateTime                @default(now())
+  governmentId           String?                 @db.Uuid
+  policeId               String?                 @db.Uuid
+  ngoId                  String?                 @db.Uuid
+  hospitalId             String?                 @db.Uuid
+  state                  String?
+  auditLogs              AuditLog[]
+  createdReports         MedicalReport[]
+  ngoRequestsSent        NGORequest[]
+  createdResources       Resource[]
+  approvedRoleRequests   RolePreferenceRequest[] @relation("ApprovedRoleRequests")
   rolePreferenceRequests RolePreferenceRequest[]
-  approvedRoleRequests RolePreferenceRequest[] @relation("ApprovedRoleRequests")
+  createdShelters        Shelter[]
+  government             Government?             @relation(fields: [governmentId], references: [id])
+  hospital               Hospital?               @relation(fields: [hospitalId], references: [id])
+  ngo                    NGO?                    @relation(fields: [ngoId], references: [id])
+  police                 Police?                 @relation(fields: [policeId], references: [id])
+  roles                  UserRole[]
+  volunteer              Volunteer?
 
   @@index([createdAt])
   @@index([governmentId])
@@ -65,20 +62,19 @@ model UserRole {
 }
 
 model Government {
-  id           String   @id @default(uuid()) @db.Uuid
+  id           String       @id @default(uuid()) @db.Uuid
   name         String
   level        String
   state        String?
   district     String?
   department   String
-  contactEmail String   @unique
+  contactEmail String       @unique
   contactPhone String
-  createdAt    DateTime @default(now())
-
-  disasters   Disaster[]
-  media       Media[]
-  users       User[]
-  ngoRequests NGORequest[] // ✅ ADD THIS
+  createdAt    DateTime     @default(now())
+  disasters    Disaster[]
+  media        Media[]
+  ngoRequests  NGORequest[]
+  users        User[]
 
   @@index([createdAt])
   @@map("government")
@@ -102,18 +98,18 @@ model Police {
 }
 
 model NGO {
-  id                 String       @id @default(uuid()) @db.Uuid
-  name               String
-  registrationNumber String       @unique
-  state              String
-  focusArea          String
-  contactEmail       String
-  contactPhone       String
-  createdAt          DateTime     @default(now())
-  users              User[]
-  requests           NGORequest[]
-  volunteers         Volunteer[]
+  id                     String                  @id @default(uuid()) @db.Uuid
+  name                   String
+  registrationNumber     String                  @unique
+  state                  String
+  focusArea              String
+  contactEmail           String
+  contactPhone           String
+  createdAt              DateTime                @default(now())
+  requests               NGORequest[]
   rolePreferenceRequests RolePreferenceRequest[]
+  users                  User[]
+  volunteers             Volunteer[]
 
   @@index([createdAt])
   @@index([state])
@@ -152,10 +148,10 @@ model Disaster {
   government   Government           @relation(fields: [governmentId], references: [id])
   metrics      DisasterMetric?
   media        Media[]
+  ngoRequests  NGORequest[]
   assignments  RescueAssignment[]
   resources    ResourceAllocation[]
   victims      Victim[]
-  ngoRequests  NGORequest[]
 
   @@index([governmentId])
   @@index([status])
@@ -165,24 +161,20 @@ model Disaster {
 }
 
 model NGORequest {
-  id String @id @default(uuid()) @db.Uuid
-
-  disasterId   String @db.Uuid
-  ngoId        String @db.Uuid
-  governmentId String @db.Uuid
-
-  status NGORequestStatus @default(PENDING)
-
-  requestedById String    @db.Uuid // government user
+  id            String           @id @default(uuid()) @db.Uuid
+  disasterId    String           @db.Uuid
+  ngoId         String           @db.Uuid
+  status        NGORequestStatus @default(PENDING)
+  requestedById String           @db.Uuid
   respondedAt   DateTime?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime         @default(now())
+  governmentId  String           @db.Uuid
+  disaster      Disaster         @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  government    Government       @relation(fields: [governmentId], references: [id])
+  ngo           NGO              @relation(fields: [ngoId], references: [id])
+  requestedBy   User             @relation(fields: [requestedById], references: [id])
 
-  disaster    Disaster   @relation(fields: [disasterId], references: [id], onDelete: Cascade)
-  ngo         NGO        @relation(fields: [ngoId], references: [id])
-  government  Government @relation(fields: [governmentId], references: [id])
-  requestedBy User       @relation(fields: [requestedById], references: [id])
-
-  @@unique([disasterId, ngoId]) // one request per NGO per disaster
+  @@unique([disasterId, ngoId])
   @@index([status])
   @@index([createdAt])
   @@index([disasterId])
@@ -343,49 +335,32 @@ model AuditLog {
   @@index([entity, entityId])
   @@map("audit_log")
 }
+
 model Volunteer {
-  id        String        @id @default(uuid()) @db.Uuid
-  userId    String        @unique @db.Uuid
-  ngoId     String        @db.Uuid
-
-  role      VolunteerRole @default(GROUND_VOLUNTEER)
-
-  
-  rolePreference VolunteerRolePreference?
-
-  
-  verified   Boolean   @default(false)
-  verifiedAt DateTime?
-
-
-  state     String
-  district  String?
-  address   String?     
-
-
-  dob       DateTime?   
-  gender    String?      
-
-  
-  emergencyContactName  String?   
-  emergencyContactPhone String?   
-
-  
-  skills           String[]  @default([]) 
-  experienceYears  Int?                  
-  certificationUrl String?              
-
-
-  canTravel  Boolean @default(false)
-  hasVehicle Boolean @default(false) 
-
-  isActive  Boolean       @default(true)
-  available Boolean       @default(true)
-
-  joinedAt  DateTime      @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ngo  NGO  @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  id                    String                   @id @default(uuid()) @db.Uuid
+  userId                String                   @unique @db.Uuid
+  ngoId                 String                   @db.Uuid
+  role                  VolunteerRole            @default(GROUND_VOLUNTEER)
+  rolePreference        VolunteerRolePreference?
+  verified              Boolean                  @default(false)
+  verifiedAt            DateTime?
+  state                 String
+  district              String?
+  address               String?
+  dob                   DateTime?
+  gender                String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  skills                String[]                 @default([])
+  experienceYears       Int?
+  certificationUrl      String?
+  canTravel             Boolean                  @default(false)
+  hasVehicle            Boolean                  @default(false)
+  isActive              Boolean                  @default(true)
+  available             Boolean                  @default(true)
+  joinedAt              DateTime                 @default(now())
+  ngo                   NGO                      @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([ngoId])
   @@index([role])
@@ -394,7 +369,30 @@ model Volunteer {
   @@map("volunteer")
 }
 
+model RolePreferenceRequest {
+  id            String                      @id @default(uuid()) @db.Uuid
+  userId        String                      @db.Uuid
+  ngoId         String                      @db.Uuid
+  state         String
+  preferredRole String
+  status        RolePreferenceRequestStatus @default(PENDING)
+  approvedRole  String?
+  approvedAt    DateTime?
+  approvedBy    String?                     @db.Uuid
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+  approver      User?                       @relation("ApprovedRoleRequests", fields: [approvedBy], references: [id])
+  ngo           NGO                         @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  user          User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, ngoId])
+  @@index([ngoId])
+  @@index([state])
+  @@index([status])
+  @@index([createdAt])
+  @@index([ngoId, state])
+  @@map("role_preference_request")
+}
 
 enum MediaType {
   IMAGE
@@ -406,46 +404,23 @@ enum NGORequestStatus {
   ACCEPTED
   REJECTED
 }
+
 enum VolunteerRole {
   GROUND_VOLUNTEER
   MEDICAL_VOLUNTEER
   RESCUE_VOLUNTEER
-  
+ 
 }
+
 enum VolunteerRolePreference {
   GROUND
   MEDICAL
   RESCUE
- 
+  
 }
+
 enum RolePreferenceRequestStatus {
   PENDING
   APPROVED
   REJECTED
-}
-
-model RolePreferenceRequest {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  ngoId     String   @db.Uuid
-  state     String
-  preferredRole String
-  status    RolePreferenceRequestStatus @default(PENDING)
-  approvedRole String?
-  approvedAt DateTime?
-  approvedBy String? @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ngo       NGO      @relation(fields: [ngoId], references: [id], onDelete: Cascade)
-  approver  User?    @relation("ApprovedRoleRequests", fields: [approvedBy], references: [id])
-
-  @@unique([userId, ngoId])
-  @@index([ngoId])
-  @@index([state])
-  @@index([status])
-  @@index([createdAt])
-  @@index([ngoId, state])
-  @@map("role_preference_request")
 }

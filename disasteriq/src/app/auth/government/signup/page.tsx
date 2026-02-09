@@ -9,6 +9,54 @@ export default function GovernmentAuthPage() {
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const router = useRouter();
 
+  // ---------------- STATE (LOGIC ONLY) ----------------
+  const [government, setGovernment] = useState({
+    name: "",
+    level: "",
+    state: "",
+    district: "",
+    department: "",
+    contactEmail: "",
+    contactPhone: "",
+  });
+
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:3000/Api/auth/Government/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            government,
+            user,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Signup failed");
+        return;
+      }
+
+      alert("Government registered successfully");
+      router.push("/auth/login");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
       <div className="w-full max-w-4xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 text-white">
@@ -38,11 +86,9 @@ export default function GovernmentAuthPage() {
             Signup
           </button>
 
-          {/* 🔥 THIS NOW NAVIGATES */}
-         <button>
-  <a href="/auth/login">Login</a>
-</button>
-
+          <button>
+            <a href="/auth/login">Login</a>
+          </button>
         </div>
 
         {/* ================= SIGNUP FORM ================= */}
@@ -55,22 +101,68 @@ export default function GovernmentAuthPage() {
                 Authority Information
               </h3>
 
-              {[
-                "Authority Name",
-                "Level (STATE / DISTRICT)",
-                "State",
-                "District",
-                "Department",
-                "Official Email",
-                "Contact Phone",
-              ].map((placeholder, i) => (
-                <input
-                  key={i}
-                  placeholder={placeholder}
-                  type={placeholder.includes("Email") ? "email" : "text"}
-                  className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              ))}
+              <input
+                placeholder="Authority Name"
+                onChange={(e) =>
+                  setGovernment({ ...government, name: e.target.value })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                placeholder="Level (STATE / DISTRICT)"
+                onChange={(e) =>
+                  setGovernment({ ...government, level: e.target.value })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                placeholder="State"
+                onChange={(e) =>
+                  setGovernment({ ...government, state: e.target.value })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                placeholder="District"
+                onChange={(e) =>
+                  setGovernment({ ...government, district: e.target.value })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                placeholder="Department"
+                onChange={(e) =>
+                  setGovernment({ ...government, department: e.target.value })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                type="email"
+                placeholder="Official Email"
+                onChange={(e) =>
+                  setGovernment({
+                    ...government,
+                    contactEmail: e.target.value,
+                  })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                placeholder="Contact Phone"
+                onChange={(e) =>
+                  setGovernment({
+                    ...government,
+                    contactPhone: e.target.value,
+                  })
+                }
+                className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             {/* Admin Info */}
@@ -82,16 +174,27 @@ export default function GovernmentAuthPage() {
 
               <input
                 placeholder="Admin Name"
+                onChange={(e) =>
+                  setUser({ ...user, name: e.target.value })
+                }
                 className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+
               <input
                 type="email"
                 placeholder="Admin Email"
+                onChange={(e) =>
+                  setUser({ ...user, email: e.target.value })
+                }
                 className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+
               <input
                 type="password"
                 placeholder="Password"
+                onChange={(e) =>
+                  setUser({ ...user, password: e.target.value })
+                }
                 className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -101,7 +204,10 @@ export default function GovernmentAuthPage() {
         {/* ================= ACTION ================= */}
         {mode === "signup" && (
           <div className="mt-8">
-            <Button className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
+            <Button
+              onClick={handleSubmit}
+              className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto"
+            >
               Register Government
             </Button>
           </div>
