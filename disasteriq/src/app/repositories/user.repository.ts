@@ -7,6 +7,7 @@ export async function findUserForAuthByEmail(email: string) {
       id: true,
       email: true,
       passwordHash: true,
+      state: true,
 
       governmentId: true,
       policeId: true,

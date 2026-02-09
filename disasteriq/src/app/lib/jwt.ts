@@ -10,8 +10,8 @@ type JwtUserPayload = {
   policeId?: string | null;
   ngoId?: string | null;
   hospitalId?: string | null;
-  governmentState?: string;
-  state?: string; // generic state (e.g., NGO state)
+  governmentState?: string | null;
+  state?: string | null; // generic state (e.g., NGO state)
 };
 
 export const generateAccessToken = (payload: JwtUserPayload) => {

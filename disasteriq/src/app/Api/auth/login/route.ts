@@ -41,6 +41,13 @@ export async function POST(req: Request) {
 
   const role = user.roles[0]?.role.name;
 
+  if (!role) {
+    return NextResponse.json(
+      { message: "User role not assigned" },
+      { status: 403 }
+    );
+  }
+
   if (role === "GOVERNMENT_ADMIN" && !user.governmentId) {
     return NextResponse.json(
       { message: "Government account not linked" },
@@ -58,6 +65,7 @@ export async function POST(req: Request) {
     governmentId: user.governmentId,
     policeId: user.policeId,
     hospitalId: user.hospitalId,
+    state: user.state,
   });
 
   const refreshToken = generateRefreshToken({
@@ -78,7 +86,7 @@ export async function POST(req: Request) {
         ? "/ngo"
         : user.hospitalId
         ? "/hospital/dashboard"
-        : "/user/home",
+        : "/public",
   });
 
   // ✅ ACCESS TOKEN COOKIE (MATCHES MIDDLEWARE)
