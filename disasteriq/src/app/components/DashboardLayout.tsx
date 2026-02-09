@@ -76,6 +76,7 @@ government: [
     { label: "Dashboard", href: "/public", icon: LayoutDashboard },
     { label: "Alerts", href: "/public/alerts", icon: AlertTriangle },
     { label: "Request Help", href: "/public/request", icon: FileText },
+    { label: "Ngo", href: "/public/ngo", icon: FileText },
   ],
 };
 
