@@ -3,6 +3,14 @@ import { sanitizeInput } from "@/app/lib/sanitize";
 
 export const NGOService = {
   /**
+   * Get all NGOs (public)
+   * @returns Array of all NGOs
+   */
+  getAll: async () => {
+    return NGORepository.getAll();
+  },
+
+  /**
    * Get NGOs by state
    * @param state - State name
    * @returns Array of NGOs in that state
