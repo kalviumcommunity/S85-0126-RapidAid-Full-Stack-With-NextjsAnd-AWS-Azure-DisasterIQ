@@ -1,13 +1,16 @@
 import { prisma } from "@/app/prisma/prisma";
 import { NGORequestStatus } from "@prisma/client";
 
+/**
+ * Create NGO request (Government → NGO)
+ */
 export async function createNGORequest(data: {
   disasterId: string;
   ngoId: string;
   governmentId: string;
   requestedById: string;
 }) {
-  return await prisma.nGORequest.create({
+  return prisma.nGORequest.create({
     data: {
       disasterId: data.disasterId,
       ngoId: data.ngoId,
@@ -20,19 +23,19 @@ export async function createNGORequest(data: {
       ngo: true,
       government: true,
       requestedBy: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: { id: true, name: true, email: true },
       },
     },
   });
 }
 
+/**
+ * Get all tasks for NGO (used in NGO dashboard)
+ */
 export async function getNGOTasks(ngoId: string) {
-  return await prisma.nGORequest.findMany({
+  return prisma.nGORequest.findMany({
     where: { ngoId },
+    orderBy: { createdAt: "desc" },
     include: {
       disaster: true,
       government: {
@@ -50,15 +53,26 @@ export async function getNGOTasks(ngoId: string) {
         },
       },
     },
-    orderBy: { createdAt: "desc" },
   });
 }
 
-export async function updateTaskStatus(taskId: string, status: NGORequestStatus) {
-  return await prisma.nGORequest.update({
-    where: { id: taskId },
-    data: { 
-      status,
+/**
+ * ✅ UPDATE NGO REQUEST STATUS (SAFE)
+ * Only called with PRIMARY KEY (requestId)
+ */
+export async function updateTaskStatus(
+  requestId: string,
+  status: "APPROVED" | "REJECTED"
+) {
+  const statusMap: Record<"APPROVED" | "REJECTED", NGORequestStatus> = {
+    APPROVED: NGORequestStatus.ACCEPTED,
+    REJECTED: NGORequestStatus.REJECTED,
+  };
+
+  return prisma.nGORequest.update({
+    where: { id: requestId },
+    data: {
+      status: statusMap[status],
       respondedAt: new Date(),
     },
     include: {
@@ -66,19 +80,19 @@ export async function updateTaskStatus(taskId: string, status: NGORequestStatus)
       ngo: true,
       government: true,
       requestedBy: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+        select: { id: true, name: true, email: true },
       },
     },
   });
 }
 
+/**
+ * Get all requests created by a government
+ */
 export async function getGovernmentRequests(governmentId: string) {
-  return await prisma.nGORequest.findMany({
+  return prisma.nGORequest.findMany({
     where: { governmentId },
+    orderBy: { createdAt: "desc" },
     include: {
       disaster: true,
       ngo: {
@@ -97,12 +111,14 @@ export async function getGovernmentRequests(governmentId: string) {
         },
       },
     },
-    orderBy: { createdAt: "desc" },
   });
 }
 
+/**
+ * NGO helpers
+ */
 export async function getNGOById(ngoId: string) {
-  return await prisma.nGO.findUnique({
+  return prisma.nGO.findUnique({
     where: { id: ngoId },
     select: {
       id: true,
@@ -115,7 +131,8 @@ export async function getNGOById(ngoId: string) {
 }
 
 export async function getAllNGOs() {
-  return await prisma.nGO.findMany({
+  return prisma.nGO.findMany({
+    orderBy: { createdAt: "desc" },
     select: {
       id: true,
       name: true,
@@ -125,6 +142,5 @@ export async function getAllNGOs() {
       contactPhone: true,
       createdAt: true,
     },
-    orderBy: { createdAt: "desc" },
   });
 }

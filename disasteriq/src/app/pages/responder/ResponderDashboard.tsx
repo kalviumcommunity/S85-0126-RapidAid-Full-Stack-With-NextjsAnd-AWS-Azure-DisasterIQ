@@ -1,19 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
   AlertTriangle,
   Heart,
-  Truck,
   Users,
   Package,
   CheckCircle,
   Clock,
-  MapPin,
-  XCircle,
 } from "lucide-react";
 
 import { DashboardLayout } from "@/app/components/DashboardLayout";
@@ -24,10 +20,9 @@ import { Button } from "@/app/components/ui/button";
 /* ===================== TYPES ===================== */
 
 type ReliefRequest = {
-  id: string;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  id: string; // ✅ PRIMARY KEY
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
-  requestedById: string;
   respondedAt?: string | null;
   disaster?: {
     type?: string;
@@ -53,6 +48,7 @@ export default function ResponderDashboard() {
         setLoadingRequests(true);
         setRequestError(null);
 
+        // ✅ KEEPING YOUR API FORMAT
         const res = await fetch(
           "http://localhost:3000/Api/ngoRequest/ngo/[ngoId]",
           {
@@ -67,6 +63,7 @@ export default function ResponderDashboard() {
           throw new Error(json.message || "Failed to fetch NGO requests");
         }
 
+        // backend returns { success, data }
         setReliefRequests(json.data);
       } catch (err: any) {
         setRequestError(err.message);
@@ -81,11 +78,11 @@ export default function ResponderDashboard() {
   /* ===================== RESPOND HANDLER ===================== */
 
   const respondToRequest = async (
-    requestedById: string,
+    requestId: string,
     status: "APPROVED" | "REJECTED"
   ) => {
     try {
-      setActionLoadingId(requestedById);
+      setActionLoadingId(requestId);
 
       const res = await fetch(
         "http://localhost:3000/Api/ngoRequest/respond",
@@ -96,7 +93,7 @@ export default function ResponderDashboard() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            requestedById,
+            requestId, // ✅ CORRECT
             status,
           }),
         }
@@ -111,10 +108,10 @@ export default function ResponderDashboard() {
       // ✅ Optimistic UI update
       setReliefRequests((prev) =>
         prev.map((req) =>
-          req.requestedById === requestedById
+          req.id === requestId
             ? {
                 ...req,
-                status,
+                status: status === "APPROVED" ? "ACCEPTED" : "REJECTED",
                 respondedAt: new Date().toISOString(),
               }
             : req
@@ -140,7 +137,7 @@ export default function ResponderDashboard() {
       <div className="space-y-8 text-white">
 
         {/* Header */}
-        <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="rounded-2xl bg-white/5 border border-white/10 p-6 flex justify-between">
           <div>
             <h1 className="text-2xl font-semibold">Responder Dashboard</h1>
             <p className="text-sm text-white/70">
@@ -157,24 +154,20 @@ export default function ResponderDashboard() {
           </Button>
         </div>
 
-        {/* Organization Card */}
-        <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5 flex items-center gap-4">
+        {/* Organization */}
+        <div className="rounded-xl bg-white/5 border border-white/10 p-5 flex gap-4">
           <div className="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center">
             <Heart className="h-7 w-7 text-green-400" />
           </div>
 
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold">Red Cross Regional Chapter</h2>
-              <StatusBadge status="success" label="Verified" />
-            </div>
-
+            <h2 className="font-semibold">Helping Hands Foundation</h2>
             <p className="text-sm text-white/70">
-              NGO • Active since 2015 • 120 volunteers
+              NGO • Active Operations
             </p>
           </div>
 
-          <Button variant="outline">Edit</Button>
+          <StatusBadge status="success" label="Verified" />
         </div>
 
         {/* Stats */}
@@ -206,7 +199,7 @@ export default function ResponderDashboard() {
         </div>
 
         {/* Incoming Requests */}
-        <div className="rounded-xl bg-white/5 border border-white/10 backdrop-blur p-5">
+        <div className="rounded-xl bg-white/5 border border-white/10 p-5">
           <h3 className="font-semibold mb-4">Incoming Requests</h3>
 
           {loadingRequests && (
@@ -246,9 +239,9 @@ export default function ResponderDashboard() {
                       <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700"
-                        disabled={actionLoadingId === r.requestedById}
+                        disabled={actionLoadingId === r.id}
                         onClick={() =>
-                          respondToRequest(r.requestedById, "APPROVED")
+                          respondToRequest(r.id, "APPROVED")
                         }
                       >
                         Accept
@@ -257,9 +250,9 @@ export default function ResponderDashboard() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        disabled={actionLoadingId === r.requestedById}
+                        disabled={actionLoadingId === r.id}
                         onClick={() =>
-                          respondToRequest(r.requestedById, "REJECTED")
+                          respondToRequest(r.id, "REJECTED")
                         }
                       >
                         Reject
@@ -267,7 +260,7 @@ export default function ResponderDashboard() {
                     </>
                   )}
 
-                  {r.status === "APPROVED" && (
+                  {r.status === "ACCEPTED" && (
                     <span className="text-green-400 text-sm font-medium">
                       Approved
                     </span>

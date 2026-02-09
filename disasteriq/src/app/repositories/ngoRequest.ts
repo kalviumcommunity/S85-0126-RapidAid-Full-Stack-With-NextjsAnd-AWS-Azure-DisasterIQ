@@ -1,13 +1,9 @@
 import { prisma } from "@/app/prisma/prisma";
 import { NGORequestStatus } from "@prisma/client";
 
-type CreateNGORequestInput = {
-  disasterId: string;
-  ngoId: string;
-  governmentId: string;
-  requestedById: string;
-};
-
+/**
+ * Common select fields
+ */
 const selectFields = {
   id: true,
   disasterId: true,
@@ -57,34 +53,7 @@ const selectFields = {
 
 export const NGORequestRepository = {
   /**
-   * Fetch all NGO requests with optional pagination
-   */
-  findAll: async (page = 1, pageSize = 10) => {
-    const skip = (page - 1) * pageSize;
-    
-    const [data, total] = await Promise.all([
-      prisma.nGORequest.findMany({
-        select: selectFields,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.nGORequest.count(),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-      },
-    };
-  },
-
-  /**
-   * Fetch NGO request by ID
+   * Fetch NGO request by PRIMARY KEY
    */
   findById: async (id: string) => {
     return prisma.nGORequest.findUnique({
@@ -94,90 +63,25 @@ export const NGORequestRepository = {
   },
 
   /**
-   * Fetch all NGO requests for a specific disaster
+   * Fetch all requests for an NGO
    */
-  findByDisasterId: async (disasterId: string, page = 1, pageSize = 10) => {
-    const skip = (page - 1) * pageSize;
-    
-    const [data, total] = await Promise.all([
-      prisma.nGORequest.findMany({
-        where: { disasterId },
-        select: selectFields,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.nGORequest.count({ where: { disasterId } }),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-      },
-    };
+  findByNgoId: async (ngoId: string) => {
+    return prisma.nGORequest.findMany({
+      where: { ngoId },
+      select: selectFields,
+      orderBy: { createdAt: "desc" },
+    });
   },
 
   /**
-   * Fetch all NGO requests for a specific NGO
+   * Create new NGO request
    */
-  findByNgoId: async (ngoId: string, page = 1, pageSize = 10) => {
-    const skip = (page - 1) * pageSize;
-    
-    const [data, total] = await Promise.all([
-      prisma.nGORequest.findMany({
-        where: { ngoId },
-        select: selectFields,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.nGORequest.count({ where: { ngoId } }),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-      },
-    };
-  },
-
-  /**
-   * Fetch all NGO requests for a specific government
-   */
-  findByGovernmentId: async (governmentId: string, page = 1, pageSize = 10) => {
-    const skip = (page - 1) * pageSize;
-    
-    const [data, total] = await Promise.all([
-      prisma.nGORequest.findMany({
-        where: { governmentId },
-        select: selectFields,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.nGORequest.count({ where: { governmentId } }),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-      },
-    };
-  },
-
-  create: async (data: CreateNGORequestInput) => {
+  create: async (data: {
+    disasterId: string;
+    ngoId: string;
+    governmentId: string;
+    requestedById: string;
+  }) => {
     return prisma.nGORequest.create({
       data: {
         disasterId: data.disasterId,
@@ -186,53 +90,29 @@ export const NGORequestRepository = {
         requestedById: data.requestedById,
         status: NGORequestStatus.PENDING,
       },
-    });
-  },
-
-  findExisting: async (disasterId: string, ngoId: string) => {
-    return prisma.nGORequest.findUnique({
-      where: {
-        disasterId_ngoId: {
-          disasterId,
-          ngoId,
-        },
-      },
-    });
-  },
-
-  /**
-   * Update NGO request status (APPROVED or REJECTED)
-   * Only updates if current status is PENDING
-   */
-  updateStatus: async (requestId: string, newStatus: "APPROVED" | "REJECTED") => {
-    const statusMap: Record<string, NGORequestStatus> = {
-      APPROVED: NGORequestStatus.ACCEPTED,
-      REJECTED: NGORequestStatus.REJECTED,
-    };
-
-    const prismaStatus = statusMap[newStatus];
-    if (!prismaStatus) {
-      throw new Error("INVALID_STATUS");
-    }
-
-    return prisma.nGORequest.update({
-      where: { id: requestId },
-      data: {
-        status: prismaStatus,
-        respondedAt: new Date(),
-      },
       select: selectFields,
     });
   },
 
   /**
-   * Find request by requestedById and ngoId
+   * Update NGO request status
+   * APPROVED -> ACCEPTED
+   * REJECTED -> REJECTED
    */
-  findByRequestedByAndNgo: async (requestedById: string, ngoId: string) => {
-    return prisma.nGORequest.findFirst({
-      where: {
-        requestedById,
-        ngoId,
+  updateStatus: async (
+    requestId: string,
+    newStatus: "APPROVED" | "REJECTED"
+  ) => {
+    const statusMap: Record<"APPROVED" | "REJECTED", NGORequestStatus> = {
+      APPROVED: NGORequestStatus.ACCEPTED,
+      REJECTED: NGORequestStatus.REJECTED,
+    };
+
+    return prisma.nGORequest.update({
+      where: { id: requestId },
+      data: {
+        status: statusMap[newStatus],
+        respondedAt: new Date(),
       },
       select: selectFields,
     });

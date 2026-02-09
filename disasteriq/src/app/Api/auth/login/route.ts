@@ -6,8 +6,6 @@ import {
 import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
 import { findUserForAuthByEmail } from "@/app/repositories/user.repository";
-import { GovernmentRepository } from "@/app/repositories/government.repository";
-import { prisma } from "@/app/prisma/prisma";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -32,6 +30,7 @@ export async function POST(req: Request) {
   }
 
   const isValid = await comparePassword(password, user.passwordHash);
+
   if (!isValid) {
     return NextResponse.json(
       { message: "Invalid Credentials" },
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
   }
 
   // -------------------------
-  // JWT PAYLOAD (LEAN)
+  // JWT PAYLOAD
   // -------------------------
   const accessToken = generateAccessToken({
     userId: user.id,
@@ -76,26 +75,28 @@ export async function POST(req: Request) {
   // RESPONSE
   // -------------------------
   const response = NextResponse.json({
+    message: "Login successful",
     role,
+    accessToken, // ✅ visible in Postman
     redirect:
       user.governmentId
         ? "/government"
         : user.policeId
         ? "/police/dashboard"
         : user.ngoId
-        ? "/ngo"
+        ? "/responder"
         : user.hospitalId
         ? "/hospital/dashboard"
         : "/public",
   });
 
-  // ✅ ACCESS TOKEN COOKIE (MATCHES MIDDLEWARE)
+  // ✅ ACCESS TOKEN COOKIE
   response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 15 * 60, // 15 min
+    maxAge: 15 * 60, // 15 minutes
   });
 
   // ✅ REFRESH TOKEN COOKIE
@@ -104,7 +105,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/api/auth/refresh",
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60, // 7 days
   });
 
   return response;
