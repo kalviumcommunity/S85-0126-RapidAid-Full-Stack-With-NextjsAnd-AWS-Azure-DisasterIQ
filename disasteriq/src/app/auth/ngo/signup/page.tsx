@@ -68,7 +68,7 @@ export default function NgoSignup() {
     setSuccess(null);
 
     try {
-      const res = await fetch("/Api/auth/ngo/signup", {
+      const res = await fetch("/api/auth/ngo/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -28,7 +28,7 @@ export default function Requests() {
   useEffect(() => {
     async function loadRequests() {
       try {
-        const res = await authApi.get("/Api/responder/requests");
+        const res = await authApi.get("/api/responder/requests");
 
         if (!res.ok) {
           throw new Error("Failed to fetch requests");

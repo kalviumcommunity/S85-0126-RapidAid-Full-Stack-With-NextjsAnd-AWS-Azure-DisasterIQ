@@ -62,7 +62,7 @@ export default function PublicDashboard() {
   useEffect(() => {
     const fetchDisasters = async () => {
       try {
-        const res = await authApi.get("/Api/disasters/get");
+        const res = await authApi.get("/api/disasters/get");
         if (!res.ok) throw new Error("Failed to fetch disasters");
 
         const json = await res.json();

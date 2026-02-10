@@ -52,7 +52,7 @@ export default function ResponderDashboard() {
 
         // ✅ JWT-based NGO extraction on backend
         const res = await fetch(
-          "http://localhost:3000/Api/ngoRequest/ngo/[ngoId]",
+          "http://localhost:3000/api/ngoRequest/ngo/[ngoId]",
           {
             method: "GET",
             credentials: "include",
@@ -88,7 +88,7 @@ export default function ResponderDashboard() {
       setActionLoadingId(requestId);
 
       const res = await fetch(
-        "http://localhost:3000/Api/ngoRequest/respond",
+        "http://localhost:3000/api/ngoRequest/respond",
         {
           method: "POST",
           credentials: "include",

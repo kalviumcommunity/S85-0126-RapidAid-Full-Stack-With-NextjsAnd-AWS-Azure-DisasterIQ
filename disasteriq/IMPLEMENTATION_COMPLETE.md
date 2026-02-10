@@ -42,23 +42,23 @@
    - Error handling with specific codes
    - 5 public methods matching repository
 
-3. src/app/Api/ngoRequest/route.ts
+3. src/app/api/ngoRequest/route.ts
    - GET /api/ngo-requests
    - Fetch all with pagination
 
-4. src/app/Api/ngoRequest/[id]/route.ts
+4. src/app/api/ngoRequest/[id]/route.ts
    - GET /api/ngo-requests/:id
    - Fetch by request ID
 
-5. src/app/Api/ngoRequest/disaster/[disasterId]/route.ts
+5. src/app/api/ngoRequest/disaster/[disasterId]/route.ts
    - GET /api/ngo-requests/disaster/:disasterId
    - Fetch by disaster with pagination
 
-6. src/app/Api/ngoRequest/ngo/[ngoId]/route.ts
+6. src/app/api/ngoRequest/ngo/[ngoId]/route.ts
    - GET /api/ngo-requests/ngo/:ngoId
    - Fetch by NGO with pagination
 
-7. src/app/Api/ngoRequest/government/[governmentId]/route.ts
+7. src/app/api/ngoRequest/government/[governmentId]/route.ts
    - GET /api/ngo-requests/government/:governmentId
    - Fetch by government with pagination
 

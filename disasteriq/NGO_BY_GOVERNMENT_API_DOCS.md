@@ -425,8 +425,8 @@ curl -X GET "http://localhost:3000/api/ngo/government-context" \
 
 ```
 Created:
-- src/app/Api/ngo/by-government/route.ts
-- src/app/Api/ngo/government-context/route.ts
+- src/app/api/ngo/by-government/route.ts
+- src/app/api/ngo/government-context/route.ts
 
 Modified:
 - src/app/Service/ngo_service.ts (added getByGovernmentState method)

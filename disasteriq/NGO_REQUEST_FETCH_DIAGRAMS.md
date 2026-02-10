@@ -12,7 +12,7 @@
                                ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │                     ROUTE HANDLER (Controller)                    │
-│                   [src/app/Api/ngoRequest/]                       │
+│                   [src/app/api/ngoRequest/]                       │
 │                                                                    │
 │  1. Parse route params and query params                          │
 │  2. Basic input validation (presence check)                      │

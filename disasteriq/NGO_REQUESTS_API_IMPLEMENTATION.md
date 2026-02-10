@@ -75,7 +75,7 @@ export const NGORequestService = {
 ---
 
 ## 3. API Route Handler
-**File:** [src/app/Api/government/requests/route.ts](src/app/Api/government/requests/route.ts)
+**File:** [src/app/api/government/requests/route.ts](src/app/api/government/requests/route.ts)
 
 ### Endpoint: `GET /api/government/requests`
 

@@ -17,7 +17,7 @@ This document details the implementation of NGO Request fetch APIs following cle
                                  │
                     ┌────────────▼─────────────┐
                     │   Route Handler (Controller)    │
-                    │  src/app/Api/ngoRequest/*      │
+                    │  src/app/api/ngoRequest/*      │
                     │  - Parse query/path params     │
                     │  - Call service layer          │
                     │  - Return HTTP response        │
@@ -123,7 +123,7 @@ throw new Error("INVALID_DISASTER_ID");
 ### 3. Controller/Route Handlers
 
 #### A. GET /api/ngo-requests
-**File:** `src/app/Api/ngoRequest/route.ts`
+**File:** `src/app/api/ngoRequest/route.ts`
 
 ```typescript
 export async function GET(req: NextRequest) {
@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
 ```
 
 #### B. GET /api/ngo-requests/:id
-**File:** `src/app/Api/ngoRequest/[id]/route.ts`
+**File:** `src/app/api/ngoRequest/[id]/route.ts`
 
 ```typescript
 export async function GET(req, { params: { id } }) {
@@ -164,7 +164,7 @@ export async function GET(req, { params: { id } }) {
 ```
 
 #### C. GET /api/ngo-requests/disaster/:disasterId
-**File:** `src/app/Api/ngoRequest/disaster/[disasterId]/route.ts`
+**File:** `src/app/api/ngoRequest/disaster/[disasterId]/route.ts`
 
 ```typescript
 export async function GET(req, { params: { disasterId } }) {
@@ -174,7 +174,7 @@ export async function GET(req, { params: { disasterId } }) {
 ```
 
 #### D. GET /api/ngo-requests/ngo/:ngoId
-**File:** `src/app/Api/ngoRequest/ngo/[ngoId]/route.ts`
+**File:** `src/app/api/ngoRequest/ngo/[ngoId]/route.ts`
 
 ```typescript
 export async function GET(req, { params: { ngoId } }) {
@@ -183,7 +183,7 @@ export async function GET(req, { params: { ngoId } }) {
 ```
 
 #### E. GET /api/ngo-requests/government/:governmentId
-**File:** `src/app/Api/ngoRequest/government/[governmentId]/route.ts`
+**File:** `src/app/api/ngoRequest/government/[governmentId]/route.ts`
 
 ```typescript
 export async function GET(req, { params: { governmentId } }) {

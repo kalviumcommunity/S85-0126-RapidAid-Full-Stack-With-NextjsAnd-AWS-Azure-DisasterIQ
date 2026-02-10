@@ -26,7 +26,7 @@ export default function Page() {
   useEffect(() => {
     const fetchNgos = async () => {
       try {
-        const res = await fetch("http://localhost:3000/Api/ngo/all", {
+        const res = await fetch("http://localhost:3000/api/ngo/all", {
           method: "GET",
           credentials: "include", // ✅ include cookies
         });
@@ -147,7 +147,7 @@ export default function Page() {
 
                           try {
                             const res = await fetch(
-                              "http://localhost:3000/Api/auth/signup-with-role-preference",
+                              "http://localhost:3000/api/auth/signup-with-role-preference",
                               {
                                 method: "POST",
                                 credentials: "include", // ✅ REQUIRED

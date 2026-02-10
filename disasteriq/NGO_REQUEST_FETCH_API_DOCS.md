@@ -27,7 +27,7 @@ Clean layered architecture for fetching NGO request records with proper separati
 - Error handling
 - Methods mirror repository methods with additional validation
 
-### 3. **Controller Layer** (Route Handlers in `src/app/Api/ngoRequest/*`)
+### 3. **Controller Layer** (Route Handlers in `src/app/api/ngoRequest/*`)
 - HTTP request/response handling
 - Query parameter extraction
 - Error response formatting

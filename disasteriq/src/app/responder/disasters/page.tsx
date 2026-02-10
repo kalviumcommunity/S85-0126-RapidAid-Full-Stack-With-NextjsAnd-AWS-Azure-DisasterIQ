@@ -31,7 +31,7 @@ export default function AssignedDisastersPage() {
   useEffect(() => {
     const fetchDisasters = async () => {
       try {
-        const res = await fetch("/Api/ngo/Approved", {
+        const res = await fetch("/api/ngo/Approved", {
           credentials: "include",
         });
 
@@ -60,7 +60,7 @@ export default function AssignedDisastersPage() {
     try {
       setSubmitting(true);
 
-      const res = await fetch("/Api/ngo/resource-request", {
+      const res = await fetch("/api/ngo/resource-request", {
         method: "POST",
         credentials: "include",
         headers: {

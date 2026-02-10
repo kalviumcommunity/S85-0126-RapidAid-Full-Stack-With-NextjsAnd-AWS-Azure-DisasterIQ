@@ -44,7 +44,7 @@ A complete secure system for users to request roles in specific NGOs, with NGO a
 ### 3. API Endpoints
 
 #### A. User Signup with Role Preference
-**File:** [src/app/Api/auth/signup-with-role-preference/route.ts](src/app/Api/auth/signup-with-role-preference/route.ts)
+**File:** [src/app/api/auth/signup-with-role-preference/route.ts](src/app/api/auth/signup-with-role-preference/route.ts)
 
 **Method:** `POST /api/auth/signup-with-role-preference`
 
@@ -72,7 +72,7 @@ A complete secure system for users to request roles in specific NGOs, with NGO a
 ---
 
 #### B. View Role Preference Requests (NGO Admin)
-**File:** [src/app/Api/ngo/role-preference-requests/route.ts](src/app/Api/ngo/role-preference-requests/route.ts)
+**File:** [src/app/api/ngo/role-preference-requests/route.ts](src/app/api/ngo/role-preference-requests/route.ts)
 
 **Method:** `GET /api/ngo/role-preference-requests?status=PENDING`
 
@@ -95,7 +95,7 @@ const requests = await RolePreferenceRequestRepository.findByNgoAndState(
 ---
 
 #### C. Approve & Assign Role (NGO Admin)
-**File:** [src/app/Api/ngo/role-preference-requests/[requestId]/route.ts](src/app/Api/ngo/role-preference-requests/%5brequestId%5d/route.ts)
+**File:** [src/app/api/ngo/role-preference-requests/[requestId]/route.ts](src/app/api/ngo/role-preference-requests/%5brequestId%5d/route.ts)
 
 **Method:** `POST /api/ngo/role-preference-requests/[requestId]`
 

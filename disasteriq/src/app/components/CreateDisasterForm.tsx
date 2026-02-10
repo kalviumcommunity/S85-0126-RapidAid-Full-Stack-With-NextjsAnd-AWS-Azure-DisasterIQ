@@ -78,7 +78,7 @@ export default function CreateDisasterForm() {
 
   const uploadToS3 = async (file: File, index: number) => {
     try {
-      const res = await fetch("/Api/upload", {
+      const res = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -156,7 +156,7 @@ export default function CreateDisasterForm() {
         )
       );
 
-      const res = await fetch("/Api/disasters/create", {
+      const res = await fetch("/api/disasters/create", {
         method: "POST",
         body: formData,
         credentials: "include",

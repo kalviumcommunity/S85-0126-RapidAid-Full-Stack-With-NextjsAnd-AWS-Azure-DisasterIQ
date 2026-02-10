@@ -54,14 +54,14 @@ export default function NGODashboard() {
     const fetchData = async () => {
       try {
         // 🔹 Fetch NGO tasks
-        const tasksRes = await authApi.get("/Api/ngoRequest/ngo/me");
+        const tasksRes = await authApi.get("/api/ngoRequest/ngo/me");
         if (tasksRes.ok) {
           const json = await tasksRes.json();
           setTasks(json.data?.items ?? []);
         }
 
         // 🔹 Fetch disasters assigned to NGO
-        const disasterRes = await authApi.get("/Api/disasters/get");
+        const disasterRes = await authApi.get("/api/disasters/get");
         if (disasterRes.ok) {
           const json = await disasterRes.json();
           setDisasters(json.data?.items ?? []);

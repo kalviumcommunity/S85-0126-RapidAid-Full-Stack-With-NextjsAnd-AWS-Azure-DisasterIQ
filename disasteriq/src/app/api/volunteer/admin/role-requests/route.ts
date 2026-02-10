@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: requests }, { status: 200 });
   } catch (err: any) {
-    console.error("GET /Api/volunteer/admin/role-requests error:", err?.message || err);
+    console.error("GET /api/volunteer/admin/role-requests error:", err?.message || err);
     if (err.message === "NO_TOKEN") return NextResponse.json({ success: false, message: "Authentication required" }, { status: 401 });
     if (err.message?.includes("jwt")) return NextResponse.json({ success: false, message: `JWT Error: ${err.message}` }, { status: 401 });
     return NextResponse.json({ success: false, message: err.message || "Internal server error" }, { status: 500 });

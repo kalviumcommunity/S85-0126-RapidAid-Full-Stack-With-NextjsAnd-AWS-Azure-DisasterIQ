@@ -22,7 +22,7 @@ export default function AdminAuthPage() {
 
     try {
       const response = await fetch(
-        isSignup ? "/Api/auth/admin/signup" : "/Api/auth/admin/login",
+        isSignup ? "/api/auth/admin/signup" : "/api/auth/admin/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

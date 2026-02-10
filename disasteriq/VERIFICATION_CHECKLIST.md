@@ -112,9 +112,9 @@
 
 ## 📁 Files Created
 
-- [x] `src/app/Api/auth/signup-with-role-preference/route.ts` - Signup endpoint
-- [x] `src/app/Api/ngo/role-preference-requests/route.ts` - View requests endpoint
-- [x] `src/app/Api/ngo/role-preference-requests/[requestId]/route.ts` - Approve/Reject endpoints
+- [x] `src/app/api/auth/signup-with-role-preference/route.ts` - Signup endpoint
+- [x] `src/app/api/ngo/role-preference-requests/route.ts` - View requests endpoint
+- [x] `src/app/api/ngo/role-preference-requests/[requestId]/route.ts` - Approve/Reject endpoints
 - [x] `src/app/repositories/rolePreferenceRequest.repository.ts` - Repository layer
 - [x] `src/app/prisma/schema.prisma` - Updated schema
 - [x] `ROLE_PREFERENCE_API_DOCS.md` - Full API documentation

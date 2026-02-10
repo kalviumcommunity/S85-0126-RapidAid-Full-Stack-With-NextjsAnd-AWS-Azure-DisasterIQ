@@ -69,19 +69,19 @@ export default function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const disastersRes = await authApi.get("/Api/disasters/get");
+        const disastersRes = await authApi.get("/api/disasters/get");
         if (disastersRes.ok) {
           const json = await disastersRes.json();
           setDisasters(json.data?.items ?? []);
         }
 
-        const ngosRes = await authApi.get("/Api/government/ngos");
+        const ngosRes = await authApi.get("/api/government/ngos");
         if (ngosRes.ok) {
           const json = await ngosRes.json();
           setNGOs(json.data ?? []);
         }
 
-        const requestsRes = await authApi.get("/Api/ngoRequest/get");
+        const requestsRes = await authApi.get("/api/ngoRequest/get");
         if (requestsRes.ok) {
           const json = await requestsRes.json();
           setRequests(json.data?.items ?? []);
@@ -112,7 +112,7 @@ export default function Page() {
     }
 
     try {
-      const response = await authApi.post("/Api/ngoRequest/create", {
+      const response = await authApi.post("/api/ngoRequest/create", {
         disasterId: selectedDisaster.id,
         ngoId: selectedNGO.id,
       });
@@ -128,7 +128,7 @@ export default function Page() {
       setSelectedNGO(null);
 
       // refresh requests
-      const requestsRes = await authApi.get("/Api/ngoRequest/get");
+      const requestsRes = await authApi.get("/api/ngoRequest/get");
       if (requestsRes.ok) {
         const json = await requestsRes.json();
         setRequests(json.data?.items ?? []);

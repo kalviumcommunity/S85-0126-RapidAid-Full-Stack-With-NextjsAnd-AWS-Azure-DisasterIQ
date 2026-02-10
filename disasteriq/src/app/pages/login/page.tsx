@@ -18,7 +18,7 @@ export default function LoginPage() {
 
     try {
       // ✅ FIXED API PATH + COOKIE SUPPORT
-      const response = await fetch("/Api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

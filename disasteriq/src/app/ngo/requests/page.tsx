@@ -37,7 +37,7 @@ export default function NGORequestsPage() {
   useEffect(() => {
   async function fetchRequests() {
     try {
-      const res = await fetch("/Api/ngoRequest/ngo/me", {
+      const res = await fetch("/api/ngoRequest/ngo/me", {
         method: "GET",
         credentials: "include"
       });
