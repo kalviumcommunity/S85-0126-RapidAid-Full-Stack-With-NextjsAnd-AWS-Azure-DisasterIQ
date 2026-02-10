@@ -16,8 +16,18 @@ interface JwtPayload {
 
 export async function authMiddleware(req: NextRequest) {
   // ✅ CORRECT: Read cookie from request
- const token = req.cookies.get("accessToken")?.value;
+  // Prefer cookie-based token
+  let token = req.cookies.get("accessToken")?.value;
 
+  // Fallback: Accept Authorization: Bearer <token> header when cookie is absent
+  // This keeps browser cookie-auth primary but allows Postman/CLI clients to work
+  if (!token) {
+    const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+      console.log("authMiddleware: using Bearer token from Authorization header");
+    }
+  }
 
   if (!token) {
     throw new Error("NO_TOKEN");

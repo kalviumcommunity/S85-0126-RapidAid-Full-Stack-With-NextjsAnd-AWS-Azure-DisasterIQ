@@ -335,7 +335,7 @@ model AuditLog {
   @@index([entity, entityId])
   @@map("audit_log")
 }
-
+ 
 model Volunteer {
   id                    String                   @id @default(uuid()) @db.Uuid
   userId                String                   @unique @db.Uuid

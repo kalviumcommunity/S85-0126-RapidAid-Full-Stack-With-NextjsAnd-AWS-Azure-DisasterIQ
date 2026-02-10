@@ -7,6 +7,8 @@ export async function findUserForAuthByEmail(email: string) {
       id: true,
       email: true,
       passwordHash: true,
+
+      // For CITIZEN
       state: true,
 
       governmentId: true,
@@ -14,11 +16,34 @@ export async function findUserForAuthByEmail(email: string) {
       ngoId: true,
       hospitalId: true,
 
+      // 🔐 ROLE
       roles: {
         select: {
           role: {
             select: { name: true },
           },
+        },
+      },
+
+      // ✅ RELATIONS (THIS WAS MISSING)
+      ngo: {
+        select: {
+          state: true,
+        },
+      },
+      government: {
+        select: {
+          state: true,
+        },
+      },
+      police: {
+        select: {
+          state: true,
+        },
+      },
+      hospital: {
+        select: {
+          state: true,
         },
       },
     },

@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useToast } from "@/app/hooks/use-toast";
-import { authApi } from "@/app/lib/authFetch";
 
 type MediaItem = {
   url: string;
@@ -122,7 +121,7 @@ export default function CreateDisasterForm() {
     }
   };
 
-  // 🔥 UPDATED SUBMIT LOGIC (THIS WAS MISSING)
+  // ✅ FIXED & WORKING SUBMIT
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -157,7 +156,11 @@ export default function CreateDisasterForm() {
         )
       );
 
-      const res = await authApi.postFormData("/Api/disasters/create", formData);
+      const res = await fetch("/Api/disasters/create", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
 
       const data = await res.json();
 
@@ -188,28 +191,32 @@ export default function CreateDisasterForm() {
       setLoading(false);
     }
   };
-return (
-    <form
-      onSubmit={handleSubmit}
-      className="
-        space-y-6
-        rounded-2xl
-        border border-slate-200
-        bg-white
-        p-8
-        shadow-sm
-      "
-    >
-      {/* Header */}
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-slate-800">
-          Create Disaster
-        </h2>
-        <p className="text-sm text-slate-500">
-          Fill in the details to report a disaster
-        </p>
-      </div>
 
+  return (
+  <form
+    onSubmit={handleSubmit}
+    className="
+      space-y-8
+      rounded-3xl
+      border border-white/20
+      bg-gradient-to-br from-white/90 to-white/70
+      p-10
+      shadow-2xl
+      backdrop-blur-xl
+    "
+  >
+    {/* Header */}
+    <div className="space-y-2">
+      <h2 className="text-2xl font-bold text-slate-900">
+        Create Disaster
+      </h2>
+      <p className="text-sm text-slate-600">
+        Fill in the details to report a disaster incident
+      </p>
+    </div>
+
+    {/* Form Fields */}
+    <div className="space-y-6">
       {/* Disaster Name */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">
@@ -220,7 +227,15 @@ return (
           placeholder="e.g. Chennai Floods"
           value={form.name}
           onChange={handleChange}
-          className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+          className="
+            bg-white
+            border border-slate-300
+            text-slate-900
+            placeholder:text-slate-400
+            focus:border-blue-500
+            focus:ring-2
+            focus:ring-blue-500/30
+          "
         />
       </div>
 
@@ -234,7 +249,15 @@ return (
           placeholder="Flood, Earthquake, Fire"
           value={form.type}
           onChange={handleChange}
-          className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+          className="
+            bg-white
+            border border-slate-300
+            text-slate-900
+            placeholder:text-slate-400
+            focus:border-blue-500
+            focus:ring-2
+            focus:ring-blue-500/30
+          "
         />
       </div>
 
@@ -248,7 +271,15 @@ return (
           placeholder="City, State"
           value={form.location}
           onChange={handleChange}
-          className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400"
+          className="
+            bg-white
+            border border-slate-300
+            text-slate-900
+            placeholder:text-slate-400
+            focus:border-blue-500
+            focus:ring-2
+            focus:ring-blue-500/30
+          "
         />
       </div>
 
@@ -265,9 +296,15 @@ return (
           value={form.severity}
           onChange={handleChange}
           className="
-            w-full rounded-md border border-slate-300
-            px-3 py-2 text-sm text-slate-900
-            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+            w-full
+            rounded-md
+            border border-slate-300
+            bg-white
+            px-3 py-2
+            text-sm text-slate-900
+            focus:border-blue-500
+            focus:ring-2
+            focus:ring-blue-500/30
           "
         />
       </div>
@@ -282,9 +319,15 @@ return (
           value={form.status}
           onChange={handleChange}
           className="
-            w-full rounded-md border border-slate-300
-            px-3 py-2 text-sm bg-white text-slate-900
-            focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+            w-full
+            rounded-md
+            border border-slate-300
+            bg-white
+            px-3 py-2
+            text-sm text-slate-900
+            focus:border-blue-500
+            focus:ring-2
+            focus:ring-blue-500/30
           "
         >
           <option value="REPORTED">REPORTED</option>
@@ -294,65 +337,74 @@ return (
       </div>
 
       {/* Media Upload */}
-<div className="space-y-3">
-  <label className="text-sm font-medium text-slate-700">
-    Media Upload
-  </label>
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-slate-700">
+          Media Upload
+        </label>
 
-  {/* Visible upload box */}
-  <div
-    onClick={() => fileInputRef.current?.click()}
-    className="
-      flex cursor-pointer items-center justify-center
-      rounded-lg border border-dashed border-slate-300
-      bg-slate-50 px-4 py-6 text-sm text-slate-500
-      hover:bg-slate-100 transition
-    "
-  >
-    Click to upload images or videos
-  </div>
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="
+            flex cursor-pointer flex-col items-center justify-center
+            gap-2 rounded-xl
+            border-2 border-dashed border-blue-300
+            bg-blue-50/60
+            px-6 py-8
+            text-sm text-slate-600
+            hover:bg-blue-100/60
+            transition
+          "
+        >
+          <span className="font-medium text-blue-700">
+            Click to upload images or videos
+          </span>
+          <span className="text-xs text-slate-500">
+            JPG, PNG, MP4 supported
+          </span>
+        </div>
 
-  {/* Hidden file input */}
-  <input
-    ref={fileInputRef}
-    type="file"
-    multiple
-    accept="image/*,video/*"
-    onChange={handleFileSelect}
-    className="hidden"
-  />
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*,video/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
 
-  {/* Uploaded media status */}
-  {media.length > 0 && (
-    <div className="space-y-1 text-sm text-slate-600">
-      {media.map((m, i) => (
-        <p key={i}>
-          {m.isUploading ? "Uploading…" : "Uploaded"}
-        </p>
-      ))}
+        {media.length > 0 && (
+          <div className="space-y-1 text-sm text-slate-600">
+            {media.map((m, i) => (
+              <p key={i}>
+                {m.isUploading ? "Uploading…" : "Uploaded"}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
-  )}
-</div>
 
-      {/* Submit */}
-     <div className="pt-4">
-  <Button
-    type="submit"
-    disabled={loading}
-    className="
-      w-full
-      bg-blue-600
-      text-white
-      hover:bg-blue-700
-      active:bg-blue-800
-      disabled:opacity-60
-      disabled:cursor-not-allowed
-    "
-  >
-    {loading ? "Creating…" : "Create Disaster"}
-  </Button>
-</div>
-
-    </form>
-  );
+    {/* Submit */}
+    <div className="pt-6">
+      <Button
+        type="submit"
+        disabled={loading}
+        className="
+          w-full
+          rounded-xl
+          bg-gradient-to-r from-blue-600 to-blue-700
+          text-white
+          hover:from-blue-700 hover:to-blue-800
+          active:scale-[0.98]
+          transition
+          shadow-lg
+          disabled:opacity-60
+          disabled:cursor-not-allowed
+        "
+      >
+        {loading ? "Creating…" : "Create Disaster"}
+      </Button>
+    </div>
+  </form>
+);
 }

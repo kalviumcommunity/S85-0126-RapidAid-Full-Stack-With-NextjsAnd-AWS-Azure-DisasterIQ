@@ -1,29 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware } from "@/app/middleware/auth";
-import { VolunteerAdminService } from "@/app/Service/volunteerAdmin_service";
+import { RolePreferenceService } from "@/app/Service/rolePreference.service";
 
-export async function POST(req: NextRequest) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { volunteerId: string } }
+) {
   try {
-    const user = await authMiddleware(req);
-    if (user.role !== "NGO_ADMIN") {
-      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    // ✅ param comes from folder name
+    // `params` may be a Promise in Next.js App Router — await it before use
+    const { volunteerId: targetUserId } = (await params) as {
+      volunteerId?: string;
+    };
+
+    console.log("REJECT ROLE PARAM volunteerId =", targetUserId);
+
+    if (!targetUserId) {
+      return NextResponse.json(
+        { success: false, message: "volunteerId param missing" },
+        { status: 400 }
+      );
     }
 
-    const ngoId = user.ngoId;
-    if (!ngoId) return NextResponse.json({ success: false, message: "NGO context missing" }, { status: 400 });
+    const auth = await authMiddleware(req);
 
-    const url = new URL(req.url);
-    const volunteerId = url.pathname.split("/").pop();
+    const result = await RolePreferenceService.rejectByNGOAdmin({
+      adminUserId: auth.id,
+      adminRole: auth.role,
+      adminNgoId: auth.ngoId,
+      targetUserId, // this is USER ID
+    });
 
-    const updated = await VolunteerAdminService.rejectRole(volunteerId as string, { id: user.id, ngoId: user.ngoId, role: user.role });
+    return NextResponse.json({
+      success: true,
+      message: "Role request rejected successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    console.error("Reject role error:", error.message);
 
-    return NextResponse.json({ success: true, message: "Volunteer role request rejected", data: updated }, { status: 200 });
-  } catch (err: any) {
-    console.error("Reject role error:", err?.message || err);
-    if (err.code === "UNAUTHORIZED" || err.message === "NO_TOKEN") return NextResponse.json({ success: false, message: "Authentication required" }, { status: 401 });
-    if (err.code === "FORBIDDEN") return NextResponse.json({ success: false, message: err.message }, { status: 403 });
-    if (err.code === "NOT_FOUND") return NextResponse.json({ success: false, message: err.message }, { status: 404 });
-    if (err.code === "VALIDATION_ERROR") return NextResponse.json({ success: false, message: err.message }, { status: 400 });
-    return NextResponse.json({ success: false, message: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }

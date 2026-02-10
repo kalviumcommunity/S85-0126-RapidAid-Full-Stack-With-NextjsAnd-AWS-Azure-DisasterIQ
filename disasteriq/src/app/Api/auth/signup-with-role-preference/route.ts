@@ -1,65 +1,73 @@
 import { NextResponse, NextRequest } from "next/server";
-import { hashPassword } from "@/app/lib/password";
 import { prisma } from "@/app/prisma/prisma";
-import { sanitizeInput } from "@/app/lib/sanitize";
 import { RolePreferenceRequestRepository } from "@/app/repositories/rolePreferenceRequest.repository";
+import { verifyToken } from "@/app/lib/jwt";
+import { cookies } from "next/headers";
 
-/**
- * API Route: POST /api/auth/signup-with-role-preference
- * Allows a user to sign up and submit a role preference request for a specific NGO
- *
- * Request body:
- * {
- *   "name": "John Doe",
- *   "email": "john@example.com",
- *   "password": "securePassword123",
- *   "phone": "1234567890",
- *   "ngoId": "uuid-of-ngo",
- *   "state": "Maharashtra",
- *   "preferredRole": "MEDICAL_VOLUNTEER"
- * }
- */
 export async function POST(req: NextRequest) {
   try {
+    // -------------------------
+    // 1. Extract token (Cookie OR Bearer)
+    // -------------------------
+    let token: string | undefined;
+
+    // ✅ 1. Try Cookie (browser)
+    const cookieStore = await cookies();
+    token = cookieStore.get("accessToken")?.value;
+
+    // ✅ 2. Fallback to Bearer (Postman / testing)
+    if (!token) {
+      const authHeader = req.headers.get("authorization");
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyToken(token);
+
+    if (!payload || !payload.userId || !payload.state) {
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+
+    // -------------------------
+    // 🔐 ROLE GUARD (CITIZEN ONLY)
+    // -------------------------
+    if (payload.role !== "CITIZEN") {
+      return NextResponse.json(
+        { error: "Only citizens can volunteer" },
+        { status: 403 }
+      );
+    }
+
+    const userId = payload.userId;
+    const state = payload.state;
+
+    // -------------------------
+    // 2. Read & validate body
+    // -------------------------
     const body = await req.json();
-    const { name, email, password, phone, ngoId, state, preferredRole } = body;
+    const ngoId = body?.ngoId;
+    const preferredRole = body?.preferredRole;
 
-    // -------------------------
-    // 1. Validate input
-    // -------------------------
-    if (!name || !email || !password || !ngoId || !state || !preferredRole) {
+    if (!ngoId || !preferredRole) {
       return NextResponse.json(
-        {
-          error: "Missing required fields: name, email, password, ngoId, state, preferredRole",
-        },
-        { status: 400 }
-      );
-    }
-
-    const sanitizedEmail = sanitizeInput(email)?.toLowerCase();
-    if (!sanitizedEmail) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
+        { error: "Missing required fields: ngoId, preferredRole" },
         { status: 400 }
       );
     }
 
     // -------------------------
-    // 2. Check if email already exists
-    // -------------------------
-    const existingUser = await prisma.user.findUnique({
-      where: { email: sanitizedEmail },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 409 }
-      );
-    }
-
-    // -------------------------
-    // 3. Verify NGO exists and state matches
+    // 3. Verify NGO & state
     // -------------------------
     const ngo = await prisma.nGO.findUnique({
       where: { id: ngoId },
@@ -72,67 +80,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (ngo.state !== state) {
-      return NextResponse.json(
-        {
-          error: "State mismatch: NGO operates in a different state",
-        },
-        { status: 400 }
-      );
-    }
-
     // -------------------------
-    // 4. Hash password
+    // 4. Create role preference request
     // -------------------------
-    const passwordHash = await hashPassword(password);
-
-    // -------------------------
-    // 5. Create user
-    // -------------------------
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email: sanitizedEmail,
-        phone: phone || undefined,
-        passwordHash,
-        isActive: true,
-      },
-    });
-
-    // -------------------------
-    // 6. Create role preference request
-    // -------------------------
-    const roleRequest = await RolePreferenceRequestRepository.create({
-      userId: user.id,
-      ngoId,
-      state,
-      preferredRole,
-    });
+    const roleRequest =
+      await RolePreferenceRequestRepository.create({
+        userId,
+        ngoId,
+        state,
+        preferredRole,
+      });
 
     return NextResponse.json(
       {
         success: true,
-        message: "User registered successfully and role preference request submitted",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-        },
+        message: "Role preference request submitted successfully",
         rolePreferenceRequest: {
           id: roleRequest.id,
           status: roleRequest.status,
           preferredRole: roleRequest.preferredRole,
-          ngo: roleRequest.ngo,
           createdAt: roleRequest.createdAt,
         },
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Signup with role preference error:", error);
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        {
+          error:
+            "Role preference request already exists for this NGO",
+        },
+        { status: 409 }
+      );
+    }
+
+    console.error("Role preference request error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

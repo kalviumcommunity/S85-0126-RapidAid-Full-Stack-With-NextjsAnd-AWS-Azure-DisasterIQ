@@ -55,6 +55,31 @@ export async function POST(req: Request) {
   }
 
   // -------------------------
+  // ✅ RESOLVE STATE BASED ON ROLE
+  // -------------------------
+  let resolvedState: string | null = null;
+
+  if (role === "CITIZEN") {
+    resolvedState = user.state;
+  }
+
+  if (role === "NGO_ADMIN") {
+    resolvedState = user.ngo?.state ?? null;
+  }
+
+  if (role === "GOVERNMENT_ADMIN") {
+    resolvedState = user.government?.state ?? null;
+  }
+
+  if (role === "POLICE") {
+    resolvedState = user.police?.state ?? null;
+  }
+
+  if (role === "HOSPITAL") {
+    resolvedState = user.hospital?.state ?? null;
+  }
+
+  // -------------------------
   // JWT PAYLOAD
   // -------------------------
   const accessToken = generateAccessToken({
@@ -64,7 +89,7 @@ export async function POST(req: Request) {
     governmentId: user.governmentId,
     policeId: user.policeId,
     hospitalId: user.hospitalId,
-    state: user.state,
+    state: resolvedState, // ✅ FIXED
   });
 
   const refreshToken = generateRefreshToken({
@@ -77,7 +102,6 @@ export async function POST(req: Request) {
   const response = NextResponse.json({
     message: "Login successful",
     role,
-    accessToken, // ✅ visible in Postman
     redirect:
       user.governmentId
         ? "/government"
@@ -90,7 +114,9 @@ export async function POST(req: Request) {
         : "/public",
   });
 
-  // ✅ ACCESS TOKEN COOKIE
+  // -------------------------
+  // 🍪 ACCESS TOKEN COOKIE
+  // -------------------------
   response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -99,7 +125,9 @@ export async function POST(req: Request) {
     maxAge: 15 * 60, // 15 minutes
   });
 
-  // ✅ REFRESH TOKEN COOKIE
+  // -------------------------
+  // 🍪 REFRESH TOKEN COOKIE
+  // -------------------------
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
