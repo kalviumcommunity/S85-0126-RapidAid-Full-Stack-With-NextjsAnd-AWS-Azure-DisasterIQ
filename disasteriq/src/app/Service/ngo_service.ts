@@ -45,4 +45,6 @@ export const NGOService = {
 
     return NGORepository.getByState(cleanState);
   },
+
+  
 };
