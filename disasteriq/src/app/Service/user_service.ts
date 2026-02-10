@@ -1,6 +1,6 @@
 
-import { getUsers } from '@/app/repositories/user.repository';
+// import { getUsers } from '@/app/repositories/user.repository';
 
-export async function fetchUsers() {
-  return await getUsers();
-}
+// export async function fetchUsers() {
+//   return await getUsers();
+// }

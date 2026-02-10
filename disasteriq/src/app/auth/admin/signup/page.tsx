@@ -22,7 +22,7 @@ export default function AdminAuthPage() {
 
     try {
       const response = await fetch(
-        isSignup ? "/Api/auth/admin/signup" : "/Api/auth//login",
+        isSignup ? "/Api/auth/admin/signup" : "/Api/auth/admin/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -35,23 +35,20 @@ export default function AdminAuthPage() {
       );
 
       if (!response.ok) {
-        // Try to parse error message, but don't fail if it's not JSON
         let errorMessage = "Authentication failed";
         try {
           const errorData = await response.json();
-          errorMessage = errorData.message || "Authentication failed";
-        } catch {
-          // If parsing fails, use default error message
-        }
+          errorMessage = errorData.message || errorMessage;
+        } catch {}
         setError(errorMessage);
         return;
       }
 
-      const data = await response.json();
+      // ✅ FIX: no unused variable
+      await response.json();
 
       // ✅ SUCCESS FLOW
       if (isSignup) {
-        // After signup → switch to login
         setIsSignup(false);
         setPassword("");
       } else {
@@ -97,7 +94,7 @@ export default function AdminAuthPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignup && (
             <input
-              className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm"
               placeholder="Admin Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -108,7 +105,7 @@ export default function AdminAuthPage() {
 
           <input
             type="email"
-            className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -118,7 +115,7 @@ export default function AdminAuthPage() {
 
           <input
             type="password"
-            className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-sm"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -127,20 +124,24 @@ export default function AdminAuthPage() {
           />
 
           <Button
-            className="w-full h-11 bg-blue-600 hover:bg-blue-700 disabled:opacity-60"
+            className="w-full h-11 bg-blue-600 hover:bg-blue-700"
             disabled={loading}
           >
-            {loading ? "Please wait..." : isSignup ? (
-              <>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Create Admin
-              </>
-            ) : (
-              <>
-                <LogIn className="h-4 w-4 mr-2" />
-                Login
-              </>
-            )}
+            {loading
+              ? "Please wait..."
+              : isSignup
+              ? (
+                <>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Create Admin
+                </>
+              )
+              : (
+                <>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </>
+              )}
           </Button>
         </form>
 

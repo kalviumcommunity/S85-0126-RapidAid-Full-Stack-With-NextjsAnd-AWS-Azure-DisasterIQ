@@ -20,7 +20,7 @@ import { Button } from "@/app/components/ui/button";
 /* ===================== TYPES ===================== */
 
 type ReliefRequest = {
-  id: string; // ✅ PRIMARY KEY
+  id: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
   respondedAt?: string | null;
@@ -36,6 +36,8 @@ export default function ResponderDashboard() {
   const router = useRouter();
 
   const [reliefRequests, setReliefRequests] = useState<ReliefRequest[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
   const [loadingRequests, setLoadingRequests] = useState(true);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export default function ResponderDashboard() {
         setLoadingRequests(true);
         setRequestError(null);
 
-        // ✅ KEEPING YOUR API FORMAT
+        // ✅ JWT-based NGO extraction on backend
         const res = await fetch(
           "http://localhost:3000/Api/ngoRequest/ngo/[ngoId]",
           {
@@ -63,8 +65,9 @@ export default function ResponderDashboard() {
           throw new Error(json.message || "Failed to fetch NGO requests");
         }
 
-        // backend returns { success, data }
-        setReliefRequests(json.data);
+        // ✅ BACKEND RETURNS { items, count }
+        setReliefRequests(json.data.items);
+        setTotalCount(json.data.count);
       } catch (err: any) {
         setRequestError(err.message);
       } finally {
@@ -93,7 +96,7 @@ export default function ResponderDashboard() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            requestId, // ✅ CORRECT
+            requestId,
             status,
           }),
         }
@@ -105,7 +108,7 @@ export default function ResponderDashboard() {
         throw new Error(json.message || "Failed to respond to request");
       }
 
-      // ✅ Optimistic UI update
+      // ✅ Optimistic update
       setReliefRequests((prev) =>
         prev.map((req) =>
           req.id === requestId
@@ -162,9 +165,7 @@ export default function ResponderDashboard() {
 
           <div className="flex-1">
             <h2 className="font-semibold">Helping Hands Foundation</h2>
-            <p className="text-sm text-white/70">
-              NGO • Active Operations
-            </p>
+            <p className="text-sm text-white/70">NGO • Active Operations</p>
           </div>
 
           <StatusBadge status="success" label="Verified" />
@@ -200,7 +201,9 @@ export default function ResponderDashboard() {
 
         {/* Incoming Requests */}
         <div className="rounded-xl bg-white/5 border border-white/10 p-5">
-          <h3 className="font-semibold mb-4">Incoming Requests</h3>
+          <h3 className="font-semibold mb-4">
+            Incoming Requests ({totalCount})
+          </h3>
 
           {loadingRequests && (
             <p className="text-sm text-white/60">Loading requests...</p>

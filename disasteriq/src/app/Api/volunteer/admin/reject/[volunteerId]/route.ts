@@ -4,14 +4,11 @@ import { RolePreferenceService } from "@/app/Service/rolePreference.service";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { volunteerId: string } }
+  { params }: { params: Promise<{ volunteerId: string }> }
 ) {
   try {
-    // ✅ param comes from folder name
-    // `params` may be a Promise in Next.js App Router — await it before use
-    const { volunteerId: targetUserId } = (await params) as {
-      volunteerId?: string;
-    };
+    // ✅ Await params (Next.js App Router requirement)
+    const { volunteerId: targetUserId } = await params;
 
     console.log("REJECT ROLE PARAM volunteerId =", targetUserId);
 
@@ -28,7 +25,7 @@ export async function PATCH(
       adminUserId: auth.id,
       adminRole: auth.role,
       adminNgoId: auth.ngoId,
-      targetUserId, // this is USER ID
+      targetUserId, // USER ID
     });
 
     return NextResponse.json({

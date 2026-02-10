@@ -30,23 +30,26 @@ type VolunteerLoginInput = {
 
 export const VolunteerService = {
   signup: async (payload: VolunteerSignupInput) => {
-    // 1. Validate required fields
     const { name, email, password, ngoId, state } = payload;
 
     if (!name || !email || !password || !ngoId || !state) {
-      throw { code: "VALIDATION_ERROR", message: "name, email, password, ngoId, and state are required" };
+      throw {
+        code: "VALIDATION_ERROR",
+        message: "name, email, password, ngoId, and state are required",
+      };
     }
 
-    // 2. Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
-      throw { code: "VALIDATION_ERROR", message: "Email already registered" };
+      throw {
+        code: "VALIDATION_ERROR",
+        message: "Email already registered",
+      };
     }
 
-    // 3. Verify NGO exists
     const ngo = await prisma.nGO.findUnique({
       where: { id: ngoId },
     });
@@ -55,7 +58,6 @@ export const VolunteerService = {
       throw { code: "NOT_FOUND", message: "NGO not found" };
     }
 
-    // 4. Hash password and create user
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
@@ -67,11 +69,10 @@ export const VolunteerService = {
       },
     });
 
-    // 5. Create volunteer profile
     const volunteer = await VolunteerRepository.create({
       userId: user.id,
       ngoId,
-      state: payload.state,
+      state,
       district: payload.district,
       address: payload.address,
       dob: payload.dob ? new Date(payload.dob) : undefined,
@@ -83,19 +84,19 @@ export const VolunteerService = {
       certificationUrl: payload.certificationUrl,
       canTravel: payload.canTravel,
       hasVehicle: payload.hasVehicle,
-      rolePreference: payload.rolePreference || null,
+      rolePreference: payload.rolePreference ?? null,
     });
 
-    // 6. Generate tokens
+    // ✅ ACCESS TOKEN
     const accessToken = generateAccessToken({
       userId: user.id,
       role: "VOLUNTEER",
       ngoId: ngo.id,
+      state: volunteer.state,
     });
 
-    const refreshToken = generateRefreshToken({
-      userId: user.id,
-    });
+    // ✅ FIXED
+    const refreshToken = generateRefreshToken(user.id);
 
     return {
       accessToken,
@@ -110,6 +111,7 @@ export const VolunteerService = {
         state: volunteer.state,
         ngoId: volunteer.ngoId,
         verified: volunteer.verified,
+        available: volunteer.available,
       },
     };
   },
@@ -118,10 +120,12 @@ export const VolunteerService = {
     const { email, password } = payload;
 
     if (!email || !password) {
-      throw { code: "VALIDATION_ERROR", message: "email and password are required" };
+      throw {
+        code: "VALIDATION_ERROR",
+        message: "email and password are required",
+      };
     }
 
-    // 1. Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -130,30 +134,30 @@ export const VolunteerService = {
       throw { code: "UNAUTHORIZED", message: "Invalid credentials" };
     }
 
-    // 2. Check if user is a volunteer
     const volunteer = await VolunteerRepository.findByUserId(user.id);
 
     if (!volunteer) {
-      throw { code: "UNAUTHORIZED", message: "User is not a registered volunteer" };
+      throw {
+        code: "UNAUTHORIZED",
+        message: "User is not a registered volunteer",
+      };
     }
 
-    // 3. Verify password
     const isValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValid) {
       throw { code: "UNAUTHORIZED", message: "Invalid credentials" };
     }
 
-    // 4. Generate tokens
     const accessToken = generateAccessToken({
       userId: user.id,
       role: "VOLUNTEER",
       ngoId: volunteer.ngoId,
+      state: volunteer.state,
     });
 
-    const refreshToken = generateRefreshToken({
-      userId: user.id,
-    });
+    // ✅ FIXED
+    const refreshToken = generateRefreshToken(user.id);
 
     return {
       accessToken,

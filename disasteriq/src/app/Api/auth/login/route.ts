@@ -38,7 +38,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const role = user.roles[0]?.role.name;
+  // ✅ SAFE ROLE EXTRACTION
+  const role = user.roles[0]?.role?.name ?? null;
 
   if (!role) {
     return NextResponse.json(
@@ -59,28 +60,30 @@ export async function POST(req: Request) {
   // -------------------------
   let resolvedState: string | null = null;
 
-  if (role === "CITIZEN") {
-    resolvedState = user.state;
-  }
+  switch (role) {
+    case "CITIZEN":
+      resolvedState = user.state;
+      break;
 
-  if (role === "NGO_ADMIN") {
-    resolvedState = user.ngo?.state ?? null;
-  }
+    case "NGO_ADMIN":
+      resolvedState = user.ngo?.state ?? null;
+      break;
 
-  if (role === "GOVERNMENT_ADMIN") {
-    resolvedState = user.government?.state ?? null;
-  }
+    case "GOVERNMENT_ADMIN":
+      resolvedState = user.government?.state ?? null;
+      break;
 
-  if (role === "POLICE") {
-    resolvedState = user.police?.state ?? null;
-  }
+    case "POLICE":
+      resolvedState = user.police?.state ?? null;
+      break;
 
-  if (role === "HOSPITAL") {
-    resolvedState = user.hospital?.state ?? null;
+    case "HOSPITAL":
+      resolvedState = user.hospital?.state ?? null;
+      break;
   }
 
   // -------------------------
-  // JWT PAYLOAD
+  // ✅ JWT PAYLOAD
   // -------------------------
   const accessToken = generateAccessToken({
     userId: user.id,
@@ -89,29 +92,27 @@ export async function POST(req: Request) {
     governmentId: user.governmentId,
     policeId: user.policeId,
     hospitalId: user.hospitalId,
-    state: resolvedState, // ✅ FIXED
+    state: resolvedState,
   });
 
-  const refreshToken = generateRefreshToken({
-    userId: user.id,
-  });
+  // ✅ FIXED: correct refresh token call
+  const refreshToken = generateRefreshToken(user.id);
 
   // -------------------------
-  // RESPONSE
+  // ✅ REDIRECT BY ROLE
   // -------------------------
+  const redirectMap: Record<string, string> = {
+    GOVERNMENT_ADMIN: "/government",
+    POLICE: "/police/dashboard",
+    NGO_ADMIN: "/responder",
+    HOSPITAL: "/hospital/dashboard",
+    CITIZEN: "/public",
+  };
+
   const response = NextResponse.json({
     message: "Login successful",
     role,
-    redirect:
-      user.governmentId
-        ? "/government"
-        : user.policeId
-        ? "/police/dashboard"
-        : user.ngoId
-        ? "/responder"
-        : user.hospitalId
-        ? "/hospital/dashboard"
-        : "/public",
+    redirect: redirectMap[role] ?? "/public",
   });
 
   // -------------------------
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 15 * 60, // 15 minutes
+    maxAge: 15 * 60,
   });
 
   // -------------------------
@@ -133,7 +134,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/api/auth/refresh",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   });
 
   return response;

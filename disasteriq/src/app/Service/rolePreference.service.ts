@@ -68,7 +68,7 @@ export const RolePreferenceService = {
   },
 
   rejectByNGOAdmin: async ({
-    adminUserId,
+   
     adminRole,
     adminNgoId,
     targetUserId,

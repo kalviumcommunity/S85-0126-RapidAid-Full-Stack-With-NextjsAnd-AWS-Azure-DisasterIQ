@@ -12,15 +12,16 @@ import {
 } from "@/app/components/ui/select";
 import { authApi } from "@/app/lib/authFetch";
 import {
-  Users,
   AlertTriangle,
   Plus,
   Send,
+  MapPin,
   CheckCircle,
   XCircle,
   Clock,
-  MapPin,
 } from "lucide-react";
+
+/* ===================== TYPES ===================== */
 
 type NGO = {
   id: string;
@@ -44,43 +45,46 @@ type Disaster = {
 
 type NGORequest = {
   id: string;
-  disasterId: string;
-  ngoId: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
   disaster?: Disaster;
   ngo?: NGO;
 };
 
+/* ===================== COMPONENT ===================== */
+
 export default function Page() {
   const [disasters, setDisasters] = useState<Disaster[]>([]);
   const [ngos, setNGOs] = useState<NGO[]>([]);
   const [requests, setRequests] = useState<NGORequest[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedDisaster, setSelectedDisaster] =
     useState<Disaster | null>(null);
   const [selectedNGO, setSelectedNGO] = useState<NGO | null>(null);
+
+  /* ===================== FETCH DATA ===================== */
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const disastersRes = await authApi.get("/Api/disasters/get");
         if (disastersRes.ok) {
-          const data = await disastersRes.json();
-          setDisasters(data.data || []);
+          const json = await disastersRes.json();
+          setDisasters(json.data?.items ?? []);
         }
 
         const ngosRes = await authApi.get("/Api/government/ngos");
         if (ngosRes.ok) {
-          const data = await ngosRes.json();
-          setNGOs(data.data || []);
+          const json = await ngosRes.json();
+          setNGOs(json.data ?? []);
         }
 
         const requestsRes = await authApi.get("/Api/ngoRequest/get");
         if (requestsRes.ok) {
-          const data = await requestsRes.json();
-          setRequests(data.data || []);
+          const json = await requestsRes.json();
+          setRequests(json.data?.items ?? []);
         }
       } catch (err) {
         console.error("Fetch error:", err);
@@ -92,12 +96,13 @@ export default function Page() {
     fetchData();
   }, []);
 
+  /* ===================== ASSIGN NGO ===================== */
+
   const handleAssignNGO = (disaster: Disaster) => {
     setSelectedDisaster(disaster);
     setShowAssignModal(true);
   };
 
-  // ✅ FIXED FUNCTION
   const handleSubmitAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -118,16 +123,15 @@ export default function Page() {
         return;
       }
 
-      alert("NGO Assigned Successfully!");
       setShowAssignModal(false);
       setSelectedDisaster(null);
       setSelectedNGO(null);
 
-      // Optional refresh
+      // refresh requests
       const requestsRes = await authApi.get("/Api/ngoRequest/get");
       if (requestsRes.ok) {
-        const data = await requestsRes.json();
-        setRequests(data.data || []);
+        const json = await requestsRes.json();
+        setRequests(json.data?.items ?? []);
       }
     } catch (err) {
       console.error("Assign error:", err);
@@ -135,19 +139,23 @@ export default function Page() {
     }
   };
 
+  /* ===================== HELPERS ===================== */
+
   const getSeverityColor = (severity: number) => {
     if (severity >= 7) return "text-red-400";
     if (severity >= 4) return "text-yellow-400";
     return "text-green-400";
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: NGORequest["status"]) => {
     if (status === "ACCEPTED")
       return <CheckCircle className="h-4 w-4 text-green-400" />;
     if (status === "REJECTED")
       return <XCircle className="h-4 w-4 text-red-400" />;
     return <Clock className="h-4 w-4 text-yellow-400" />;
   };
+
+  /* ===================== UI ===================== */
 
   return (
     <DashboardLayout role="government" userName="Gov. Official">
@@ -206,6 +214,36 @@ export default function Page() {
           )}
         </div>
 
+        {/* NGO Requests */}
+        <div className="rounded-xl bg-white/5 border border-white/10 p-6">
+          <h2 className="text-lg font-semibold mb-4">
+            NGO Requests
+          </h2>
+
+          {requests.length === 0 ? (
+            <p className="text-white/60">No NGO requests yet</p>
+          ) : (
+            requests.map((req) => (
+              <div
+                key={req.id}
+                className="flex justify-between items-center p-3 rounded-lg bg-white/5 border border-white/10"
+              >
+                <div>
+                  <p className="font-medium">
+                    {req.ngo?.name ?? "NGO"} →{" "}
+                    {req.disaster?.name ?? "Disaster"}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {new Date(req.createdAt).toLocaleString()}
+                  </p>
+                </div>
+
+                {getStatusIcon(req.status)}
+              </div>
+            ))
+          )}
+        </div>
+
         {/* Modal */}
         {showAssignModal && selectedDisaster && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -218,7 +256,9 @@ export default function Page() {
                 <Select
                   value={selectedNGO?.id || ""}
                   onValueChange={(id) =>
-                    setSelectedNGO(ngos.find((n) => n.id === id) || null)
+                    setSelectedNGO(
+                      ngos.find((n) => n.id === id) || null
+                    )
                   }
                 >
                   <SelectTrigger className="bg-gray-800">
@@ -227,7 +267,7 @@ export default function Page() {
                   <SelectContent className="bg-gray-900">
                     {ngos.map((ngo) => (
                       <SelectItem key={ngo.id} value={ngo.id}>
-                        {ngo.name} - {ngo.state}
+                        {ngo.name} — {ngo.state}
                       </SelectItem>
                     ))}
                   </SelectContent>

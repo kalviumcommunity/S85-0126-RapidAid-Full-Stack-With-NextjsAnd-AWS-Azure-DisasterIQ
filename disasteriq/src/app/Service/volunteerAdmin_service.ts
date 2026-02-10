@@ -1,5 +1,5 @@
 import { VolunteerAdminRepository } from "@/app/repositories/volunteerAdmin.repository";
-import { prisma } from "@/app/prisma/prisma";
+
 import { VolunteerRole } from "@prisma/client";
 
 type AdminUserContext = {

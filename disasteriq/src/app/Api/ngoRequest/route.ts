@@ -1,22 +1,3 @@
-/**
- * GET /api/ngo-requests
- * 
- * Fetch all NGO requests with pagination
- * 
- * Query Parameters:
- * - page: number (default: 1)
- * - pageSize: number (default: 10, max: 100)
- * 
- * Response:
- * {
- *   success: boolean,
- *   message: string,
- *   data: NGORequest[],
- *   pagination: { page, pageSize, total, totalPages },
- *   timestamp: ISO8601
- * }
- */
-
 import { NextRequest } from "next/server";
 import { NGORequestFetchService } from "@/app/Service/ngoRequest_fetch.service";
 import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
@@ -24,37 +5,58 @@ import { authMiddleware } from "@/app/middleware/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    // ✅ Authentication + Authorization
+    // ✅ Auth
     const user = await authMiddleware(req);
 
-    if (user.role !== "GOVERNMENT_ADMIN" && user.role !== "NGO_ADMIN") {
-      return sendError("Forbidden: Only Government and NGO admins can access", "FORBIDDEN", 403);
+    // ✅ Role guard
+    if (
+      user.role !== "GOVERNMENT_ADMIN" &&
+      user.role !== "NGO_ADMIN"
+    ) {
+      return sendError(
+        "Forbidden: Only Government and NGO admins can access",
+        "FORBIDDEN",
+        403
+      );
     }
 
     const { searchParams } = req.nextUrl;
 
-    const page = searchParams.get("page");
-    const pageSize = searchParams.get("pageSize");
+    const pageParam = searchParams.get("page");
+    const pageSizeParam = searchParams.get("pageSize");
 
-    const result = await NGORequestFetchService.getAllRequests({
-      page: page ? Number(page) : undefined,
-      pageSize: pageSize ? Number(pageSize) : undefined,
-    });
+    const page = pageParam ? Number(pageParam) : undefined;
+    const pageSize = pageSizeParam ? Number(pageSizeParam) : undefined;
+
+    const { items, count } =
+      await NGORequestFetchService.getAllRequests({
+        page,
+        pageSize,
+      });
 
     return sendSuccess(
-      result.data,
-      `Retrieved ${result.data.length} NGO request(s)`,
+      {
+        items,
+        count,
+      },
+      `Retrieved ${items.length} NGO request(s)`,
       200
     );
-  } catch (error: any) {
-    console.error("❌ GET /api/ngo-requests error:", error.message);
+  } catch (error: unknown) {
+    console.error("❌ GET /api/ngo-requests error:", error);
+
+    if (error instanceof Error) {
+      return sendError(
+        error.message,
+        "FETCH_ERROR",
+        500
+      );
+    }
 
     return sendError(
-      error.message || "Failed to fetch NGO requests",
+      "Failed to fetch NGO requests",
       "FETCH_ERROR",
-      500,
-      error
+      500
     );
   }
 }
-

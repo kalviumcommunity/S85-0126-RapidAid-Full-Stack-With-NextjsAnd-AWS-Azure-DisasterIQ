@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import { AuthRepository } from "@/app/repositories/auth.repo";
-import { signToken } from "@/app/lib/jwt";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "@/app/lib/jwt";
 
 export const AuthService = {
   signup: async (payload: any) => {
@@ -39,11 +42,28 @@ export const AuthService = {
       throw { code: "UNAUTHORIZED", message: "Invalid credentials" };
     }
 
-    const token = signToken({
-      id: user.id,
-      email: user.email,
+    // ✅ Extract role correctly from RBAC tables
+    const primaryRole = user.roles[0]?.role.name ?? "CITIZEN";
+
+    const accessToken = generateAccessToken({
+      userId: user.id,
+      role: primaryRole,
+
+      governmentId: user.governmentId ?? null,
+      policeId: user.policeId ?? null,
+      ngoId: user.ngoId ?? null,
+      hospitalId: user.hospitalId ?? null,
+
+      governmentState: user.government?.state ?? null,
+      state: user.state ?? null,
     });
 
-    return { token, user };
+    const refreshToken = generateRefreshToken(user.id);
+
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
   },
 };

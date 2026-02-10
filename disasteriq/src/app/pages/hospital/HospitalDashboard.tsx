@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import {
   AlertTriangle,
-  Heart,
+  
   Activity,
   Users,
   Shield,
