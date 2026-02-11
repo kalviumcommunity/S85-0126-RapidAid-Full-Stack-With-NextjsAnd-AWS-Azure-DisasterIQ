@@ -74,7 +74,7 @@ export default function Page() {
         }
 
         // Fetch existing requests
-        const requestsRes = await authApi.get("/Api/ngoRequest/get"); // Assuming this endpoint exists
+        const requestsRes = await authApi.get("/Api/ngoRequest"); // Assuming this endpoint exists
         if (requestsRes.ok) {
           const requestsData = await requestsRes.json();
           setRequests(requestsData.data || []);
