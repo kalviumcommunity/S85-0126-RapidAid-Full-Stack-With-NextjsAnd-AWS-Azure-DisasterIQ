@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 import { Input } from "@/app/components/ui/input";
 import { useToast } from "@/app/hooks/use-toast";
 

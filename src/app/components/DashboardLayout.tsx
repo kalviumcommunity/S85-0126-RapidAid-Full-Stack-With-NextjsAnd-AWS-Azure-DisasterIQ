@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/app/lib/utils";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 
 /* ===================== TYPES ===================== */
 

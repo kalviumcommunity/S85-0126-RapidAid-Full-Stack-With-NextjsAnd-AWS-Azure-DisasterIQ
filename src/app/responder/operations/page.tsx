@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardLayout } from "@/app/components/DashboardLayout";
+import { DashboardLayout } from "@/app/components";
 
 type RoleRequest = {
   id: string;

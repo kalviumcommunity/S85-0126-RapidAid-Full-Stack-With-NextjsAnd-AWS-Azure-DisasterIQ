@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardLayout } from "@/app/components/DashboardLayout";
-import { Button } from "@/app/components/ui/button";
+import { DashboardLayout } from "@/app/components";
+import { Button } from "@/app/components/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { authApi } from "@/app/lib/authFetch";
 import {

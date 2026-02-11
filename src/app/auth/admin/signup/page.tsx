@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Shield, UserPlus, LogIn } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 import { useRouter } from "next/navigation";
 
 export default function AdminAuthPage() {

@@ -10,12 +10,6 @@ import { findUserForAuthByEmail } from "@/app/repositories/user.repository";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  console.log("==== LOGIN DEBUG START ====");
-  console.log("NODE_ENV:", process.env.NODE_ENV);
-  console.log("DATABASE_URL:", process.env.DATABASE_URL);
-  console.log("==== LOGIN DEBUG END ====");
-
-  
   const body = await req.json();
 
   const email = sanitizeInput(body.email)?.toLowerCase();

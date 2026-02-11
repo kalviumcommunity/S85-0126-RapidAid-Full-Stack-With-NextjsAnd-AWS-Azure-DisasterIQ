@@ -2,7 +2,7 @@
 
 import { MapPin, Clock, Users, AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/app/components/StatusBadge";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 import { cn } from "@/app/lib/utils";
 
 interface DisasterCardProps {

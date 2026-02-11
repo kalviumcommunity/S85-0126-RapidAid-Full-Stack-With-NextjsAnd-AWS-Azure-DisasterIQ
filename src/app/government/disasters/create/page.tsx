@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardLayout } from "@/app/components/DashboardLayout";
+import { DashboardLayout } from "@/app/components";
 import CreateDisasterForm from "@/app/components/CreateDisasterForm";
 
 export default function CreateDisasterPage() {

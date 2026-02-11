@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/app/components/ui/use-toast";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 
 export default function FeedbackDemo() {
   const { toast } = useToast();

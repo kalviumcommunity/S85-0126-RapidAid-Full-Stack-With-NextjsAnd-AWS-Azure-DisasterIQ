@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Building2, Shield, User } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 import { useRouter } from "next/navigation";
 
 export default function GovernmentAuthPage() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardLayout } from "@/app/components/DashboardLayout";
+import { DashboardLayout } from "@/app/components";
 
 export default function OperationsPage() {
   return (

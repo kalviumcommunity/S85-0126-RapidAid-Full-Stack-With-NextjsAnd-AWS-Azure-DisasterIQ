@@ -12,10 +12,10 @@ import {
   Clock,
 } from "lucide-react";
 
-import { DashboardLayout } from "@/app/components/DashboardLayout";
+import { DashboardLayout } from "@/app/components";
 import { StatCard } from "@/app/components/StatCart";
 import { StatusBadge } from "@/app/components/StatusBadge";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 
 /* ===================== TYPES ===================== */
 

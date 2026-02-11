@@ -17,7 +17,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 import { StatusBadge } from "@/app/components/StatusBadge";
 
 /* ================= DATA (UNCHANGED) ================= */

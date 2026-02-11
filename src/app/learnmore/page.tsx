@@ -1,6 +1,6 @@
 import { Shield, Heart, Hospital, Users } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/app/components/ui";
 
 export default function LearnMorePage() {
   return (
