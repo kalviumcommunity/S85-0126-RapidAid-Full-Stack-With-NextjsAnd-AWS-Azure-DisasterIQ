@@ -4,6 +4,14 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.jsx': ['.tsx', '.jsx'],
+    };
+    return config;
+  },
+
   async headers() {
     return [
       {
