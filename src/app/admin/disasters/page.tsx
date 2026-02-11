@@ -8,7 +8,7 @@ export default function Page() {
       <div className="space-y-4 text-white">
         <h1 className="text-3xl font-bold">
           Coming Soon
-        </h1>
+        </h1> 
 
         <p className="text-white/60">
           This page is under development.

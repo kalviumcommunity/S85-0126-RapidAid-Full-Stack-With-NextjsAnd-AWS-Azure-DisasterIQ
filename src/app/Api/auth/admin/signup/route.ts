@@ -5,7 +5,7 @@ import { EmailService } from "@/app/Service/email.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
+//efewfewf
 export async function POST(req: Request) {
   const body = await req.json();
   const { name, email, password, phone } = body;
