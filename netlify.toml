@@ -1,6 +1,5 @@
 [build]
   command = "npx prisma generate --schema=src/app/prisma/schema.prisma && npm run build"
-  publish = ".netlify/output"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
