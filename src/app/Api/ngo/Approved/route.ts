@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import { NGORequestService } from "@/app/Service/ngoApproval.service";
 
+export const dynamic = "force-dynamic";
+
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
 
 interface JwtPayload {

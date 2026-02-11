@@ -3,6 +3,8 @@ import { authMiddleware } from "@/app/middleware/auth";
 import { NGORequestFetchService } from "@/app/Service/ngoRequest_fetch.service";
 import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     // ✅ Auth

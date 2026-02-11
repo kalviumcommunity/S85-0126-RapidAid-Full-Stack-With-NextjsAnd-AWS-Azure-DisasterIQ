@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NGOService } from "@/app/Service/ngo_service";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(req:any) {
   try {

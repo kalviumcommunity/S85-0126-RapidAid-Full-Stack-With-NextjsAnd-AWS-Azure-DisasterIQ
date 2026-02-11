@@ -4,6 +4,8 @@ import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
 import { ERROR_CODES } from "@/app/lib/ errorCodes";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 
+export const dynamic = "force-dynamic";
+
 
 export const DELETE = apiHandler(async (req: Request) => {
   const { searchParams } = new URL(req.url);

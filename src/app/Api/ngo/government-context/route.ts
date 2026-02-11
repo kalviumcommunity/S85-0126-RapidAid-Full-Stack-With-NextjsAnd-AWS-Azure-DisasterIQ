@@ -19,6 +19,8 @@ import { NGOService } from "@/app/Service/ngo_service";
 import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
 import { prisma } from "@/app/prisma/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     // ✅ Authentication + Authorization

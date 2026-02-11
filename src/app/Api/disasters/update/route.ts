@@ -4,6 +4,7 @@ import { ERROR_CODES } from "@/app/lib/ errorCodes";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 import { updateDisasterSchema } from "@/app/lib/schema";
 import { ZodError } from "zod";
+export const dynamic = "force-dynamic";
 export const PUT = apiHandler(async (req: Request) => {
   try {
     const { searchParams } = new URL(req.url);

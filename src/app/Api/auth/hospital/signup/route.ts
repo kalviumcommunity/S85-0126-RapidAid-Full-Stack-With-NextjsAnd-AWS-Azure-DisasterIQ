@@ -3,6 +3,8 @@ import { hashPassword } from "@/app/lib/password";
 import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   const { hospital, user } = await req.json();
 

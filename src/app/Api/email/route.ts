@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { SendEmailCommand } from "@aws-sdk/client-ses";
 import { ses } from "@/app/lib/ses";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const { to, subject, message } = await req.json();

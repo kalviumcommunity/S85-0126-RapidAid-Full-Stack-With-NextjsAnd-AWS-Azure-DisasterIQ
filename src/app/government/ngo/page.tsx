@@ -115,7 +115,7 @@ export default function Page() {
         setSelectedNGO(null);
         
         // Refresh requests list
-        const requestsRes = await authApi.get("/Api/ngoRequest/get");
+        const requestsRes = await authApi.get("/Api/ngoRequest");
         if (requestsRes.ok) {
           const requestsData = await requestsRes.json();
           setRequests(requestsData.data || []);

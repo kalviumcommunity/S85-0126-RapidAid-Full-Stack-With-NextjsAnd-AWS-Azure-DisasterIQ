@@ -7,6 +7,8 @@ import { sanitizeInput } from "@/app/lib/sanitize";
 import { NextResponse } from "next/server";
 import { findUserForAuthByEmail } from "@/app/repositories/user.repository";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   const body = await req.json();
 

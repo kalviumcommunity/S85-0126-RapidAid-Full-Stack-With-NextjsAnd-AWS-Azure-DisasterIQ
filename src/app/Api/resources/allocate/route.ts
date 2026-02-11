@@ -8,6 +8,8 @@ import {
 } from "@/app/Service/resource_allocation_service";
 import { ZodError } from "zod";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/resources/allocate
  * Body: { resourceId, disasterId, allocatedQuantity }

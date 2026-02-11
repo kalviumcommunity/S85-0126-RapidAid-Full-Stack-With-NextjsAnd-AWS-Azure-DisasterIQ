@@ -5,6 +5,8 @@ import { apiHandler } from "@/app/lib/ apiWrapper";
 import { createDisasterSchema } from "@/app/lib/schema";
 import { ZodError } from "zod";
 
+export const dynamic = "force-dynamic";
+
 
 export const POST = apiHandler(async (req: Request & { user?: any }) => {
   try {

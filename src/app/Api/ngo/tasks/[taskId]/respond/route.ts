@@ -5,6 +5,8 @@ import { ERROR_CODES } from "@/app/lib/ errorCodes";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 import { requireRole } from "@/app/middleware/requireRole";
 
+export const dynamic = "force-dynamic";
+
 export const PATCH = apiHandler(async (req: NextRequest & { user?: any }) => {
   const taskId = req.nextUrl.pathname.split('/').slice(-2)[0];
   const { status } = await req.json();

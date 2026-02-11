@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware } from "@/app/middleware/auth";
 import { RolePreferenceService } from "@/app/Service/rolePreference.service";
 
+export const dynamic = "force-dynamic";
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ volunteerId: string }> }

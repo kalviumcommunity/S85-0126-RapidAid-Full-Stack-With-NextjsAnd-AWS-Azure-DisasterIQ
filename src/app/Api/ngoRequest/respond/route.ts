@@ -4,6 +4,8 @@ import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
 import { NGORequestRepository } from "@/app/repositories/ngoRequest";
 import { NGORequestStatus } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 type ActionStatus = "APPROVED" | "REJECTED";
 
 export async function POST(req: NextRequest) {

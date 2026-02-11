@@ -3,6 +3,8 @@ import { DisasterService } from "@/app/Service/disaster_service";
 import { sendSuccess } from "@/app/lib/ responseHandler";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 
+export const dynamic = "force-dynamic";
+
 export const GET = apiHandler(async (req: NextRequest & { user?: any }) => {
   const { searchParams } = req.nextUrl;
 

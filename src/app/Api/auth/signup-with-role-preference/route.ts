@@ -4,6 +4,8 @@ import { RolePreferenceRequestRepository } from "@/app/repositories/rolePreferen
 import { verifyToken } from "@/app/lib/jwt";
 import { cookies } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     // -------------------------

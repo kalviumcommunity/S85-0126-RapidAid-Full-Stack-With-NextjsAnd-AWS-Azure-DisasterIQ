@@ -3,6 +3,8 @@ import { apiHandler } from "@/app/lib/ apiWrapper";
 import { sendError, sendSuccess } from "@/app/lib/ responseHandler";
 import { ERROR_CODES } from "@/app/lib/ errorCodes";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/transactions/rollback-demo
  *

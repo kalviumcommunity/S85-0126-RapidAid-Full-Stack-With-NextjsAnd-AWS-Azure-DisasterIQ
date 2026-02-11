@@ -4,6 +4,8 @@ import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
 import { sanitizeInput } from "@/app/lib/sanitize";
 import { NGOService } from "@/app/Service/ngo_service";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/ngo/by-government
  * 

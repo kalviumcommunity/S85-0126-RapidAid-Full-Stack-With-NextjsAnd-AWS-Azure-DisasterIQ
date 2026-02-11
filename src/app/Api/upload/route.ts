@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { S3Client } from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 
+export const dynamic = "force-dynamic";
+
 const s3 = new S3Client({
   region: process.env.DISASTERIQ_AWS_REGION!, // eu-north-1
   credentials: {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { NGORequestService } from "@/app/Service/ngoRequest_service";
 import { authMiddleware } from "@/app/middleware/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     // -------------------------

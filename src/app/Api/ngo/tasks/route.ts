@@ -5,6 +5,8 @@ import { ERROR_CODES } from "@/app/lib/ errorCodes";
 import { apiHandler } from "@/app/lib/ apiWrapper";
 import { requireRole } from "@/app/middleware/requireRole";
 
+export const dynamic = "force-dynamic";
+
 export const GET = apiHandler(async (req: NextRequest & { user?: any }) => {
   // 🔐 ROLE CHECK - Only NGO can view their tasks
   const roleError = requireRole(req, ["NGO"]);
