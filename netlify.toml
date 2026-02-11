@@ -1,5 +1,11 @@
 [build]
-  command = "npx prisma generate --schema=src/app/prisma/schema.prisma && npm run build"
+  # We removed 'npx prisma migrate deploy' because you already did it locally!
+  command = "npx prisma generate && npm run build"
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_CONFIG_IGNORE_SCRIPTS = "true"
