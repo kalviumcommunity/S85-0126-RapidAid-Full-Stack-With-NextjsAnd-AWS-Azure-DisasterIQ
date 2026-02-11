@@ -9,6 +9,11 @@ const nextConfig = {
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
       '.jsx': ['.tsx', '.jsx'],
     };
+    
+    // Ensure index files are resolved correctly
+    config.resolve.mainFiles = ['index'];
+    config.resolve.extensions = ['.ts', '.tsx', '.js', '.jsx', '.json'];
+    
     return config;
   },
   //dsfdsf
