@@ -32,7 +32,7 @@ export default function Page() {
     const fetchRequests = async () => {
       try {
         const res = await fetch(
-          "http://localhost:3000/Api/government/requests",
+          "/Api/government/requests",
           {
             credentials: "include",
           }

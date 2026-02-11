@@ -29,7 +29,7 @@ export default function GovernmentAuthPage() {
   const handleSubmit = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3000/Api/auth/Government/signup",
+        "/Api/auth/Government/signup",
         {
           method: "POST",
           headers: {

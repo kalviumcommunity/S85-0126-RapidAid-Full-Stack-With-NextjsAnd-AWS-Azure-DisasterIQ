@@ -29,7 +29,7 @@ export default function OperationsPage() {
     const fetchRoleRequests = async () => {
       try {
         const res = await fetch(
-          "http://localhost:3000/Api/volunteer/admin/role-requests",
+          "/Api/volunteer/admin/role-requests",
           { credentials: "include" }
         );
 
@@ -54,7 +54,7 @@ export default function OperationsPage() {
   const handleApprove = async (userId: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/Api/volunteer/admin/approve/${userId}`,
+        `/Api/volunteer/admin/approve/${userId}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -88,7 +88,7 @@ export default function OperationsPage() {
   const handleReject = async (userId: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/Api/volunteer/admin/reject/${userId}`,
+        `/Api/volunteer/admin/reject/${userId}`,
         {
           method: "PATCH",
           credentials: "include",

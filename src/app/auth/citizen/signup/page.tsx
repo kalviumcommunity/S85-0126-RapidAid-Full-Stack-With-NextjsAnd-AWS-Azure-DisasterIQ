@@ -29,7 +29,7 @@ export default function CitizenSignup() {
 
     try {
       const res = await fetch(
-        "http://localhost:3000/Api/auth/user/signup",
+        "/Api/auth/user/signup",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
