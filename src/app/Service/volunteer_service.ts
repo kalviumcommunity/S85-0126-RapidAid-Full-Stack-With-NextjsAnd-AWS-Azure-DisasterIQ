@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/app/prisma/prisma";
 import { VolunteerRepository } from "@/app/repositories/volunteer.repository";
 import { generateAccessToken, generateRefreshToken } from "@/app/lib/jwt";
