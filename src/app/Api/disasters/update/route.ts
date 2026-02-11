@@ -1,0 +1,71 @@
+import { DisasterService } from "@/app/Service/disaster_service";
+import { sendSuccess, sendError } from "@/app/lib/ responseHandler";
+import { ERROR_CODES } from "@/app/lib/ errorCodes";
+import { apiHandler } from "@/app/lib/ apiWrapper";
+import { updateDisasterSchema } from "@/app/lib/schema";
+import { ZodError } from "zod";
+export const PUT = apiHandler(async (req: Request) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return sendError("ID required", ERROR_CODES.VALIDATION_ERROR, 400);
+    }
+
+    const body = await req.json();
+
+    // 🔒 Full update validation
+    const validatedBody = updateDisasterSchema.parse(body);
+
+    const updated = await DisasterService.update(id, validatedBody);
+    return sendSuccess(updated, "Disaster updated");
+  } catch (err: any) {
+    if (err instanceof ZodError) {
+      return sendError(
+       err.issues.map(e => `${e.path.join(".")}: ${e.message}`).join("; "),
+        ERROR_CODES.VALIDATION_ERROR,
+        400
+      );
+    }
+
+    return sendError(
+      err.message,
+      err.code ?? ERROR_CODES.INTERNAL_ERROR,
+      400
+    );
+  }
+});
+
+export const PATCH = apiHandler(async (req: Request) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return sendError("ID required", ERROR_CODES.VALIDATION_ERROR, 400);
+    }
+
+    const body = await req.json();
+
+    // 🔒 Partial update validation
+    const validatedBody = updateDisasterSchema.parse(body);
+
+    const updated = await DisasterService.partialUpdate(id, validatedBody);
+    return sendSuccess(updated, "Disaster partially updated");
+  } catch (err: any) {
+    if (err instanceof ZodError) {
+      return sendError(
+ err.issues.map(e => `${e.path.join(".")}: ${e.message}`).join("; "),
+        ERROR_CODES.VALIDATION_ERROR,
+        400
+      );
+    }
+
+    return sendError(
+      err.message,
+      err.code ?? ERROR_CODES.INTERNAL_ERROR,
+      400
+    );
+  }
+});

@@ -1,0 +1,489 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  name                      String
+  email                     String                     @unique
+  phone                     String?
+  passwordHash              String
+  isActive                  Boolean                    @default(true)
+  createdAt                 DateTime                   @default(now())
+  governmentId              String?                    @db.Uuid
+  policeId                  String?                    @db.Uuid
+  ngoId                     String?                    @db.Uuid
+  hospitalId                String?                    @db.Uuid
+  state                     String?
+  auditLogs                 AuditLog[]
+  createdReports            MedicalReport[]
+  ngoRequestsSent           NGORequest[]
+  createdResources          Resource[]
+  approvedRoleRequests      RolePreferenceRequest[]    @relation("ApprovedRoleRequests")
+  rolePreferenceRequests    RolePreferenceRequest[]
+  createdShelters           Shelter[]
+  government                Government?                @relation(fields: [governmentId], references: [id])
+  hospital                  Hospital?                  @relation(fields: [hospitalId], references: [id])
+  ngo                       NGO?                       @relation(fields: [ngoId], references: [id])
+  police                    Police?                    @relation(fields: [policeId], references: [id])
+  roles                     UserRole[]
+  volunteer                 Volunteer?
+  volunteerResourceRequests VolunteerResourceRequest[]
+
+  @@index([createdAt])
+  @@index([governmentId])
+  @@index([policeId])
+  @@index([ngoId])
+  @@index([hospitalId])
+  @@map("user")
+}
+
+model Role {
+  id    String     @id @default(uuid()) @db.Uuid
+  name  String     @unique
+  users UserRole[]
+
+  @@map("role")
+}
+
+model UserRole {
+  userId String @db.Uuid
+  roleId String @db.Uuid
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@map("user_role")
+}
+
+model Government {
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String
+  level        String
+  state        String?
+  district     String?
+  department   String
+  contactEmail String       @unique
+  contactPhone String
+  createdAt    DateTime     @default(now())
+  disasters    Disaster[]
+  media        Media[]
+  ngoRequests  NGORequest[]
+  users        User[]
+
+  @@index([createdAt])
+  @@map("government")
+}
+
+model Police {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  stationCode     String   @unique
+  state           String
+  district        String
+  address         String
+  officerInCharge String
+  contactNumber   String
+  createdAt       DateTime @default(now())
+  users           User[]
+
+  @@index([createdAt])
+  @@index([state, district])
+  @@map("police")
+}
+
+model NGO {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  name                      String
+  registrationNumber        String                     @unique
+  state                     String
+  focusArea                 String
+  contactEmail              String
+  contactPhone              String
+  createdAt                 DateTime                   @default(now())
+  requests                  NGORequest[]
+  rolePreferenceRequests    RolePreferenceRequest[]
+  users                     User[]
+  volunteers                Volunteer[]
+  volunteerResourceRequests VolunteerResourceRequest[]
+
+  @@index([createdAt])
+  @@index([state])
+  @@map("ngo")
+}
+
+model Hospital {
+  id            String          @id @default(uuid()) @db.Uuid
+  name          String
+  type          String
+  state         String
+  district      String
+  address       String
+  totalBeds     Int
+  availableBeds Int
+  emergencyBeds Int
+  contactNumber String
+  createdAt     DateTime        @default(now())
+  reports       MedicalReport[]
+  users         User[]
+
+  @@index([createdAt])
+  @@index([state, district])
+  @@map("hospital")
+}
+
+model Disaster {
+  id                        String                     @id @default(uuid()) @db.Uuid
+  name                      String
+  type                      String
+  severity                  Int
+  location                  String
+  status                    String
+  reportedAt                DateTime                   @default(now())
+  governmentId              String                     @db.Uuid
+  government                Government                 @relation(fields: [governmentId], references: [id])
+  metrics                   DisasterMetric?
+  media                     Media[]
+  ngoRequests               NGORequest[]
+  assignments               RescueAssignment[]
+  resources                 ResourceAllocation[]
+  victims                   Victim[]
+  volunteerResourceRequests VolunteerResourceRequest[]
+
+  @@index([governmentId])
+  @@index([status])
+  @@index([reportedAt])
+  @@index([governmentId, reportedAt])
+  @@map("disaster")
+}
+
+model NGORequest {
+  id            String           @id @default(uuid()) @db.Uuid
+  disasterId    String           @db.Uuid
+  ngoId         String           @db.Uuid
+  status        NGORequestStatus @default(PENDING)
+  requestedById String           @db.Uuid
+  respondedAt   DateTime?
+  createdAt     DateTime         @default(now())
+  governmentId  String           @db.Uuid
+  disaster      Disaster         @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  government    Government       @relation(fields: [governmentId], references: [id])
+  ngo           NGO              @relation(fields: [ngoId], references: [id])
+  requestedBy   User             @relation(fields: [requestedById], references: [id])
+
+  @@unique([disasterId, ngoId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([disasterId])
+  @@index([ngoId])
+  @@index([governmentId])
+  @@map("ngo_request")
+}
+
+model Media {
+  id                     String     @id @default(uuid()) @db.Uuid
+  type                   MediaType
+  url                    String
+  thumbnail              String?
+  disasterId             String     @db.Uuid
+  uploadedByGovernmentId String     @db.Uuid
+  createdAt              DateTime   @default(now())
+  disaster               Disaster   @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  uploadedByGovernment   Government @relation(fields: [uploadedByGovernmentId], references: [id])
+
+  @@index([disasterId])
+  @@index([uploadedByGovernmentId])
+  @@index([createdAt])
+  @@map("media")
+}
+
+model Victim {
+  id         String          @id @default(uuid()) @db.Uuid
+  disasterId String          @db.Uuid
+  name       String?
+  age        Int?
+  gender     String?
+  condition  String?
+  rescued    Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  reports    MedicalReport[]
+  disaster   Disaster        @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+
+  @@index([disasterId])
+  @@index([rescued])
+  @@index([createdAt])
+  @@map("victim")
+}
+
+model RescueTeam {
+  id           String             @id @default(uuid()) @db.Uuid
+  name         String
+  organization String
+  contactPhone String
+  status       String
+  assignments  RescueAssignment[]
+
+  @@index([status])
+  @@map("rescue_team")
+}
+
+model RescueAssignment {
+  id           String     @id @default(uuid()) @db.Uuid
+  rescueTeamId String     @db.Uuid
+  disasterId   String     @db.Uuid
+  assignedAt   DateTime   @default(now())
+  disaster     Disaster   @relation(fields: [disasterId], references: [id])
+  rescueTeam   RescueTeam @relation(fields: [rescueTeamId], references: [id])
+
+  @@index([disasterId])
+  @@index([rescueTeamId])
+  @@index([assignedAt])
+  @@index([disasterId, rescueTeamId])
+  @@map("rescue_assignment")
+}
+
+model Shelter {
+  id                String   @id @default(uuid()) @db.Uuid
+  name              String
+  location          String
+  capacity          Int
+  availableCapacity Int
+  createdAt         DateTime @default(now())
+  createdById       String   @db.Uuid
+  createdBy         User     @relation(fields: [createdById], references: [id])
+
+  @@index([createdById])
+  @@index([createdAt])
+  @@map("shelter")
+}
+
+model Resource {
+  id          String               @id @default(uuid()) @db.Uuid
+  type        String
+  quantity    Int
+  unit        String
+  createdById String               @db.Uuid
+  createdBy   User                 @relation(fields: [createdById], references: [id])
+  allocations ResourceAllocation[]
+
+  @@index([createdById])
+  @@index([type])
+  @@map("resource")
+}
+
+model ResourceAllocation {
+  id                String   @id @default(uuid()) @db.Uuid
+  resourceId        String   @db.Uuid
+  disasterId        String   @db.Uuid
+  allocatedQuantity Int
+  allocatedAt       DateTime @default(now())
+  disaster          Disaster @relation(fields: [disasterId], references: [id])
+  resource          Resource @relation(fields: [resourceId], references: [id])
+
+  @@index([disasterId])
+  @@index([resourceId])
+  @@index([allocatedAt])
+  @@index([disasterId, resourceId])
+  @@map("resource_allocation")
+}
+
+model MedicalReport {
+  id          String   @id @default(uuid()) @db.Uuid
+  hospitalId  String   @db.Uuid
+  victimId    String   @db.Uuid
+  report      String
+  reportedAt  DateTime @default(now())
+  createdById String   @db.Uuid
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  hospital    Hospital @relation(fields: [hospitalId], references: [id])
+  victim      Victim   @relation(fields: [victimId], references: [id])
+
+  @@index([hospitalId])
+  @@index([victimId])
+  @@index([createdById])
+  @@index([reportedAt])
+  @@map("medical_report")
+}
+
+model DisasterMetric {
+  disasterId     String   @id @db.Uuid
+  totalVictims   Int
+  rescuedVictims Int
+  activeShelters Int
+  lastUpdated    DateTime @default(now())
+  disaster       Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+
+  @@index([lastUpdated])
+  @@map("disaster_metric")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  action    String
+  entity    String
+  entityId  String
+  timestamp DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([entity])
+  @@index([entity, entityId])
+  @@map("audit_log")
+}
+
+model Volunteer {
+  id                    String                      @id @default(uuid()) @db.Uuid
+  userId                String                      @unique @db.Uuid
+  ngoId                 String                      @db.Uuid
+  role                  VolunteerRole               @default(GROUND_VOLUNTEER)
+  rolePreference        VolunteerRolePreference?
+  verified              Boolean                     @default(false)
+  verifiedAt            DateTime?
+  state                 String
+  district              String?
+  address               String?
+  dob                   DateTime?
+  gender                String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  skills                String[]                    @default([])
+  experienceYears       Int?
+  certificationUrl      String?
+  canTravel             Boolean                     @default(false)
+  hasVehicle            Boolean                     @default(false)
+  isActive              Boolean                     @default(true)
+  available             Boolean                     @default(true)
+  joinedAt              DateTime                    @default(now())
+  ngo                   NGO                         @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  user                  User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses             VolunteerResourceResponse[]
+
+  @@index([ngoId])
+  @@index([role])
+  @@index([state])
+  @@index([available])
+  @@map("volunteer")
+}
+
+model RolePreferenceRequest {
+  id            String                      @id @default(uuid()) @db.Uuid
+  userId        String                      @db.Uuid
+  ngoId         String                      @db.Uuid
+  state         String
+  preferredRole String
+  status        RolePreferenceRequestStatus @default(PENDING)
+  approvedRole  String?
+  approvedAt    DateTime?
+  approvedBy    String?                     @db.Uuid
+  createdAt     DateTime                    @default(now())
+  updatedAt     DateTime                    @updatedAt
+  approver      User?                       @relation("ApprovedRoleRequests", fields: [approvedBy], references: [id])
+  ngo           NGO                         @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  user          User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ngoId])
+  @@index([ngoId])
+  @@index([state])
+  @@index([status])
+  @@index([createdAt])
+  @@index([ngoId, state])
+  @@map("role_preference_request")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum NGORequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum VolunteerRole {
+  GROUND_VOLUNTEER
+  MEDICAL_VOLUNTEER
+  RESCUE_VOLUNTEER
+}
+
+enum VolunteerRolePreference {
+  GROUND
+  MEDICAL
+  RESCUE
+}
+
+enum RolePreferenceRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model VolunteerResourceRequest {
+  id            String  @id @default(uuid()) @db.Uuid
+  ngoId         String  @db.Uuid
+  requestedById String  @db.Uuid
+  disasterId    String? @db.Uuid
+
+  resourceType String // food, water, blankets
+  quantity     Int
+  unit         String // kg, packets, liters
+  requiredRole VolunteerRole @default(GROUND_VOLUNTEER)
+
+  status ResourceRequestStatus @default(PENDING)
+
+  createdAt   DateTime  @default(now())
+  fulfilledAt DateTime?
+
+  ngo         NGO       @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  requestedBy User      @relation(fields: [requestedById], references: [id])
+  disaster    Disaster? @relation(fields: [disasterId], references: [id])
+
+  responses VolunteerResourceResponse[]
+
+  @@index([ngoId])
+  @@index([requiredRole])
+  @@index([status])
+  @@index([disasterId])
+  @@map("volunteer_resource_request")
+}
+
+model VolunteerResourceResponse {
+  id          String @id @default(uuid()) @db.Uuid
+  requestId   String @db.Uuid
+  volunteerId String @db.Uuid
+
+  offeredQuantity Int
+  status          VolunteerResponseStatus @default(PENDING)
+  respondedAt     DateTime?
+
+  request   VolunteerResourceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  volunteer Volunteer                @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, volunteerId])
+  @@index([volunteerId])
+  @@index([status])
+  @@map("volunteer_resource_response")
+}
+
+enum ResourceRequestStatus {
+  PENDING
+  PARTIALLY_FULFILLED
+  FULFILLED
+  CANCELLED
+}
+
+enum VolunteerResponseStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
