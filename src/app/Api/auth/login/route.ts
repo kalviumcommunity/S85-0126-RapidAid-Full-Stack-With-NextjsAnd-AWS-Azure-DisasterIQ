@@ -109,6 +109,7 @@ export async function POST(req: Request) {
     NGO_ADMIN: "/responder",
     HOSPITAL: "/hospital/dashboard",
     CITIZEN: "/public",
+    ADMIN:"/admin"
   };
 
   const response = NextResponse.json({

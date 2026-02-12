@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       roles: {
         create: {
           role: {
-            connect: { name: "USER" }
+            connect: { name: "ADMIN" }
           }
         }
       }

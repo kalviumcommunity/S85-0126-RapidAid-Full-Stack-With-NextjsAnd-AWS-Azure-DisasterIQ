@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
 
 import {
   AlertTriangle,
   Heart,
   Users,
-  Package,
   CheckCircle,
   Clock,
 } from "lucide-react";
@@ -33,7 +32,7 @@ type ReliefRequest = {
 /* ===================== COMPONENT ===================== */
 
 export default function ResponderDashboard() {
-  const router = useRouter();
+  
 
   const [reliefRequests, setReliefRequests] = useState<ReliefRequest[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -50,7 +49,6 @@ export default function ResponderDashboard() {
         setLoadingRequests(true);
         setRequestError(null);
 
-        // ✅ JWT-based NGO extraction on backend
         const res = await fetch(
           "/Api/ngoRequest/ngo/[ngoId]",
           {
@@ -65,7 +63,6 @@ export default function ResponderDashboard() {
           throw new Error(json.message || "Failed to fetch NGO requests");
         }
 
-        // ✅ BACKEND RETURNS { items, count }
         setReliefRequests(json.data.items);
         setTotalCount(json.data.count);
       } catch (err: any) {
@@ -108,7 +105,6 @@ export default function ResponderDashboard() {
         throw new Error(json.message || "Failed to respond to request");
       }
 
-      // ✅ Optimistic update
       setReliefRequests((prev) =>
         prev.map((req) =>
           req.id === requestId
@@ -140,21 +136,11 @@ export default function ResponderDashboard() {
       <div className="space-y-8 text-white">
 
         {/* Header */}
-        <div className="rounded-2xl bg-white/5 border border-white/10 p-6 flex justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Responder Dashboard</h1>
-            <p className="text-sm text-white/70">
-              Manage relief operations and resource deployment
-            </p>
-          </div>
-
-          <Button
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={() => router.push("/responder/resources")}
-          >
-            <Package className="h-4 w-4 mr-2" />
-            Update Resources
-          </Button>
+        <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
+          <h1 className="text-2xl font-semibold">Responder Dashboard</h1>
+          <p className="text-sm text-white/70">
+            Manage relief operations and resource deployment
+          </p>
         </div>
 
         {/* Organization */}
