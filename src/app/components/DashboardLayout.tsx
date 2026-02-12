@@ -45,37 +45,40 @@ const navItems: Record<DashboardLayoutProps["role"], NavItem[]> = {
     { label: "Reports", href: "/admin/reports", icon: FileText },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ],
-government: [
-  { label: "Dashboard", href: "/government", icon: LayoutDashboard },
-  { label: "Disasters", href: "/government/disaster", icon: AlertTriangle },
-  { label: "Coordination", href: "/government/coordination", icon: Building2 },
-  { label: "Resources", href: "/government/resources", icon: Shield },
-  { label: "Reports", href: "/government/reports", icon: FileText },
-  { label: "NGO", href: "/government/ngo", icon: Users },
-],
 
+  government: [
+    { label: "Dashboard", href: "/government", icon: LayoutDashboard },
+ 
+    { label: "Coordination", href: "/government/coordination", icon: Building2 },
+
+   
+    { label: "NGO", href: "/government/ngo", icon: Users },
+  ],
+
+  // ✅ Resources removed from responder
   responder: [
     { label: "Dashboard", href: "/responder", icon: LayoutDashboard },
     { label: "Assigned Disasters", href: "/responder/disasters", icon: AlertTriangle },
-    { label: "Resources", href: "/responder/resources", icon: Shield },
     { label: "Operations", href: "/responder/operations", icon: Building2 },
   ],
+
   ngo: [
     { label: "Dashboard", href: "/ngo", icon: LayoutDashboard },
     { label: "Disasters", href: "/ngo/disasters", icon: AlertTriangle },
-    { label: "Resources", href: "/ngo/resources", icon: Shield },
     { label: "Requests", href: "/ngo/requests", icon: FileText },
   ],
+
   hospital: [
     { label: "Dashboard", href: "/hospital", icon: LayoutDashboard },
     { label: "Disasters", href: "/hospital/disasters", icon: AlertTriangle },
     { label: "Emergency", href: "/hospital/emergency", icon: Bell },
     { label: "Resources", href: "/hospital/resources", icon: Shield },
   ],
+
   public: [
     { label: "Dashboard", href: "/public", icon: LayoutDashboard },
-    { label: "Alerts", href: "/public/alerts", icon: AlertTriangle },
-    { label: "Request Help", href: "/public/request", icon: FileText },
+   
+  
     { label: "Ngo", href: "/public/ngo", icon: FileText },
   ],
 };
