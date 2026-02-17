@@ -217,8 +217,9 @@ App will run on:
 
 ## 👨‍💻 Contributors
 
-* **Nishant** – Full-stack development, API integration, RBAC, Dashboard UI
-* Team Members – NGO routing, Volunteer preference system, UI improvements
+* **Nishant** – Full-stack development, Dashboard UI
+* **Pranav** – NGO routing, Volunteer preference system, UI improvements,RBAC,Aoi integration
+* **Tanmay** - testing,ci/cd pipeline ,deployment
 
 ---
 
